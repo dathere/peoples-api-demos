@@ -12,7 +12,7 @@
 
 ## What This Is
 
-This project demonstrates an AI-driven policy analysis workflow built entirely with [Claude](https://claude.ai) using [Cowork mode](https://www.anthropic.com/product/claude-cowork) and the [qsv data wrangling plugin](https://github.com/dathere/qsv?tab=readme-ov-file#qsv-blazing-fast-data-wrangling-toolkit). Starting from raw public datasets, it produces a 2,600-line policy analysis document and 8 interactive dashboards — all generated through iterative conversation with Claude.
+This project demonstrates an AI-driven policy analysis workflow built entirely with [Claude](https://claude.ai) using [Cowork mode](https://www.anthropic.com/product/claude-cowork) and the [qsv data wrangling plugin](https://github.com/dathere/qsv?tab=readme-ov-file#qsv-blazing-fast-data-wrangling-toolkit) and its [Policy-Analyst Agent](https://github.com/dathere/qsv/blob/master/.claude/skills/agents/policy-analyst.md). Starting from raw public datasets, it produces a 2,600-line policy analysis document and 8 interactive dashboards — all generated through iterative conversation with Claude.
 
 The scenario is a housing policy briefing for mayor Zohran Mamdani, pre-loading all the data in a Cowork project, with the prompt:
 
