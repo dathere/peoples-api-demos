@@ -1,7 +1,7 @@
 # NYC Housing Policy Analysis for Mayor Mamdani
 
 [![Dashboard Screenshot](images/dashboard-scnshot.png)](Explorer_Master_Dashboard.html)
-]
+
 **Date:** March 24, 2026
 
 **Scope:** Comprehensive data-driven housing policy analysis spanning supply, affordability, subsidized housing, building conditions, public land, and NYCHA capital needs across all five NYC boroughs.
