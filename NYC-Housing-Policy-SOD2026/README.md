@@ -6,7 +6,7 @@
 
 - **Primary Deliverable:** [`Mamdani_Policy_Analysis_EXPANDED.md`](Mamdani_Policy_Analysis_EXPANDED.md)<br>a 2,600-line policy brief with six analytical sections, evidence-based findings, risk scenarios, and implementation roadmaps.
 
-- **Supplementary Deliverables:** [`Housing Policy Master Dashboard`](Explorer_Master_Dashboard.html)<br>8 interactive dashboards in HTML format, detailed data source ontology, and methodological notes.
+- **Supplementary Deliverables:** <a href="Explorer_Master_Dashboard.html">Housing Policy Master Dashboard</a><br>8 interactive dashboards in HTML format, detailed data source ontology, and methodological notes.
 
 ## What This Is
 
