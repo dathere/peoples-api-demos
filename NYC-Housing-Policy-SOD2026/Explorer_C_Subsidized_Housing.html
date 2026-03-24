@@ -264,6 +264,12 @@
         th:hover .sort-icon {
             opacity: 1;
         }
+
+        .info-tip { position: relative; display: inline-flex; align-items: center; justify-content: center; width: 18px; height: 18px; border-radius: 50%; background: rgba(100,116,139,.25); color: #64748b; font-size: 11px; font-style: italic; font-family: serif; cursor: help; user-select: none; flex-shrink: 0; vertical-align: middle; margin-left: 4px; }
+        .info-tip:hover { background: rgba(100,116,139,.45); color: #94a3b8; }
+        .info-tip .tip-text { visibility: hidden; opacity: 0; position: absolute; bottom: calc(100% + 8px); left: 50%; transform: translateX(-50%); background: #1e293b; border: 1px solid #334155; color: #e2e8f0; font-size: 0.75rem; font-style: normal; font-family: system-ui, sans-serif; padding: 8px 12px; border-radius: 6px; width: max-content; max-width: 250px; z-index: 1000; line-height: 1.4; pointer-events: none; transition: opacity .15s; box-shadow: 0 4px 12px rgba(0,0,0,.4); }
+        .info-tip .tip-text::after { content: ''; position: absolute; top: 100%; left: 50%; transform: translateX(-50%); border: 6px solid transparent; border-top-color: #334155; }
+        .info-tip:hover .tip-text { visibility: visible; opacity: 1; }
     </style>
 </head>
 <body>
@@ -304,25 +310,25 @@
 
         <div class="kpi-grid">
             <div class="kpi-card critical">
-                <div class="kpi-label">Total Units at Risk (2026–2035)</div>
+                <div class="kpi-label">Total Units at Risk (2026–2035)<span class="info-tip">i<span class="tip-text">Subsidized properties whose affordability restrictions are expiring within the next 10 years, across all programs.</span></span></div>
                 <div class="kpi-value" id="kpiTotalUnits">377,631</div>
                 <div class="kpi-subtext">Subsidies expiring across all programs</div>
             </div>
 
             <div class="kpi-card critical">
-                <div class="kpi-label">421-a Units at Risk</div>
+                <div class="kpi-label">421-a Units at Risk<span class="info-tip">i<span class="tip-text">Units enrolled in the 421-a property tax abatement program approaching expiration of affordability covenants.</span></span></div>
                 <div class="kpi-value" id="kpiUnits421a">201,965</div>
                 <div class="kpi-subtext">53.5% of portfolio</div>
             </div>
 
             <div class="kpi-card critical">
-                <div class="kpi-label">Peak Crisis Year</div>
+                <div class="kpi-label">Peak Crisis Year<span class="info-tip">i<span class="tip-text">Year with the highest number of subsidies expiring, representing the greatest concentration of affordability loss.</span></span></div>
                 <div class="kpi-value" id="kpiPeakYear">2035</div>
                 <div class="kpi-subtext">18,734 units expiring (49.1%)</div>
             </div>
 
             <div class="kpi-card">
-                <div class="kpi-label">Tax Delinquency Rate</div>
+                <div class="kpi-label">Tax Delinquency Rate<span class="info-tip">i<span class="tip-text">Percentage of subsidized properties with property tax arrears exceeding 6 months.</span></span></div>
                 <div class="kpi-value" id="kpiDelinquency">94.8%</div>
                 <div class="kpi-subtext">421-a portfolio average</div>
             </div>
@@ -330,35 +336,35 @@
 
         <div class="charts-grid">
             <div class="chart-container full-width">
-                <div class="chart-title">421-a Expiration Timeline (2026–2035)</div>
+                <div class="chart-title">421-a Expiration Timeline (2026–2035)<span class="info-tip">i<span class="tip-text">Year-by-year breakdown of 421-a units losing affordability restrictions, showing when expirations peak.</span></span></div>
                 <div class="chart-wrapper">
                     <canvas id="expirationTimelineChart"></canvas>
                 </div>
             </div>
 
             <div class="chart-container full-width">
-                <div class="chart-title">Cumulative Units Losing Subsidy (2026–2035)</div>
+                <div class="chart-title">Cumulative Units Losing Subsidy (2026–2035)<span class="info-tip">i<span class="tip-text">Running total of all units that lose subsidies from 2026 through 2035, showing cumulative impact.</span></span></div>
                 <div class="chart-wrapper">
                     <canvas id="cumulativeExpirationChart"></canvas>
                 </div>
             </div>
 
             <div class="chart-container">
-                <div class="chart-title">Portfolio Composition (All Programs)</div>
+                <div class="chart-title">Portfolio Composition (All Programs)<span class="info-tip">i<span class="tip-text">Distribution of subsidized units across all programs including 421-a, J-51, Mitchell-Lama, LIHTC, Section 8, and NYCHA.</span></span></div>
                 <div class="chart-wrapper">
                     <canvas id="portfolioCompositionChart"></canvas>
                 </div>
             </div>
 
             <div class="chart-container">
-                <div class="chart-title">421-a by Borough</div>
+                <div class="chart-title">421-a by Borough<span class="info-tip">i<span class="tip-text">Number of 421-a properties and units in each borough, showing geographic concentration of affordability risk.</span></span></div>
                 <div class="chart-wrapper">
                     <canvas id="boroughChart"></canvas>
                 </div>
             </div>
 
             <div class="chart-container full-width">
-                <div class="chart-title">J-51 Expiration Roadmap</div>
+                <div class="chart-title">J-51 Expiration Roadmap<span class="info-tip">i<span class="tip-text">J-51 tax abatement units grouped by expiration windows, indicating future affordability loss timeline.</span></span></div>
                 <div class="chart-wrapper">
                     <canvas id="j51ExpirationChart"></canvas>
                 </div>
@@ -366,7 +372,7 @@
         </div>
 
         <div class="table-container">
-            <div class="chart-title">Detailed Expiration Schedule & Risk Assessment (421-a)</div>
+            <div class="chart-title">Detailed Expiration Schedule & Risk Assessment (421-a)<span class="info-tip">i<span class="tip-text">Year-by-year breakdown with property counts, units, violations, tax delinquency, and risk classification for 421-a expirations.</span></span></div>
             <table id="expirationTable">
                 <thead>
                     <tr>
@@ -387,7 +393,7 @@
 
         <div class="disclaimer">
             <div class="disclaimer-title">Data Source & Methodology</div>
-            <p>This interactive explorer presents aggregated data from the Furman Center's Subsidized Housing Dataset (2026) and NYC Department of Finance property tax records. All figures represent nominal counts as of Q2 2026. Expiration timelines reflect contractual obligation dates and may differ from actual affordability loss dates due to renewals, modifications, or policy interventions. Borough-level data aggregates properties by primary location. Tax delinquency percentages reflect properties with outstanding property tax arrears exceeding 6 months. For policy analysis, cross-reference with official NYCHA, HPD, and Department of Finance filings. This explorer is provided for informational purposes and should not be construed as investment or policy advice.</p>
+            <p>This interactive explorer presents aggregated data from the Furman Center's Subsidized Housing Dataset (2026) and NYC Department of Finance property tax records. All figures represent nominal counts as of Q2 2026. Expiration timelines reflect contractual obligation dates and may differ from actual affordability loss dates due to renewals, modifications, or policy interventions. Borough-level data aggregates properties by primary location. Tax delinquency percentages reflect properties with outstanding property tax arrears exceeding 6 months. For policy analysis, cross-reference with official NYCHA, HPD, and Department of Finance filings. This explorer is provided for informational purposes and should not be construed as investment or policy advice. This document was produced using Claude, an AI assistant by Anthropic, using datHere's qsv Cowork plugin. Content should be reviewed for accuracy.</p>
         </div>
     </div>
 

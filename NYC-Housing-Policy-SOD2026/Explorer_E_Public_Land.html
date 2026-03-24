@@ -37,6 +37,11 @@ th{color:var(--muted);font-weight:600;font-size:.78rem;text-transform:uppercase}
 .badge.mod{background:#065f46;color:#a7f3d0}
 .badge.low{background:#1e3a5f;color:#93c5fd}
 .note{color:var(--muted);font-size:.78rem;font-style:italic;margin-top:8px}
+.info-tip { position: relative; display: inline-flex; align-items: center; justify-content: center; width: 18px; height: 18px; border-radius: 50%; background: rgba(100,116,139,.25); color: #64748b; font-size: 11px; font-style: italic; font-family: serif; cursor: help; user-select: none; flex-shrink: 0; vertical-align: middle; margin-left: 4px; }
+.info-tip:hover { background: rgba(100,116,139,.45); color: #94a3b8; }
+.info-tip .tip-text { visibility: hidden; opacity: 0; position: absolute; bottom: calc(100% + 8px); left: 50%; transform: translateX(-50%); background: #1e293b; border: 1px solid #334155; color: #e2e8f0; font-size: 0.75rem; font-style: normal; font-family: system-ui, sans-serif; padding: 8px 12px; border-radius: 6px; width: max-content; max-width: 250px; z-index: 1000; line-height: 1.4; pointer-events: none; transition: opacity .15s; box-shadow: 0 4px 12px rgba(0,0,0,.4); }
+.info-tip .tip-text::after { content: ''; position: absolute; top: 100%; left: 50%; transform: translateX(-50%); border: 6px solid transparent; border-top-color: #334155; }
+.info-tip:hover .tip-text { visibility: visible; opacity: 1; }
 @media(max-width:900px){.grid{grid-template-columns:1fr}}
 </style>
 </head>
@@ -65,41 +70,41 @@ th{color:var(--muted);font-weight:600;font-size:.78rem;text-transform:uppercase}
 
 <div class="grid">
   <div class="chart-card">
-    <h3>Potential Units by Borough (Unused FAR)</h3>
+    <h3>Potential Units by Borough (Unused FAR)<span class="info-tip">i<span class="tip-text">Estimated housing units achievable from developable city-owned land. FAR = Floor Area Ratio; assumes 800 sq ft per unit.</span></span></h3>
     <div class="chart-wrap short"><canvas id="unitsChart"></canvas></div>
   </div>
   <div class="chart-card">
-    <h3>Borough Share of Developable Parcels</h3>
+    <h3>Borough Share of Developable Parcels<span class="info-tip">i<span class="tip-text">Distribution of city-owned developable land across NYC boroughs. Shows where development opportunity is concentrated.</span></span></h3>
     <div class="chart-wrap short"><canvas id="shareDonut"></canvas></div>
   </div>
 
   <div class="chart-card">
-    <h3>Acreage vs. Potential Units by Borough</h3>
+    <h3>Acreage vs. Potential Units by Borough<span class="info-tip">i<span class="tip-text">Scatter plot showing land area (X) vs development potential (Y). Bubble size reflects total opportunity. Highlights efficiency differences across boroughs.</span></span></h3>
     <div class="chart-wrap short"><canvas id="scatterChart"></canvas></div>
   </div>
   <div class="chart-card">
-    <h3>Flood Zone Exposure by Borough</h3>
+    <h3>Flood Zone Exposure by Borough<span class="info-tip">i<span class="tip-text">Percentage of developable parcels in each borough located in FEMA flood zones. High exposure indicates climate risk and elevated construction costs.</span></span></h3>
     <div class="chart-wrap short"><canvas id="floodChart"></canvas></div>
   </div>
 
   <div class="chart-card full-width">
-    <h3>Top 20 Community Districts by Development Potential</h3>
+    <h3>Top 20 Community Districts by Development Potential<span class="info-tip">i<span class="tip-text">Highest-opportunity community boards ranked by potential units from city-owned developable land. Identifies hotspots for housing production.</span></span></h3>
     <div class="chart-wrap"><canvas id="cdChart"></canvas></div>
   </div>
 
   <div class="chart-card full-width">
-    <h3>Borough Summary</h3>
+    <h3>Borough Summary<span class="info-tip">i<span class="tip-text">Comprehensive borough-level inventory of city-owned parcels with parcel counts, acreage, development capacity, flood exposure, and existing units.</span></span></h3>
     <div style="overflow-x:auto"><table id="boroTable"></table></div>
   </div>
 
   <div class="chart-card full-width">
-    <h3>Top 20 Individual Development Opportunities</h3>
+    <h3>Top 20 Individual Development Opportunities<span class="info-tip">i<span class="tip-text">Largest city-owned parcels ranked by unused residential development capacity. Shows specific sites with greatest housing production potential.</span></span></h3>
     <div style="overflow-x:auto;max-height:500px"><table id="oppsTable"></table></div>
     <p class="note">Ranked by unused residential FAR capacity. Parks excluded. Potential units = unused FAR sqft / 800.</p>
   </div>
 </div>
 
-<p class="note" style="margin-top:12px">Data source: NYC DCP PLUTO (Feb 2026), 858,284 tax lots. City-owned = ownertype='C'. Developable = non-park, residfar > 0. FEMA FIRM 2015 flood zones. Analysis date: March 24, 2026.</p>
+<p class="note" style="margin-top:12px">Data source: NYC DCP PLUTO (Feb 2026), 858,284 tax lots. City-owned = ownertype='C'. Developable = non-park, residfar > 0. FEMA FIRM 2015 flood zones. Analysis date: March 24, 2026. This document was produced using Claude, an AI assistant by Anthropic, using datHere's qsv Cowork plugin. Content should be reviewed for accuracy.</p>
 
 <script>
 const BOROS = ['Manhattan','Brooklyn','Queens','Bronx','Staten Island'];
@@ -196,19 +201,19 @@ function updateKPIs(){
   if(view==='dev'){
     const floodPct = d.parcels>0?Math.round(d.flood/d.parcels*100):0;
     html = `
-      <div class="kpi"><div class="val ok">${fmtN(d.parcels)}</div><div class="label">Developable Parcels</div></div>
-      <div class="kpi"><div class="val">${fmtN(Math.round(d.acres))}</div><div class="label">Acres</div></div>
-      <div class="kpi"><div class="val purple">${fmt(Math.round(d.potential||0))}</div><div class="label">Potential Units (FAR)</div></div>
-      <div class="kpi"><div class="val warn">${fmtN(d.vacant||0)}</div><div class="label">Vacant Lots</div></div>
-      <div class="kpi"><div class="val danger">${floodPct}%</div><div class="label">In Flood Zone</div></div>
-      <div class="kpi"><div class="val">${fmtN(d.existing||0)}</div><div class="label">Existing Units</div></div>`;
+      <div class="kpi"><div class="val ok">${fmtN(d.parcels)}</div><div class="label">Developable Parcels<span class="info-tip">i<span class="tip-text">City-owned tax lots with residential FAR capacity, excluding parks and non-developable sites. Source: NYC DCP PLUTO.</span></span></div></div>
+      <div class="kpi"><div class="val">${fmtN(Math.round(d.acres))}</div><div class="label">Acres<span class="info-tip">i<span class="tip-text">Total land area in developable parcels. One acre = 43,560 square feet.</span></span></div></div>
+      <div class="kpi"><div class="val purple">${fmt(Math.round(d.potential||0))}</div><div class="label">Potential Units (FAR)<span class="info-tip">i<span class="tip-text">Estimated housing units possible from unused Floor Area Ratio (FAR) capacity, at 800 sq ft per unit.</span></span></div></div>
+      <div class="kpi"><div class="val warn">${fmtN(d.vacant||0)}</div><div class="label">Vacant Lots<span class="info-tip">i<span class="tip-text">Parcels with no existing buildings or minimal existing structures, ready for development.</span></span></div></div>
+      <div class="kpi"><div class="val danger">${floodPct}%</div><div class="label">In Flood Zone<span class="info-tip">i<span class="tip-text">Percentage of developable parcels located in FEMA-designated flood zones (2015 FIRM data).</span></span></div></div>
+      <div class="kpi"><div class="val">${fmtN(d.existing||0)}</div><div class="label">Existing Units<span class="info-tip">i<span class="tip-text">Current residential units on developable sites that would be impacted by redevelopment.</span></span></div></div>`;
   } else {
     html = `
-      <div class="kpi"><div class="val ok">${fmtN(d.parcels)}</div><div class="label">City-Owned Parcels</div></div>
-      <div class="kpi"><div class="val">${fmtN(Math.round(d.acres))}</div><div class="label">Total Acres</div></div>
-      <div class="kpi"><div class="val purple">${fmtN(d.res_zoned||0)}</div><div class="label">Residentially Zoned</div></div>
-      <div class="kpi"><div class="val danger">${fmtN(d.flood||0)}</div><div class="label">In Flood Zone</div></div>
-      <div class="kpi"><div class="val">${fmtN(d.units||0)}</div><div class="label">Existing Res Units</div></div>`;
+      <div class="kpi"><div class="val ok">${fmtN(d.parcels)}</div><div class="label">City-Owned Parcels<span class="info-tip">i<span class="tip-text">All tax lots with city ownership. Includes parks, facilities, and developable sites. Source: NYC DCP PLUTO.</span></span></div></div>
+      <div class="kpi"><div class="val">${fmtN(Math.round(d.acres))}</div><div class="label">Total Acres<span class="info-tip">i<span class="tip-text">Total land area of all city-owned parcels in the inventory.</span></span></div></div>
+      <div class="kpi"><div class="val purple">${fmtN(d.res_zoned||0)}</div><div class="label">Residentially Zoned<span class="info-tip">i<span class="tip-text">City-owned parcels in residential zoning districts with development capacity.</span></span></div></div>
+      <div class="kpi"><div class="val danger">${fmtN(d.flood||0)}</div><div class="label">In Flood Zone<span class="info-tip">i<span class="tip-text">City-owned parcels located in FEMA-designated flood zones (2015 FIRM data).</span></span></div></div>
+      <div class="kpi"><div class="val">${fmtN(d.units||0)}</div><div class="label">Existing Res Units<span class="info-tip">i<span class="tip-text">Current residential units on city-owned land.</span></span></div></div>`;
   }
   document.getElementById('kpis').innerHTML = html;
 }

@@ -51,6 +51,12 @@
             h1 { font-size: 1.6rem; }
             .chart-container { height: 300px; }
         }
+
+        .info-tip { position: relative; display: inline-flex; align-items: center; justify-content: center; width: 18px; height: 18px; border-radius: 50%; background: rgba(100,116,139,.25); color: #64748b; font-size: 11px; font-style: italic; font-family: serif; cursor: help; user-select: none; flex-shrink: 0; vertical-align: middle; margin-left: 4px; }
+        .info-tip:hover { background: rgba(100,116,139,.45); color: #94a3b8; }
+        .info-tip .tip-text { visibility: hidden; opacity: 0; position: absolute; bottom: calc(100% + 8px); left: 50%; transform: translateX(-50%); background: #1e293b; border: 1px solid #334155; color: #e2e8f0; font-size: 0.75rem; font-style: normal; font-family: system-ui, sans-serif; padding: 8px 12px; border-radius: 6px; width: max-content; max-width: 250px; z-index: 1000; line-height: 1.4; pointer-events: none; transition: opacity .15s; box-shadow: 0 4px 12px rgba(0,0,0,.4); }
+        .info-tip .tip-text::after { content: ''; position: absolute; top: 100%; left: 50%; transform: translateX(-50%); border: 6px solid transparent; border-top-color: #334155; }
+        .info-tip:hover .tip-text { visibility: visible; opacity: 1; }
     </style>
 </head>
 <body>
@@ -86,29 +92,29 @@
 
         <!-- KPI Cards -->
         <div class="kpi-cards" id="kpiCards">
-            <div class="card"><div class="kpi-label">Total Complaints</div><div class="kpi-value" id="kpiTotal">—</div><div class="kpi-detail" id="kpiTotalDetail"></div></div>
-            <div class="card"><div class="kpi-label">Peak Year</div><div class="kpi-value" id="kpiPeak">—</div><div class="kpi-detail" id="kpiPeakDetail"></div></div>
-            <div class="card"><div class="kpi-label">2025 vs 2019</div><div class="kpi-value" id="kpiVs2019">—</div><div class="kpi-change" id="kpiVs2019Change"></div></div>
-            <div class="card"><div class="kpi-label">Heat/Hot Water Share</div><div class="kpi-value" id="kpiHeat">—</div><div class="kpi-detail" id="kpiHeatDetail"></div></div>
-            <div class="card"><div class="kpi-label">Median Resolution</div><div class="kpi-value" id="kpiRes">—</div><div class="kpi-detail" id="kpiResDetail"></div></div>
-            <div class="card"><div class="kpi-label">Bronx + Brooklyn Share</div><div class="kpi-value" id="kpiBxBk">—</div><div class="kpi-detail" id="kpiBxBkDetail"></div></div>
+            <div class="card"><div class="kpi-label">Total Complaints<span class="info-tip">i<span class="tip-text">Cumulative HPD housing complaints filed through NYC 311, 2010–2025 (10.06 million total).</span></span></div><div class="kpi-value" id="kpiTotal">—</div><div class="kpi-detail" id="kpiTotalDetail"></div></div>
+            <div class="card"><div class="kpi-label">Peak Year<span class="info-tip">i<span class="tip-text">Year with the highest number of HPD complaints on record, indicating peak housing condition issues.</span></span></div><div class="kpi-value" id="kpiPeak">—</div><div class="kpi-detail" id="kpiPeakDetail"></div></div>
+            <div class="card"><div class="kpi-label">2025 vs 2019<span class="info-tip">i<span class="tip-text">Percentage change in complaint volume comparing pre-pandemic 2019 to current year 2025.</span></span></div><div class="kpi-value" id="kpiVs2019">—</div><div class="kpi-change" id="kpiVs2019Change"></div></div>
+            <div class="card"><div class="kpi-label">Heat/Hot Water Share<span class="info-tip">i<span class="tip-text">Percentage of all complaints focused on heating and hot water issues, most seasonal complaint type.</span></span></div><div class="kpi-value" id="kpiHeat">—</div><div class="kpi-detail" id="kpiHeatDetail"></div></div>
+            <div class="card"><div class="kpi-label">Median Resolution<span class="info-tip">i<span class="tip-text">Median days to close a complaint for closed cases resolved within 365 days.</span></span></div><div class="kpi-value" id="kpiRes">—</div><div class="kpi-detail" id="kpiResDetail"></div></div>
+            <div class="card"><div class="kpi-label">Bronx + Brooklyn Share<span class="info-tip">i<span class="tip-text">Combined share of total complaints from two boroughs with highest complaint concentration.</span></span></div><div class="kpi-value" id="kpiBxBk">—</div><div class="kpi-detail" id="kpiBxBkDetail"></div></div>
         </div>
 
         <!-- Annual Volume -->
         <div class="section">
-            <h2 class="section-title">Annual HPD Complaint Volume</h2>
+            <h2 class="section-title">Annual HPD Complaint Volume<span class="info-tip">i<span class="tip-text">Total number of HPD complaints filed each year from 2011–2025, showing overall trend and pandemic impact.</span></span></h2>
             <div class="chart-container"><div class="chart-wrapper"><canvas id="annualChart"></canvas></div></div>
         </div>
 
         <!-- Borough Trends -->
         <div class="section">
-            <h2 class="section-title">Complaints by Borough (Annual Trend)</h2>
+            <h2 class="section-title">Complaints by Borough (Annual Trend)<span class="info-tip">i<span class="tip-text">Annual complaint volume by borough, showing geographic concentration and variation in housing condition issues.</span></span></h2>
             <div class="chart-container"><div class="chart-wrapper"><canvas id="boroughTrendChart"></canvas></div></div>
         </div>
 
         <!-- Complaint Types -->
         <div class="section">
-            <h2 class="section-title">Top Complaint Types (Stacked)</h2>
+            <h2 class="section-title">Top Complaint Types (Stacked)<span class="info-tip">i<span class="tip-text">Annual breakdown of seven major complaint categories: Heat/Hot Water, Unsanitary, Plumbing, Paint/Plaster, Electric, Door/Window, and Water Leak.</span></span></h2>
             <div class="chart-container tall"><div class="chart-wrapper"><canvas id="typeStackChart"></canvas></div></div>
         </div>
 
@@ -116,11 +122,11 @@
         <div class="section">
             <div class="grid-2col">
                 <div>
-                    <h2 class="section-title">Borough Distribution</h2>
+                    <h2 class="section-title">Borough Distribution<span class="info-tip">i<span class="tip-text">Pie chart showing total complaint volume allocation across five boroughs for selected time period.</span></span></h2>
                     <div class="chart-container"><div class="chart-wrapper"><canvas id="boroughDonut"></canvas></div></div>
                 </div>
                 <div>
-                    <h2 class="section-title">Borough Ranking</h2>
+                    <h2 class="section-title">Borough Ranking<span class="info-tip">i<span class="tip-text">Ranked list of boroughs by complaint volume, including total, share percentage, and trend comparison to 2019.</span></span></h2>
                     <div><table id="boroughTable"><thead><tr><th>Borough</th><th>Total</th><th>Share</th><th>Trend vs 2019</th></tr></thead><tbody></tbody></table></div>
                 </div>
             </div>
@@ -128,7 +134,7 @@
 
         <!-- Seasonal Pattern -->
         <div class="section">
-            <h2 class="section-title">Seasonal Pattern (Monthly Totals, All Years)</h2>
+            <h2 class="section-title">Seasonal Pattern (Monthly Totals, All Years)<span class="info-tip">i<span class="tip-text">Monthly complaint distribution showing winter heating spikes and seasonal variation in housing condition issues.</span></span></h2>
             <div class="chart-container tall"><div class="chart-wrapper"><canvas id="seasonalChart"></canvas></div></div>
         </div>
 
@@ -136,11 +142,11 @@
         <div class="section">
             <div class="grid-2col">
                 <div>
-                    <h2 class="section-title">Heat Complaint % by Month</h2>
+                    <h2 class="section-title">Heat Complaint % by Month<span class="info-tip">i<span class="tip-text">Percentage of monthly complaints attributed to Heat/Hot Water, peaking in winter months.</span></span></h2>
                     <div class="chart-container"><div class="chart-wrapper"><canvas id="heatShareChart"></canvas></div></div>
                 </div>
                 <div>
-                    <h2 class="section-title">Median Resolution Days (Trend)</h2>
+                    <h2 class="section-title">Median Resolution Days (Trend)<span class="info-tip">i<span class="tip-text">Year-over-year median days to resolve HPD complaints, showing improving resolution times.</span></span></h2>
                     <div class="chart-container"><div class="chart-wrapper"><canvas id="resolutionChart"></canvas></div></div>
                 </div>
             </div>
@@ -148,12 +154,12 @@
 
         <!-- Growth Table -->
         <div class="section">
-            <h2 class="section-title">Complaint Growth by Borough (2019 → 2025)</h2>
+            <h2 class="section-title">Complaint Growth by Borough (2019 → 2025)<span class="info-tip">i<span class="tip-text">Comparison of complaint volume before pandemic (2019), during pandemic (2020), and recent (2025), with growth rates and compound annual growth rate (CAGR).</span></span></h2>
             <div><table id="growthTable"></table></div>
         </div>
 
         <div class="disclaimer">
-            <strong>Data Source & Disclaimer:</strong> NYC Open Data 311 Service Requests (42.96M total rows), filtered to Agency=HPD (10.06M rows, 2010–2026). Complaint type names merged across the 2014 schema change (e.g., "HEATING" + "HEAT/HOT WATER"). 2010 borough data excluded (Borough field not populated). 2026 data is partial (Jan–Feb only) and excluded from trend analysis. Resolution times are median values for closed complaints within 365 days. This explorer is for informational purposes; consult NYC HPD for official statistics.
+            <strong>Data Source & Disclaimer:</strong> NYC Open Data 311 Service Requests (42.96M total rows), filtered to Agency=HPD (10.06M rows, 2010–2026). Complaint type names merged across the 2014 schema change (e.g., "HEATING" + "HEAT/HOT WATER"). 2010 borough data excluded (Borough field not populated). 2026 data is partial (Jan–Feb only) and excluded from trend analysis. Resolution times are median values for closed complaints within 365 days. This explorer is for informational purposes; consult NYC HPD for official statistics. This document was produced using Claude, an AI assistant by Anthropic, using datHere's qsv Cowork plugin. Content should be reviewed for accuracy.
         </div>
         <div class="footer">Interactive Explorer — 311 HPD Housing Conditions Data 2011–2025 · Built from 10.06M complaint records</div>
     </div>

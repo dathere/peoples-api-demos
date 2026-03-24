@@ -66,6 +66,11 @@
         .hidden { display:none; }
         .boro-note { text-align:center; padding:10px 16px; margin-bottom:20px; background:rgba(245,158,11,.08); border:1px solid rgba(245,158,11,.25); border-radius:8px; font-size:.85rem; color:var(--warn); }
         .highlight-row { background:rgba(168,85,247,.12) !important; }
+        .info-tip { position: relative; display: inline-flex; align-items: center; justify-content: center; width: 18px; height: 18px; border-radius: 50%; background: rgba(100,116,139,.25); color: #64748b; font-size: 11px; font-style: italic; font-family: serif; cursor: help; user-select: none; flex-shrink: 0; vertical-align: middle; margin-left: 4px; }
+        .info-tip:hover { background: rgba(100,116,139,.45); color: #94a3b8; }
+        .info-tip .tip-text { visibility: hidden; opacity: 0; position: absolute; bottom: calc(100% + 8px); left: 50%; transform: translateX(-50%); background: #1e293b; border: 1px solid #334155; color: #e2e8f0; font-size: 0.75rem; font-style: normal; font-family: system-ui, sans-serif; padding: 8px 12px; border-radius: 6px; width: max-content; max-width: 250px; z-index: 1000; line-height: 1.4; pointer-events: none; transition: opacity .15s; box-shadow: 0 4px 12px rgba(0,0,0,.4); }
+        .info-tip .tip-text::after { content: ''; position: absolute; top: 100%; left: 50%; transform: translateX(-50%); border: 6px solid transparent; border-top-color: #334155; }
+        .info-tip:hover .tip-text { visibility: visible; opacity: 1; }
     </style>
 </head>
 <body>
@@ -106,16 +111,16 @@
 
     <div id="sectionAll">
         <div class="chart-container">
-            <div class="chart-title" id="titleWorkTypes">5-Year Capital Need by Work Type</div>
+            <div class="chart-title" id="titleWorkTypes">5-Year Capital Need by Work Type<span class="info-tip">i<span class="tip-text">Breakdown of capital needs by building system (apartments, heating, elevators, plumbing, etc.) from PNA inspection data. Shows which systems require most investment.</span></span></div>
             <div class="chart-wrapper tall"><canvas id="chartWorkTypes"></canvas></div>
         </div>
         <div class="grid-2">
             <div class="chart-container">
-                <div class="chart-title">5-Year vs 20-Year Need</div>
+                <div class="chart-title">5-Year vs 20-Year Need<span class="info-tip">i<span class="tip-text">Comparison of immediate capital need (5 years) vs long-term rehabilitation needs (20 years). Shows deferred maintenance backlog.</span></span></div>
                 <div class="chart-wrapper"><canvas id="chartGrouped"></canvas></div>
             </div>
             <div class="chart-container">
-                <div class="chart-title" id="titleDonut">Share of 5-Year Need</div>
+                <div class="chart-title" id="titleDonut">Share of 5-Year Need<span class="info-tip">i<span class="tip-text">Distribution of 5-year capital investment across NYCHA developments. Shows which developments account for largest portion of total need.</span></span></div>
                 <div class="chart-wrapper"><canvas id="chartDonut"></canvas></div>
             </div>
         </div>
@@ -124,11 +129,11 @@
     <div id="sectionDevs">
         <div class="grid-2">
             <div class="chart-container">
-                <div class="chart-title" id="titleTopDevs">Top 15 Developments by 5-Year Need</div>
+                <div class="chart-title" id="titleTopDevs">Top 15 Developments by 5-Year Need<span class="info-tip">i<span class="tip-text">The 15 NYCHA developments with the largest 5-year capital needs. Prioritizes major investment opportunities and critical infrastructure repairs.</span></span></div>
                 <div class="chart-wrapper tall"><canvas id="chartTopDevs"></canvas></div>
             </div>
             <div class="chart-container">
-                <div class="chart-title">Per-Unit Cost Distribution</div>
+                <div class="chart-title">Per-Unit Cost Distribution<span class="info-tip">i<span class="tip-text">5-year capital need per occupied unit across NYCHA developments. Shows how investment intensity varies by property. Average = total 5Y need ÷ total units.</span></span></div>
                 <div class="chart-wrapper"><canvas id="chartCostDist"></canvas></div>
             </div>
         </div>
@@ -136,28 +141,28 @@
 
     <div id="sectionTrend">
         <div class="chart-container">
-            <div class="chart-title" id="titleTrend">2023 vs 2025 Trend — Top 8 Work Types</div>
+            <div class="chart-title" id="titleTrend">2023 vs 2025 Trend — Top 8 Work Types<span class="info-tip">i<span class="tip-text">Comparison of 2023 vs 2025 PNA assessments showing how capital needs have grown. Reflects inflation, updated facility conditions, and revised priorities.</span></span></div>
             <div class="chart-wrapper"><canvas id="chartTrend"></canvas></div>
         </div>
     </div>
 
     <div id="sectionDevTable">
         <div class="table-container">
-            <div class="table-title" id="titleDevTable">Top 15 Developments — Detailed View</div>
+            <div class="table-title" id="titleDevTable">Top 15 Developments — Detailed View<span class="info-tip">i<span class="tip-text">Comprehensive summary of the 15 largest NYCHA capital projects with unit counts, total need (5-year and 20-year), and per-unit cost intensity from 2025 PNA.</span></span></div>
             <table><thead><tr><th>Development</th><th class="num">Units</th><th class="num">5-Year Need</th><th class="num">20-Year Need</th><th class="num">Per-Unit (5Y)</th></tr></thead><tbody id="devTableBody"></tbody></table>
         </div>
     </div>
 
     <div id="sectionWorkTable">
         <div class="table-container">
-            <div class="table-title" id="titleWorkTable">Work Type Detail — All 14 Systems</div>
+            <div class="table-title" id="titleWorkTable">Work Type Detail — All 14 Systems<span class="info-tip">i<span class="tip-text">Detailed breakdown of capital needs by building system category (apartments, heating, elevators, plumbing, etc.) from comprehensive PNA facility inspections.</span></span></div>
             <table><thead><tr><th>Work Type</th><th class="num">5-Year Need</th><th class="num">20-Year Need</th><th class="num">Share of 5Y</th><th class="num">Growth (5→20yr)</th></tr></thead><tbody id="workTableBody"></tbody></table>
         </div>
     </div>
 
     <div class="footer">
         <p><strong>Data Source:</strong> NYCHA Physical Needs Assessment (PNA) 2023 &amp; 2025 · STV/AECOM Joint Venture</p>
-        <p style="margin-top:12px;font-style:italic">This document was produced using Claude, an AI assistant by Anthropic. Content should be reviewed for accuracy.</p>
+        <p style="margin-top:12px;font-style:italic">This document was produced using Claude, an AI assistant by Anthropic, using datHere's qsv Cowork plugin. Content should be reviewed for accuracy.</p>
     </div>
 </div>
 
@@ -321,11 +326,11 @@ function render(){
     const perUnit = Math.round(scaled5 / scaledUnits);
 
     document.getElementById('kpiRow1').innerHTML = `
-        <div class="kpi-card kpi-danger"><div class="kpi-label">Est. 5-Year Need${isBoro?' — '+boro:''}</div><div class="kpi-value">${fmtD(scaled5)}</div><div class="kpi-sublabel">${isBoro?pct(boroData.units,TOTAL_FC_UNITS)+'% share':'2025 PNA · Portfolio-wide'}</div></div>
-        <div class="kpi-card kpi-purple"><div class="kpi-label">Est. 20-Year Need</div><div class="kpi-value">${fmtD(scaled20)}</div><div class="kpi-sublabel">${isBoro?'Scaled by unit share':'2025 PNA · Portfolio-wide'}</div></div>
-        <div class="kpi-card kpi-accent"><div class="kpi-label">${isBoro?'Properties':'Active Developments'}</div><div class="kpi-value">${fmtN(scaledDevs)}</div><div class="kpi-sublabel">${isBoro?boro+' NYCHA properties':'Down from '+SUMMARY.yr2023.devs+' in 2023'}</div></div>
-        <div class="kpi-card kpi-accent"><div class="kpi-label">Units${isBoro?' — '+boro:''}</div><div class="kpi-value">${fmtN(scaledUnits)}</div><div class="kpi-sublabel">${isBoro?pct(boroData.units,TOTAL_FC_UNITS)+'% of portfolio':'152,781 in 2025 PNA'}</div></div>
-        <div class="kpi-card kpi-warn"><div class="kpi-label">Est. Per-Unit 5yr Cost</div><div class="kpi-value">$${(perUnit/1000).toFixed(0)}K</div><div class="kpi-sublabel">${isBoro?'Borough-scaled estimate':'Up from $374K in 2023'}</div></div>`;
+        <div class="kpi-card kpi-danger"><div class="kpi-label">Est. 5-Year Need${isBoro?' — '+boro:''}  <span class="info-tip">i<span class="tip-text">Total capital investment required across all NYCHA developments over 5 years, from the 2025 Physical Needs Assessment.</span></span></div><div class="kpi-value">${fmtD(scaled5)}</div><div class="kpi-sublabel">${isBoro?pct(boroData.units,TOTAL_FC_UNITS)+'% share':'2025 PNA · Portfolio-wide'}</div></div>
+        <div class="kpi-card kpi-purple"><div class="kpi-label">Est. 20-Year Need  <span class="info-tip">i<span class="tip-text">Long-term capital investment forecast for full portfolio rehabilitation over 20 years.</span></span></div><div class="kpi-value">${fmtD(scaled20)}</div><div class="kpi-sublabel">${isBoro?'Scaled by unit share':'2025 PNA · Portfolio-wide'}</div></div>
+        <div class="kpi-card kpi-accent"><div class="kpi-label">${isBoro?'Properties':'Active Developments'}  <span class="info-tip">i<span class="tip-text">Number of NYCHA developments in the Physical Needs Assessment. Portfolio consolidation (PACT transfers) reduced this from 264 to 233 since 2023.</span></span></div><div class="kpi-value">${fmtN(scaledDevs)}</div><div class="kpi-sublabel">${isBoro?boro+' NYCHA properties':'Down from '+SUMMARY.yr2023.devs+' in 2023'}</div></div>
+        <div class="kpi-card kpi-accent"><div class="kpi-label">Units${isBoro?' — '+boro:''}  <span class="info-tip">i<span class="tip-text">Total occupied residential units in NYCHA portfolio assessed in the PNA. Capital needs are allocated per unit.</span></span></div><div class="kpi-value">${fmtN(scaledUnits)}</div><div class="kpi-sublabel">${isBoro?pct(boroData.units,TOTAL_FC_UNITS)+'% of portfolio':'152,781 in 2025 PNA'}</div></div>
+        <div class="kpi-card kpi-warn"><div class="kpi-label">Est. Per-Unit 5yr Cost  <span class="info-tip">i<span class="tip-text">Average 5-year capital need divided by total NYCHA units, indicating investment intensity per occupied unit.</span></span></div><div class="kpi-value">$${(perUnit/1000).toFixed(0)}K</div><div class="kpi-sublabel">${isBoro?'Borough-scaled estimate':'Up from $374K in 2023'}</div></div>`;
 
     // KPI Row 2 — trend (always portfolio-level)
     const fiveChg = ((s.fiveYr - SUMMARY.yr2023.fiveYr)/1e9).toFixed(2);
@@ -335,9 +340,9 @@ function render(){
     const puGrowth = ((perUnit25/perUnit23-1)*100).toFixed(1);
 
     document.getElementById('kpiRow2').innerHTML = `
-        <div class="kpi-card kpi-danger"><div class="kpi-label">5-Year Need Change (2023→2025)</div><div class="kpi-value">+$${fiveChg}B</div><div class="kpi-sublabel">+${fiveChgPct}% despite 31 fewer developments</div></div>
-        <div class="kpi-card kpi-warn"><div class="kpi-label">Developments Lost to PACT</div><div class="kpi-value">${SUMMARY.yr2023.devs - s.devs}</div><div class="kpi-sublabel">${fmtN(SUMMARY.yr2023.units - s.units)} units moved to private mgmt</div></div>
-        <div class="kpi-card kpi-danger"><div class="kpi-label">Per-Unit Cost Growth</div><div class="kpi-value">+${puGrowth}%</div><div class="kpi-sublabel">$${(perUnit23/1000).toFixed(0)}K → $${(perUnit25/1000).toFixed(0)}K in 2 years</div></div>`;
+        <div class="kpi-card kpi-danger"><div class="kpi-label">5-Year Need Change (2023→2025)  <span class="info-tip">i<span class="tip-text">Increase in total capital needs between 2023 and 2025 PNA assessments. Reflects inflation, condition changes, and updated rehabilitation plans.</span></span></div><div class="kpi-value">+$${fiveChg}B</div><div class="kpi-sublabel">+${fiveChgPct}% despite 31 fewer developments</div></div>
+        <div class="kpi-card kpi-warn"><div class="kpi-label">Developments Lost to PACT  <span class="info-tip">i<span class="tip-text">NYCHA developments transferred to private management under the Permanent Affordability Commitment Together (PACT) program since 2023 PNA.</span></span></div><div class="kpi-value">${SUMMARY.yr2023.devs - s.devs}</div><div class="kpi-sublabel">${fmtN(SUMMARY.yr2023.units - s.units)} units moved to private mgmt</div></div>
+        <div class="kpi-card kpi-danger"><div class="kpi-label">Per-Unit Cost Growth  <span class="info-tip">i<span class="tip-text">Increase in capital cost per unit between 2023 and 2025. Reflects inflation and condition assessment updates. Calculated as total 5-year need ÷ units.</span></span></div><div class="kpi-value">+${puGrowth}%</div><div class="kpi-sublabel">$${(perUnit23/1000).toFixed(0)}K → $${(perUnit25/1000).toFixed(0)}K in 2 years</div></div>`;
 
     // Visibility by view
     const showAll = view === 'all' || view === 'top3';

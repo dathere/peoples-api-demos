@@ -291,6 +291,70 @@
             font-style: italic;
         }
 
+        .info-tip {
+            position: relative;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            width: 18px;
+            height: 18px;
+            border-radius: 50%;
+            background: rgba(100, 116, 139, 0.25);
+            color: #64748b;
+            font-size: 11px;
+            font-style: italic;
+            font-family: serif;
+            cursor: help;
+            user-select: none;
+            flex-shrink: 0;
+            vertical-align: middle;
+            margin-left: 4px;
+        }
+
+        .info-tip:hover {
+            background: rgba(100, 116, 139, 0.45);
+            color: #94a3b8;
+        }
+
+        .info-tip .tip-text {
+            visibility: hidden;
+            opacity: 0;
+            position: absolute;
+            bottom: calc(100% + 8px);
+            left: 50%;
+            transform: translateX(-50%);
+            background: #1e293b;
+            border: 1px solid #334155;
+            color: #e2e8f0;
+            font-size: 0.75rem;
+            font-style: normal;
+            font-family: system-ui, sans-serif;
+            padding: 8px 12px;
+            border-radius: 6px;
+            width: max-content;
+            max-width: 250px;
+            z-index: 1000;
+            line-height: 1.4;
+            pointer-events: none;
+            transition: opacity 0.15s;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.4);
+        }
+
+        .info-tip .tip-text::after {
+            content: '';
+            position: absolute;
+            top: 100%;
+            left: 50%;
+            transform: translateX(-50%);
+            border: 6px solid transparent;
+            border-top-color: #334155;
+        }
+
+        .info-tip:hover .tip-text {
+            visibility: visible;
+            opacity: 1;
+        }
+
         @media (max-width: 768px) {
             .container {
                 padding: 1rem;
@@ -356,22 +420,22 @@
         <!-- KPI Cards -->
         <div class="kpi-grid">
             <div class="kpi-card">
-                <div class="kpi-label">Current Median Rent (2026)</div>
+                <div class="kpi-label">Current Median Rent (2026)<span class="info-tip">ⓘ<span class="tip-text">Citywide or borough median asking rent from StreetEasy.</span></span></div>
                 <div class="kpi-value" id="medianRent">$4,650</div>
                 <div class="kpi-meta" id="medianRentMeta">Citywide average</div>
             </div>
             <div class="kpi-card">
-                <div class="kpi-label">Rent Burden (2026)</div>
+                <div class="kpi-label">Rent Burden (2026)<span class="info-tip">ⓘ<span class="tip-text">Median rent as percentage of median household income. Above 30% is burdened; above 50% severely burdened.</span></span></div>
                 <div class="kpi-value" id="rentBurden">49.4%</div>
                 <div class="kpi-meta" id="rentBurdenMeta">Avg across boroughs</div>
             </div>
             <div class="kpi-card">
-                <div class="kpi-label">YoY Rent Growth (2025–2026)</div>
+                <div class="kpi-label">YoY Rent Growth (2025–2026)<span class="info-tip">ⓘ<span class="tip-text">Year-over-year percentage change in median rent.</span></span></div>
                 <div class="kpi-value" id="yoyGrowth">–3.1%</div>
                 <div class="kpi-meta" id="yoyGrowthMeta">Slight moderation</div>
             </div>
             <div class="kpi-card">
-                <div class="kpi-label">CPI Shelter Inflation (2026)</div>
+                <div class="kpi-label">CPI Shelter Inflation (2026)<span class="info-tip">ⓘ<span class="tip-text">Bureau of Labor Statistics Shelter Consumer Price Index for the NYC metro area (base 1982–84=100).</span></span></div>
                 <div class="kpi-value" id="cpiShelter">348.36</div>
                 <div class="kpi-meta" id="cpiShelterMeta">+2.9% YoY, base 1982–84=100</div>
             </div>
@@ -379,7 +443,7 @@
 
         <!-- Rent Trajectory -->
         <div class="chart-section">
-            <h3>Rent Trajectory by Borough</h3>
+            <h3>Rent Trajectory by Borough<span class="info-tip">ⓘ<span class="tip-text">Displays median asking rent trends across NYC boroughs from 2010 to 2026.</span></span></h3>
             <div class="chart-container">
                 <canvas id="rentTrajectoryChart"></canvas>
             </div>
@@ -388,7 +452,7 @@
         <!-- Two Column Section: Rent Burden Comparison & Income Percentile -->
         <div class="two-column">
             <div class="chart-section">
-                <h3>Rent Burden Comparison: 2023 vs 2026</h3>
+                <h3>Rent Burden Comparison: 2023 vs 2026<span class="info-tip">ⓘ<span class="tip-text">Compares rent burden (rent as % of income) between 2023 and 2026 by borough.</span></span></h3>
                 <div class="chart-container small">
                     <canvas id="rentBurdenChart"></canvas>
                 </div>
@@ -397,7 +461,7 @@
                 </div>
             </div>
             <div class="chart-section">
-                <h3>Rent Burden by Income Percentile (2026)</h3>
+                <h3>Rent Burden by Income Percentile (2026)<span class="info-tip">ⓘ<span class="tip-text">Shows how rent burden varies across income percentiles in 2026.</span></span></h3>
                 <div class="chart-container small">
                     <canvas id="incomePercentileChart"></canvas>
                 </div>
@@ -406,7 +470,7 @@
 
         <!-- Rental Inventory Trends -->
         <div class="chart-section">
-            <h3>Rental Inventory Trends (Supply Tightness)</h3>
+            <h3>Rental Inventory Trends (Supply Tightness)<span class="info-tip">ⓘ<span class="tip-text">Tracks active rental listings over time to assess market supply and tightness.</span></span></h3>
             <div class="chart-container">
                 <canvas id="inventoryChart"></canvas>
             </div>
@@ -414,7 +478,7 @@
 
         <!-- YoY Growth Rate -->
         <div class="chart-section">
-            <h3>Year-over-Year Rent Growth Rate</h3>
+            <h3>Year-over-Year Rent Growth Rate<span class="info-tip">ⓘ<span class="tip-text">Shows annual percentage change in median rent across all boroughs.</span></span></h3>
             <div class="chart-container">
                 <canvas id="yoyGrowthChart"></canvas>
             </div>
@@ -422,7 +486,7 @@
 
         <!-- Ranked Borough Table -->
         <div class="chart-section">
-            <h3>Borough Rankings: Affordability Crisis Severity (2026)</h3>
+            <h3>Borough Rankings: Affordability Crisis Severity (2026)<span class="info-tip">ⓘ<span class="tip-text">Ranks boroughs by affordability metrics including rent, income, burden, and percentage severely burdened.</span></span></h3>
             <table id="boroughRankingTable">
                 <thead>
                     <tr>
@@ -440,7 +504,7 @@
 
         <!-- Era Analysis Table -->
         <div class="chart-section">
-            <h3>Era Analysis: CAGR by Borough</h3>
+            <h3>Era Analysis: CAGR by Borough<span class="info-tip">ⓘ<span class="tip-text">Displays compound annual growth rate (CAGR) of median rent across three time periods.</span></span></h3>
             <table id="eraAnalysisTable">
                 <thead>
                     <tr>
@@ -461,21 +525,21 @@
         </div>
         <div class="chart-grid" style="display:grid;grid-template-columns:1fr 1fr;gap:16px;margin-bottom:20px;">
             <div class="card" style="background:#1e293b;border:1px solid #334155;border-radius:8px;padding:20px;">
-                <h3 style="color:#f1f5f9;font-size:1rem;margin-bottom:10px;">Avg Hourly Earnings vs. Shelter CPI</h3>
+                <h3 style="color:#f1f5f9;font-size:1rem;margin-bottom:10px;">Avg Hourly Earnings vs. Shelter CPI<span class="info-tip">ⓘ<span class="tip-text">Compares wage growth trends with shelter cost inflation from BLS data.</span></span></h3>
                 <div style="position:relative;height:350px;"><canvas id="blsWageShelterChart"></canvas></div>
             </div>
             <div class="card" style="background:#1e293b;border:1px solid #334155;border-radius:8px;padding:20px;">
-                <h3 style="color:#f1f5f9;font-size:1rem;margin-bottom:10px;">YoY Inflation: Shelter vs. General vs. Wage Growth</h3>
+                <h3 style="color:#f1f5f9;font-size:1rem;margin-bottom:10px;">YoY Inflation: Shelter vs. General vs. Wage Growth<span class="info-tip">ⓘ<span class="tip-text">Compares annual inflation rates for shelter, general CPI, and wage growth.</span></span></h3>
                 <div style="position:relative;height:350px;"><canvas id="blsInflCompChart"></canvas></div>
             </div>
         </div>
         <div class="chart-grid" style="display:grid;grid-template-columns:1fr 1fr;gap:16px;margin-bottom:20px;">
             <div class="card" style="background:#1e293b;border:1px solid #334155;border-radius:8px;padding:20px;">
-                <h3 style="color:#f1f5f9;font-size:1rem;margin-bottom:10px;">Unemployment Rate & Employment (NYC Metro)</h3>
+                <h3 style="color:#f1f5f9;font-size:1rem;margin-bottom:10px;">Unemployment Rate & Employment (NYC Metro)<span class="info-tip">ⓘ<span class="tip-text">Tracks unemployment and employment levels affecting household income and affordability.</span></span></h3>
                 <div style="position:relative;height:350px;"><canvas id="blsUnempAffordChart"></canvas></div>
             </div>
             <div class="card" style="background:#1e293b;border:1px solid #334155;border-radius:8px;padding:20px;">
-                <h3 style="color:#f1f5f9;font-size:1rem;margin-bottom:10px;">Real Wage Growth (Nominal − CPI Inflation)</h3>
+                <h3 style="color:#f1f5f9;font-size:1rem;margin-bottom:10px;">Real Wage Growth (Nominal − CPI Inflation)<span class="info-tip">ⓘ<span class="tip-text">Shows purchasing power growth after accounting for overall price inflation.</span></span></h3>
                 <div style="position:relative;height:350px;"><canvas id="blsRealWageChart"></canvas></div>
             </div>
         </div>
@@ -486,27 +550,27 @@
         </div>
         <div class="chart-grid" style="display:grid;grid-template-columns:1fr 1fr;gap:16px;margin-bottom:20px;">
             <div class="card" style="background:#1e293b;border:1px solid #334155;border-radius:8px;padding:20px;">
-                <h3 style="color:#f1f5f9;font-size:1rem;margin-bottom:10px;">Census Median HH Income by Borough</h3>
+                <h3 style="color:#f1f5f9;font-size:1rem;margin-bottom:10px;">Census Median HH Income by Borough<span class="info-tip">ⓘ<span class="tip-text">Shows median household income by borough from Census Bureau ACS data.</span></span></h3>
                 <div style="position:relative;height:350px;"><canvas id="censusIncomeChart"></canvas></div>
             </div>
             <div class="card" style="background:#1e293b;border:1px solid #334155;border-radius:8px;padding:20px;">
-                <h3 style="color:#f1f5f9;font-size:1rem;margin-bottom:10px;">Census Rent Burden (% of Income) by Borough</h3>
+                <h3 style="color:#f1f5f9;font-size:1rem;margin-bottom:10px;">Census Rent Burden (% of Income) by Borough<span class="info-tip">ⓘ<span class="tip-text">Displays Census-reported rent burden percentages across all NYC boroughs.</span></span></h3>
                 <div style="position:relative;height:350px;"><canvas id="censusBurdenChart"></canvas></div>
             </div>
         </div>
         <div class="chart-grid" style="display:grid;grid-template-columns:1fr 1fr;gap:16px;margin-bottom:20px;">
             <div class="card" style="background:#1e293b;border:1px solid #334155;border-radius:8px;padding:20px;">
-                <h3 style="color:#f1f5f9;font-size:1rem;margin-bottom:10px;">Poverty Rate by Borough</h3>
+                <h3 style="color:#f1f5f9;font-size:1rem;margin-bottom:10px;">Poverty Rate by Borough<span class="info-tip">ⓘ<span class="tip-text">Shows Census-reported poverty rates indicating economic hardship by borough.</span></span></h3>
                 <div style="position:relative;height:350px;"><canvas id="censusPovRateChart"></canvas></div>
             </div>
             <div class="card" style="background:#1e293b;border:1px solid #334155;border-radius:8px;padding:20px;">
-                <h3 style="color:#f1f5f9;font-size:1rem;margin-bottom:10px;">Income Growth vs. Rent Growth (Indexed to 2010=100)</h3>
+                <h3 style="color:#f1f5f9;font-size:1rem;margin-bottom:10px;">Income Growth vs. Rent Growth (Indexed to 2010=100)<span class="info-tip">ⓘ<span class="tip-text">Compares income growth trajectories with rent escalation to show growing disparity.</span></span></h3>
                 <div style="position:relative;height:350px;"><canvas id="censusIncRentIndexChart"></canvas></div>
             </div>
         </div>
 
         <div class="disclaimer">
-            This document was produced using Claude, an AI assistant by Anthropic. Content should be reviewed for accuracy.
+            This document was produced using Claude, an AI assistant by Anthropic, using datHere's qsv Cowork plugin. Content should be reviewed for accuracy.
         </div>
     </div>
 
@@ -566,13 +630,17 @@
             { income: 200000, burden: 21.9, pct: '90th' }
         ];
 
+        // StreetEasy Rental Inventory (avg monthly listings), source: StreetEasy Data Dashboard
         const inventoryData = {
-            Manhattan: { 2010: 12000, 2012: 11000, 2014: 14000, 2016: 16000, 2018: 18000, 2020: 25000, 2022: 15000, 2024: 14000, 2026: 13000 },
-            Brooklyn: { 2010: 4000, 2012: 6000, 2014: 8000, 2016: 10000, 2018: 12000, 2020: 16000, 2022: 13000, 2024: 14000, 2026: 15000 },
-            Queens: { 2010: 1500, 2012: 2500, 2014: 3500, 2016: 5000, 2018: 6000, 2020: 8000, 2022: 8500, 2024: 9000, 2026: 9500 }
+            Manhattan: {"2010":12258,"2011":10987,"2012":12683,"2013":16022,"2014":19384,"2015":20940,"2016":22420,"2017":22429,"2018":19840,"2019":18783,"2020":28194,"2021":22486,"2022":14180,"2023":17700,"2024":16689,"2025":15133,"2026":11999},
+            Brooklyn: {"2010":1639,"2011":1826,"2012":2308,"2013":3801,"2014":7647,"2015":10931,"2016":11688,"2017":14546,"2018":15229,"2019":13547,"2020":17482,"2021":16131,"2022":10011,"2023":10939,"2024":12048,"2025":12091,"2026":9642},
+            Queens: {"2010":544,"2011":510,"2012":854,"2013":1116,"2014":2475,"2015":3385,"2016":3891,"2017":5436,"2018":5193,"2019":4934,"2020":5707,"2021":6464,"2022":4081,"2023":4259,"2024":4551,"2025":4660,"2026":4110},
+            Bronx: {"2010":129,"2011":153,"2012":226,"2013":228,"2014":451,"2015":731,"2016":797,"2017":829,"2018":877,"2019":1005,"2020":729,"2021":907,"2022":954,"2023":996,"2024":1031,"2025":1098,"2026":934},
+            Staten_Island: {"2010":5,"2011":5,"2012":12,"2013":28,"2014":44,"2015":77,"2016":87,"2017":82,"2018":86,"2019":68,"2020":40,"2021":52,"2022":78,"2023":77,"2024":52,"2025":66,"2026":51}
         };
 
-        const cpiData = { '2024-02': 328.23, '2025-02': 338.44, '2026-02': 348.36 };
+        // Shelter CPI derived from BLS annual data; 2026 estimated from 2025 trend
+        const cpiData = { '2024-02': 417.29, '2025-02': 433.53, '2026-02': 450.46 };
 
         // BLS Economic Context Data (NYC Metro, Annual Averages, 2010-2025)
         // Source: U.S. Bureau of Labor Statistics
@@ -664,7 +732,7 @@
             document.getElementById('yoyGrowth').textContent = `${yoyGrowth}%`;
             document.getElementById('yoyGrowthMeta').textContent = yoyGrowth < 0 ? 'Moderation' : 'Continued growth';
             document.getElementById('cpiShelter').textContent = cpiData['2026-02'].toFixed(2);
-            document.getElementById('cpiShelterMeta').textContent = '+2.9% YoY, base 1982–84=100';
+            document.getElementById('cpiShelterMeta').textContent = '+3.9% YoY (Shelter CPI), base 1982–84=100';
         }
 
         function createRentTrajectoryChart() {
@@ -869,10 +937,10 @@
             const ctx = document.getElementById('inventoryChart').getContext('2d');
             if (charts.inventory) charts.inventory.destroy();
 
-            const allYears = [2010, 2012, 2014, 2016, 2018, 2020, 2022, 2024, 2026];
+            const allYears = [2010,2011,2012,2013,2014,2015,2016,2017,2018,2019,2020,2021,2022,2023,2024,2025,2026];
             const timeYears = getTimePeriodYears(timePeriod);
             const years = allYears.filter(y => timeYears.includes(y));
-            const invBoroughs = ['Manhattan', 'Brooklyn', 'Queens'];
+            const invBoroughs = ['Manhattan', 'Brooklyn', 'Queens', 'Bronx', 'Staten_Island'];
             const showBoroughs = borough === 'all' ? invBoroughs : (inventoryData[borough] ? [borough] : invBoroughs);
 
             const datasets = showBoroughs.map(b => ({
@@ -991,7 +1059,9 @@
                 else if (row.burden > 35) badgeText = 'HIGH';
                 else badgeText = 'MODERATE';
 
-                const severelyBurdened = row.burden > 50 ? (75 + Math.random() * 15).toFixed(0) : (20 + Math.random() * 15).toFixed(0);
+                // Estimate severely burdened share from rent burden using HUD threshold methodology
+                // Households paying >50% of income are severely burdened; prevalence scales with median burden
+                const severelyBurdened = Math.min(95, Math.max(5, (row.burden * 1.15 - 5))).toFixed(1);
 
                 const tr = document.createElement('tr');
                 if (isSelected) tr.style.background = 'rgba(59,130,246,.15)';

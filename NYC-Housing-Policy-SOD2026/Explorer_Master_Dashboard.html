@@ -50,6 +50,12 @@ tr:hover{background:rgba(59,130,246,.08)}
 .tab-link{color:var(--muted);text-decoration:none;font-size:.7rem;margin-left:4px;vertical-align:super}
 .tab-link:hover{color:var(--accent)}
 @media(max-width:900px){.grid-2,.grid-3,.grid-5{grid-template-columns:1fr}}
+.info-tip{position:relative;display:inline-flex;align-items:center;justify-content:center;width:18px;height:18px;border-radius:50%;background:rgba(100,116,139,.25);color:#64748b;font-size:11px;font-style:italic;font-family:serif;cursor:help;user-select:none;flex-shrink:0;margin-left:6px}
+.info-tip:hover{background:rgba(100,116,139,.45);color:#94a3b8}
+.info-tip .tip-text{visibility:hidden;opacity:0;position:absolute;bottom:calc(100% + 8px);left:50%;transform:translateX(-50%);background:#1e293b;border:1px solid #334155;color:#e2e8f0;font-size:0.75rem;font-style:normal;font-family:system-ui,sans-serif;padding:8px 12px;border-radius:6px;width:max-content;max-width:250px;z-index:1000;line-height:1.4;pointer-events:none;transition:opacity .15s;box-shadow:0 4px 12px rgba(0,0,0,.4)}
+.info-tip .tip-text::after{content:'';position:absolute;top:100%;left:50%;transform:translateX(-50%);border:6px solid transparent;border-top-color:#334155}
+.info-tip:hover .tip-text{visibility:visible;opacity:1}
+@media(max-width:768px){.info-tip .tip-text{bottom:auto;top:calc(100% + 8px);border-top-color:transparent;border-bottom-color:#334155}.info-tip .tip-text::after{top:auto;bottom:100%;border-top-color:transparent;border-bottom-color:#334155}}
 </style>
 </head>
 <body>
@@ -88,7 +94,7 @@ tr:hover{background:rgba(59,130,246,.08)}
 
 <div id="content"></div>
 
-<div class="disclaimer">This document was produced using Claude, an AI assistant by Anthropic. Content should be reviewed for accuracy.</div>
+<div class="disclaimer">This document was produced using Claude, an AI assistant by Anthropic, using datHere's qsv Cowork plugin. Content should be reviewed for accuracy.</div>
 </div>
 
 <script>
@@ -475,53 +481,53 @@ function renderOverview(){
 
   el.innerHTML = `
   <div class="grid grid-3" style="margin-bottom:14px">
-    <div class="card"><h3>Median Asking Rent (${latestYear})</h3><div class="kpi warn">${dollar(totalRent)}/mo</div><div class="kpi-sub">${geoLabel} · +${rentChange}% since 2019</div></div>
-    <div class="card"><h3>Rent Burden (% of Income)</h3><div class="kpi ${burdenClass}">${pct(burden)}</div><div class="kpi-sub">HUD threshold: 30% · ${burdenLabel}</div></div>
-    <div class="card"><h3>${latestSupYear} Net Units Permitted</h3><div class="kpi accent">${fmt(latestSupply)}</div><div class="kpi-sub">Target: 20K/yr · Gap: ${gap<0?'+'+Math.abs(gap):gap}%${boro?' (Citywide — no borough split)':''}</div></div>
+    <div class="card"><h3>Median Asking Rent (${latestYear})<span class="info-tip">ⓘ<div class="tip-text">Citywide median asking rent from StreetEasy listings, averaged annually.</div></span></h3><div class="kpi warn">${dollar(totalRent)}/mo</div><div class="kpi-sub">${geoLabel} · +${rentChange}% since 2019</div></div>
+    <div class="card"><h3>Rent Burden (% of Income)<span class="info-tip">ⓘ<div class="tip-text">Median rent as % of median household income. Above 30% is cost-burdened; above 50% severely burdened.</div></span></h3><div class="kpi ${burdenClass}">${pct(burden)}</div><div class="kpi-sub">HUD threshold: 30% · ${burdenLabel}</div></div>
+    <div class="card"><h3>${latestSupYear} Net Units Permitted<span class="info-tip">ⓘ<div class="tip-text">Net new housing units permitted by HPD, accounting for demolitions and new construction.</div></span></h3><div class="kpi accent">${fmt(latestSupply)}</div><div class="kpi-sub">Target: 20K/yr · Gap: ${gap<0?'+'+Math.abs(gap):gap}%${boro?' (Citywide — no borough split)':''}</div></div>
   </div>
   <div class="grid grid-3" style="margin-bottom:14px">
-    <div class="card"><h3>Subsidized Units at Risk</h3><div class="kpi danger">488,755</div><div class="kpi-sub">421-a peak cliff: 2035 (18,734 units)</div></div>
-    <div class="card"><h3>NYCHA Units</h3><div class="kpi purple">${fmt(nychaUnits)}</div><div class="kpi-sub">${nychaProps} properties · ${geoLabel}</div></div>
-    <div class="card"><h3>Avg Annual HPD Complaints</h3><div class="kpi warn">${fmt(avgComplaints)}</div><div class="kpi-sub">${geoLabel} · ${timeLabel}</div></div>
+    <div class="card"><h3>Subsidized Units at Risk<span class="info-tip">ⓘ<div class="tip-text">Tax-exempt subsidized housing units vulnerable to subsidy expiration, primarily under 421-a program rules.</div></span></h3><div class="kpi danger">488,755</div><div class="kpi-sub">421-a peak cliff: 2035 (18,734 units)</div></div>
+    <div class="card"><h3>NYCHA Units<span class="info-tip">ⓘ<div class="tip-text">New York City Housing Authority public housing units maintained by NYCHA.</div></span></h3><div class="kpi purple">${fmt(nychaUnits)}</div><div class="kpi-sub">${nychaProps} properties · ${geoLabel}</div></div>
+    <div class="card"><h3>Avg Annual HPD Complaints<span class="info-tip">ⓘ<div class="tip-text">Average annual housing quality complaints from NYC 311 directed to HPD.</div></span></h3><div class="kpi warn">${fmt(avgComplaints)}</div><div class="kpi-sub">${geoLabel} · ${timeLabel}</div></div>
   </div>
   <div class="grid grid-2" style="margin-bottom:14px">
-    <div class="card"><h3>City-Owned Land (Public Land for Public Good)</h3><div class="kpi success">${publicParcels.toLocaleString()} parcels</div><div class="kpi-sub">${fmt(potentialUnits)} potential units · ${publicAcres.toLocaleString()} acres · ${geoLabel}</div></div>
-    <div class="card"><h3>NYC Metro Unemployment Rate</h3><div class="kpi ${blsLatestUnemp>6?'danger':blsLatestUnemp>4.5?'warn':'success'}">${blsLatestUnemp}%</div><div class="kpi-sub">${blsLatestUnempYear} avg · ${fmt(blsLatestEmp)}K nonfarm jobs · BLS</div></div>
+    <div class="card"><h3>City-Owned Land (Public Land for Public Good)<span class="info-tip">ⓘ<div class="tip-text">Available public parcels suitable for affordable housing development under Public Land for Public Good program.</div></span></h3><div class="kpi success">${publicParcels.toLocaleString()} parcels</div><div class="kpi-sub">${fmt(potentialUnits)} potential units · ${publicAcres.toLocaleString()} acres · ${geoLabel}</div></div>
+    <div class="card"><h3>NYC Metro Unemployment Rate<span class="info-tip">ⓘ<div class="tip-text">Labor force unemployment for NYC metro area (New York-Newark-Jersey City MSA) from Bureau of Labor Statistics.</div></span></h3><div class="kpi ${blsLatestUnemp>6?'danger':blsLatestUnemp>4.5?'warn':'success'}">${blsLatestUnemp}%</div><div class="kpi-sub">${blsLatestUnempYear} avg · ${fmt(blsLatestEmp)}K nonfarm jobs · BLS</div></div>
   </div>
   <div class="grid grid-2" style="margin-bottom:14px">
-    <div class="card"><h3>Avg Hourly Earnings (Private)</h3><div class="kpi accent">${dollar(blsLatestWage)}/hr</div><div class="kpi-sub">${blsLatestWageYear} avg · ${blsWageGrowthPct} since 2019 · BLS</div></div>
-    <div class="card"><h3>CPI Shelter Inflation (YoY)</h3><div class="kpi danger">${blsLatestShelterInfl}%</div><div class="kpi-sub">${blsLatestShelterInflYear} · General CPI: ${blsLatestCPIInfl}% · BLS</div></div>
+    <div class="card"><h3>Avg Hourly Earnings (Private)<span class="info-tip">ⓘ<div class="tip-text">Average hourly earnings for private sector jobs in NYC metro, from Bureau of Labor Statistics.</div></span></h3><div class="kpi accent">${dollar(blsLatestWage)}/hr</div><div class="kpi-sub">${blsLatestWageYear} avg · ${blsWageGrowthPct} since 2019 · BLS</div></div>
+    <div class="card"><h3>CPI Shelter Inflation (YoY)<span class="info-tip">ⓘ<div class="tip-text">Year-over-year shelter component of Consumer Price Index from BLS. Tracks rental inflation nationally.</div></span></h3><div class="kpi danger">${blsLatestShelterInfl}%</div><div class="kpi-sub">${blsLatestShelterInflYear} · General CPI: ${blsLatestCPIInfl}% · BLS</div></div>
   </div>
   <div class="grid grid-2" style="margin-bottom:14px">
-    <div class="card"><h3>Rent Trends — ${geoLabel} (${timeLabel})</h3><div class="chart-container"><canvas id="overviewRentChart"></canvas></div></div>
-    <div class="card"><h3>Rent Burden — ${boro?geoLabel:'All Boroughs'} (2023 vs 2026)</h3><div class="chart-container"><canvas id="overviewBurdenChart"></canvas></div></div>
+    <div class="card"><h3>Rent Trends — ${geoLabel} (${timeLabel})<span class="info-tip">ⓘ<div class="tip-text">Historical median asking rent by year and borough from StreetEasy data.</div></span></h3><div class="chart-container"><canvas id="overviewRentChart"></canvas></div></div>
+    <div class="card"><h3>Rent Burden — ${boro?geoLabel:'All Boroughs'} (2023 vs 2026)<span class="info-tip">ⓘ<div class="tip-text">Comparison of rent burden (% of income) across boroughs in 2023 vs 2026, showing deterioration over time.</div></span></h3><div class="chart-container"><canvas id="overviewBurdenChart"></canvas></div></div>
   </div>
   <div style="margin-bottom:8px;padding:4px 12px;background:var(--card);border-left:3px solid #3b82f6;border-radius:4px;font-size:.92rem;color:#94a3b8;">
     <strong style="color:#e2e8f0;">BLS Economic Context</strong> — NYC Metro Area · Source: Bureau of Labor Statistics · Annual Averages
   </div>
   <div class="grid grid-2" style="margin-bottom:14px">
-    <div class="card"><h3>Unemployment Rate & Nonfarm Employment (${timeLabel})</h3><div class="chart-container"><canvas id="blsUnempChart"></canvas></div></div>
-    <div class="card"><h3>Wages vs. Inflation (${timeLabel})</h3><div class="chart-container"><canvas id="blsWagesChart"></canvas></div></div>
+    <div class="card"><h3>Unemployment Rate & Nonfarm Employment (${timeLabel})<span class="info-tip">ⓘ<div class="tip-text">NYC metro unemployment rate and total nonfarm employment trends from Bureau of Labor Statistics.</div></span></h3><div class="chart-container"><canvas id="blsUnempChart"></canvas></div></div>
+    <div class="card"><h3>Wages vs. Inflation (${timeLabel})<span class="info-tip">ⓘ<div class="tip-text">Real wage growth (average hourly earnings) compared against general CPI inflation to show purchasing power trends.</div></span></h3><div class="chart-container"><canvas id="blsWagesChart"></canvas></div></div>
   </div>
   <div class="grid grid-2" style="margin-bottom:14px">
-    <div class="card"><h3>Shelter CPI vs. General CPI (${timeLabel})</h3><div class="chart-container"><canvas id="blsCPIChart"></canvas></div></div>
-    <div class="card"><h3>YoY Inflation: Shelter vs. General CPI (${timeLabel})</h3><div class="chart-container"><canvas id="blsInflChart"></canvas></div></div>
+    <div class="card"><h3>Shelter CPI vs. General CPI (${timeLabel})<span class="info-tip">ⓘ<div class="tip-text">Comparison of shelter (housing) inflation against overall CPI, showing if housing inflates faster than goods.</div></span></h3><div class="chart-container"><canvas id="blsCPIChart"></canvas></div></div>
+    <div class="card"><h3>YoY Inflation: Shelter vs. General CPI (${timeLabel})<span class="info-tip">ⓘ<div class="tip-text">Year-over-year inflation rates for shelter and general CPI, highlighting divergence in housing cost growth.</div></span></h3><div class="chart-container"><canvas id="blsInflChart"></canvas></div></div>
   </div>
   <div style="margin-bottom:8px;padding:4px 12px;background:var(--card);border-left:3px solid #a855f7;border-radius:4px;font-size:.92rem;color:#94a3b8;">
     <strong style="color:#e2e8f0;">Census ACS Context</strong> — Borough-Level · Source: U.S. Census Bureau, American Community Survey 1-Year Estimates
   </div>
   <div class="grid grid-3" style="margin-bottom:14px">
-    <div class="card"><h3>Median HH Income (${censusLatestYear})</h3><div class="kpi accent">${dollar(censusLatestIncome)}</div><div class="kpi-sub">${geoLabel} · ${censusIncGrowth} since 2010 · Census ACS</div></div>
-    <div class="card"><h3>Poverty Rate (${censusLatestYear})</h3><div class="kpi ${censusLatestPov>20?'danger':censusLatestPov>15?'warn':'success'}">${pct(censusLatestPov)}</div><div class="kpi-sub">${geoLabel} · Census ACS</div></div>
-    <div class="card"><h3>Population (${censusLatestYear})</h3><div class="kpi purple">${fmt(censusLatestPop)}</div><div class="kpi-sub">${geoLabel} · ${censusPopChange} since 2010 · Census ACS</div></div>
+    <div class="card"><h3>Median HH Income (${censusLatestYear})<span class="info-tip">ⓘ<div class="tip-text">Median household income from Census ACS, used to calculate rent burden and affordability metrics.</div></span></h3><div class="kpi accent">${dollar(censusLatestIncome)}</div><div class="kpi-sub">${geoLabel} · ${censusIncGrowth} since 2010 · Census ACS</div></div>
+    <div class="card"><h3>Poverty Rate (${censusLatestYear})<span class="info-tip">ⓘ<div class="tip-text">Percentage of population below federal poverty line from Census ACS, indicator of economic hardship.</div></span></h3><div class="kpi ${censusLatestPov>20?'danger':censusLatestPov>15?'warn':'success'}">${pct(censusLatestPov)}</div><div class="kpi-sub">${geoLabel} · Census ACS</div></div>
+    <div class="card"><h3>Population (${censusLatestYear})<span class="info-tip">ⓘ<div class="tip-text">Total population count from Census ACS, used to calculate per-capita housing needs and metrics.</div></span></h3><div class="kpi purple">${fmt(censusLatestPop)}</div><div class="kpi-sub">${geoLabel} · ${censusPopChange} since 2010 · Census ACS</div></div>
   </div>
   <div class="grid grid-2" style="margin-bottom:14px">
-    <div class="card"><h3>Census Rent Burden vs. Median Income — ${geoLabel}</h3><div class="chart-container"><canvas id="censusIncBurdenChart"></canvas></div></div>
-    <div class="card"><h3>Poverty Rate by Borough</h3><div class="chart-container"><canvas id="censusPovChart"></canvas></div></div>
+    <div class="card"><h3>Census Rent Burden vs. Median Income — ${geoLabel}<span class="info-tip">ⓘ<div class="tip-text">Scatterplot showing relationship between median household income and rent burden across neighborhoods.</div></span></h3><div class="chart-container"><canvas id="censusIncBurdenChart"></canvas></div></div>
+    <div class="card"><h3>Poverty Rate by Borough<span class="info-tip">ⓘ<div class="tip-text">Bar chart comparing poverty rates across the five boroughs from Census ACS data.</div></span></h3><div class="chart-container"><canvas id="censusPovChart"></canvas></div></div>
   </div>
   <div class="grid grid-2">
-    <div class="card"><h3>Population Trend — ${geoLabel}</h3><div class="chart-container"><canvas id="censusPopChart"></canvas></div></div>
-    <div class="card"><h3>Renter Share (%) by Borough</h3><div class="chart-container"><canvas id="censusRenterChart"></canvas></div></div>
+    <div class="card"><h3>Population Trend — ${geoLabel}<span class="info-tip">ⓘ<div class="tip-text">Historical population trend showing growth or decline patterns relevant to housing demand.</div></span></h3><div class="chart-container"><canvas id="censusPopChart"></canvas></div></div>
+    <div class="card"><h3>Renter Share (%) by Borough<span class="info-tip">ⓘ<div class="tip-text">Percentage of population renting vs. owning in each borough from Census ACS data.</div></span></h3><div class="chart-container"><canvas id="censusRenterChart"></canvas></div></div>
   </div>`;
 
   // Rent trend chart — filtered by time range and geo
@@ -681,29 +687,29 @@ function renderSupply(){
 
   el.innerHTML = `
   <div class="grid grid-3" style="margin-bottom:14px">
-    <div class="card"><h3>${latestYr} Net Units Permitted</h3><div class="kpi accent">${fmt(latestVal)}</div><div class="kpi-sub">${geoLabel} · Target: ${fmt(boroTarget)}/yr · Gap: ${gap<0?'+'+Math.abs(gap):gap}%${boro?' (est.)':''}</div></div>
-    <div class="card"><h3>Median Asking Rent (${seLatestYr})</h3><div class="kpi warn">${dollar(Math.round(seLatestRent))}/mo</div><div class="kpi-sub">${geoLabel} · ${seRentYoY>=0?'+':''}${seRentYoY}% YoY · ${seRentVs2019>=0?'+':''}${seRentVs2019}% since 2019 · StreetEasy</div></div>
-    <div class="card"><h3>Median Sales Price (${seLatestYr})</h3><div class="kpi purple">${dollar(Math.round(seLatestSales))}</div><div class="kpi-sub">${geoLabel} · ${seSalesYoY>=0?'+':''}${seSalesYoY}% YoY · StreetEasy</div></div>
+    <div class="card"><h3>${latestYr} Net Units Permitted<span class="info-tip">ⓘ<div class="tip-text">Net new housing units permitted by HPD, accounting for demolitions and new construction.</div></span></h3><div class="kpi accent">${fmt(latestVal)}</div><div class="kpi-sub">${geoLabel} · Target: ${fmt(boroTarget)}/yr · Gap: ${gap<0?'+'+Math.abs(gap):gap}%${boro?' (est.)':''}</div></div>
+    <div class="card"><h3>Median Asking Rent (${seLatestYr})<span class="info-tip">ⓘ<div class="tip-text">Median asking rent from StreetEasy listings, averaged annually by borough.</div></span></h3><div class="kpi warn">${dollar(Math.round(seLatestRent))}/mo</div><div class="kpi-sub">${geoLabel} · ${seRentYoY>=0?'+':''}${seRentYoY}% YoY · ${seRentVs2019>=0?'+':''}${seRentVs2019}% since 2019 · StreetEasy</div></div>
+    <div class="card"><h3>Median Sales Price (${seLatestYr})<span class="info-tip">ⓘ<div class="tip-text">Median home sale price from StreetEasy, reflecting ownership market conditions by borough.</div></span></h3><div class="kpi purple">${dollar(Math.round(seLatestSales))}</div><div class="kpi-sub">${geoLabel} · ${seSalesYoY>=0?'+':''}${seSalesYoY}% YoY · StreetEasy</div></div>
   </div>
   <div class="grid grid-3" style="margin-bottom:14px">
-    <div class="card"><h3>Rental Inventory (${seLatestYr})</h3><div class="kpi ${seLatestInv<20000?'danger':seLatestInv<35000?'warn':'success'}">${fmt(Math.round(seLatestInv))}</div><div class="kpi-sub">Avg monthly listings · ${geoLabel} · StreetEasy</div></div>
-    <div class="card"><h3>Days on Market (${seLatestYr})</h3><div class="kpi ${seLatestDOM<70?'success':seLatestDOM<90?'accent':'warn'}">${Math.round(seLatestDOM)} days</div><div class="kpi-sub">Sales median · ${geoLabel} · StreetEasy</div></div>
-    <div class="card"><h3>Completion Rate (Latest)</h3><div class="kpi ${cYrs.length&&cData[cYrs[cYrs.length-1]]>70?'success':cYrs.length&&cData[cYrs[cYrs.length-1]]>50?'warn':'danger'}">${cYrs.length?pct(cData[cYrs[cYrs.length-1]]):'—'}</div><div class="kpi-sub">3–5 year permit-to-completion lag</div></div>
+    <div class="card"><h3>Rental Inventory (${seLatestYr})<span class="info-tip">ⓘ<div class="tip-text">Average monthly available rental listings from StreetEasy; lower inventory indicates tighter market.</div></span></h3><div class="kpi ${seLatestInv<20000?'danger':seLatestInv<35000?'warn':'success'}">${fmt(Math.round(seLatestInv))}</div><div class="kpi-sub">Avg monthly listings · ${geoLabel} · StreetEasy</div></div>
+    <div class="card"><h3>Days on Market (${seLatestYr})<span class="info-tip">ⓘ<div class="tip-text">Median time in days between listing and sale for residential properties from StreetEasy.</div></span></h3><div class="kpi ${seLatestDOM<70?'success':seLatestDOM<90?'accent':'warn'}">${Math.round(seLatestDOM)} days</div><div class="kpi-sub">Sales median · ${geoLabel} · StreetEasy</div></div>
+    <div class="card"><h3>Completion Rate (Latest)<span class="info-tip">ⓘ<div class="tip-text">Percentage of permitted units completed; 3-5 year lag between permit and completion typical.</div></span></h3><div class="kpi ${cYrs.length&&cData[cYrs[cYrs.length-1]]>70?'success':cYrs.length&&cData[cYrs[cYrs.length-1]]>50?'warn':'danger'}">${cYrs.length?pct(cData[cYrs[cYrs.length-1]]):'—'}</div><div class="kpi-sub">3–5 year permit-to-completion lag</div></div>
   </div>
   <div class="grid grid-2" style="margin-bottom:14px">
-    <div class="card"><h3>Annual Net Units Permitted — ${geoLabel}</h3><div class="chart-container"><canvas id="supplyChart"></canvas></div></div>
-    <div class="card"><h3>Median Asking Rent — All Boroughs (${timeLabel})</h3><div class="chart-container"><canvas id="seRentChart"></canvas></div></div>
+    <div class="card"><h3>Annual Net Units Permitted — ${geoLabel}<span class="info-tip">ⓘ<div class="tip-text">Annual trend of net units permitted showing progress toward or shortfall from 20K/year goal.</div></span></h3><div class="chart-container"><canvas id="supplyChart"></canvas></div></div>
+    <div class="card"><h3>Median Asking Rent — All Boroughs (${timeLabel})<span class="info-tip">ⓘ<div class="tip-text">Rent trends across all five boroughs over time, highlighting divergence in market appreciation.</div></span></h3><div class="chart-container"><canvas id="seRentChart"></canvas></div></div>
   </div>
   <div style="margin-bottom:8px;padding:4px 12px;background:var(--card);border-left:3px solid #f59e0b;border-radius:4px;font-size:.92rem;color:#94a3b8;">
     <strong style="color:#e2e8f0;">StreetEasy Market Context</strong> — Borough-Level Annual Averages · Source: StreetEasy Data Dashboard
   </div>
   <div class="grid grid-2" style="margin-bottom:14px">
-    <div class="card"><h3>Rental Inventory Trend (${timeLabel})</h3><div class="chart-container"><canvas id="seInvChart"></canvas></div></div>
-    <div class="card"><h3>Median Sales Price — All Boroughs (${timeLabel})</h3><div class="chart-container"><canvas id="seSalesChart"></canvas></div></div>
+    <div class="card"><h3>Rental Inventory Trend (${timeLabel})<span class="info-tip">ⓘ<div class="tip-text">Average monthly rental listings available on StreetEasy showing supply tightness over time.</div></span></h3><div class="chart-container"><canvas id="seInvChart"></canvas></div></div>
+    <div class="card"><h3>Median Sales Price — All Boroughs (${timeLabel})<span class="info-tip">ⓘ<div class="tip-text">Home sale price trends across boroughs reflecting ownership market conditions and appreciation.</div></span></h3><div class="chart-container"><canvas id="seSalesChart"></canvas></div></div>
   </div>
   <div class="grid grid-2" style="margin-bottom:14px">
-    <div class="card"><h3>Days on Market — All Boroughs (${timeLabel})</h3><div class="chart-container"><canvas id="seDOMChart"></canvas></div></div>
-    <div class="card"><h3>StreetEasy Rental Index (${timeLabel})</h3><div class="chart-container"><canvas id="seRentalIdxChart"></canvas></div></div>
+    <div class="card"><h3>Days on Market — All Boroughs (${timeLabel})<span class="info-tip">ⓘ<div class="tip-text">Time to sell trend across boroughs; lower values indicate competitive/tight market conditions.</div></span></h3><div class="chart-container"><canvas id="seDOMChart"></canvas></div></div>
+    <div class="card"><h3>StreetEasy Rental Index (${timeLabel})<span class="info-tip">ⓘ<div class="tip-text">Indexed rental price trend (baseline = 100) showing relative rent growth across time periods.</div></span></h3><div class="chart-container"><canvas id="seRentalIdxChart"></canvas></div></div>
   </div>
   <div class="card" style="margin-bottom:14px"><h3>Borough Market Snapshot (${seLatestYr})</h3>
   <table><thead><tr><th>Borough</th><th>Med. Rent</th><th>Rent vs 2019</th><th>Med. Sales Price</th><th>Rental Inventory</th><th>Days on Mkt</th></tr></thead><tbody>
@@ -773,11 +779,11 @@ function renderAfford(){
   const displayBoros = boro?[boro]:DATA.boroughs;
   el.innerHTML = `
   <div class="grid grid-3" style="margin-bottom:14px">
-    ${displayBoros.slice(0,3).map(b=>`<div class="card"><h3>${b} Rent Burden 2026</h3><div class="kpi ${DATA.rentBurden2026[b]>60?'danger':DATA.rentBurden2026[b]>45?'warn':'accent'}">${pct(DATA.rentBurden2026[b])}</div><div class="kpi-sub">Income: ${dollar(DATA.income[b])} · Rent: ${dollar(DATA.rentByBorough[b][2026])}/mo</div></div>`).join('')}
+    ${displayBoros.slice(0,3).map(b=>`<div class="card"><h3>${b} Rent Burden 2026<span class="info-tip">ⓘ<div class="tip-text">Median asking rent as percentage of median household income in 2026. Above 30% indicates cost-burdened households.</div></span></h3><div class="kpi ${DATA.rentBurden2026[b]>60?'danger':DATA.rentBurden2026[b]>45?'warn':'accent'}">${pct(DATA.rentBurden2026[b])}</div><div class="kpi-sub">Income: ${dollar(DATA.income[b])} · Rent: ${dollar(DATA.rentByBorough[b][2026])}/mo</div></div>`).join('')}
   </div>
   <div class="grid grid-2">
-    <div class="card"><h3>Median Asking Rent Trajectory</h3><div class="chart-container"><canvas id="affordRentChart"></canvas></div></div>
-    <div class="card"><h3>Estimated Rent Burden Over Time (% of Income)</h3><div class="chart-container"><canvas id="affordBurdenChart"></canvas></div><div style="color:var(--muted);font-size:.7rem;margin-top:6px;line-height:1.4;padding:0 4px"><strong>Methodology:</strong> Burden = (Median Asking Rent × 12) ÷ HHI × 100. Household income uses Census ACS 1-Year Estimates (2010–2023), linearly interpolated for non-survey years. The green dashed line marks the HUD 30% cost-burden threshold.</div></div>
+    <div class="card"><h3>Median Asking Rent Trajectory<span class="info-tip">ⓘ<div class="tip-text">Historical trend of median asking rent by borough, showing acceleration of rental inflation over time.</div></span></h3><div class="chart-container"><canvas id="affordRentChart"></canvas></div></div>
+    <div class="card"><h3>Estimated Rent Burden Over Time (% of Income)<span class="info-tip">ⓘ<div class="tip-text">Calculated burden (rent × 12 ÷ HHI × 100) by borough over time. Green line is HUD 30% cost-burden threshold.</div></span></h3><div class="chart-container"><canvas id="affordBurdenChart"></canvas></div><div style="color:var(--muted);font-size:.7rem;margin-top:6px;line-height:1.4;padding:0 4px"><strong>Methodology:</strong> Burden = (Median Asking Rent × 12) ÷ HHI × 100. Household income uses Census ACS 1-Year Estimates (2010–2023), linearly interpolated for non-survey years. The green dashed line marks the HUD 30% cost-burden threshold.</div></div>
   </div>
   <div class="card" style="margin-top:14px"><h3>Borough Affordability Ranking</h3>
   <table><thead><tr><th>Rank</th><th>Borough</th><th>Median HHI</th><th>Rent 2026</th><th>Burden 2026</th><th>Change from 2023</th><th>Status</th></tr></thead><tbody>
@@ -867,13 +873,13 @@ function renderSubsidy(){
 
   el.innerHTML = `
   <div class="grid grid-3" style="margin-bottom:14px">
-    <div class="card"><h3>421-a Units — ${geoLabel}</h3><div class="kpi warn">${fmt(boroUnits421a)}</div><div class="kpi-sub">${boroProps421a.toLocaleString()} properties · 93.8% tax-delinquent</div></div>
-    <div class="card"><h3>Units Expiring (${timeLabel})</h3><div class="kpi danger">${fmt(totalUnitsAtRisk)}</div><div class="kpi-sub">${geoLabel} · ${totalPropsAtRisk.toLocaleString()} properties in period</div></div>
-    <div class="card"><h3>Peak Year in Range</h3><div class="kpi danger">${peakYear||'—'}</div><div class="kpi-sub">${fmt(peakUnits)} units · ${scaledTimeline[peakYear]?.props||0} properties</div></div>
+    <div class="card"><h3>421-a Units — ${geoLabel}<span class="info-tip">ⓘ<div class="tip-text">Total units under 421-a tax abatement program. 93.8% are tax-delinquent, indicating property tax issues.</div></span></h3><div class="kpi warn">${fmt(boroUnits421a)}</div><div class="kpi-sub">${boroProps421a.toLocaleString()} properties · 93.8% tax-delinquent</div></div>
+    <div class="card"><h3>Units Expiring (${timeLabel})<span class="info-tip">ⓘ<div class="tip-text">421-a subsidies expiring in this period. Units lose tax abatement and may see rent spikes or conversion.</div></span></h3><div class="kpi danger">${fmt(totalUnitsAtRisk)}</div><div class="kpi-sub">${geoLabel} · ${totalPropsAtRisk.toLocaleString()} properties in period</div></div>
+    <div class="card"><h3>Peak Year in Range<span class="info-tip">ⓘ<div class="tip-text">Year with highest number of 421-a units expiring; indicates peak cliff risk period for affordability.</div></span></h3><div class="kpi danger">${peakYear||'—'}</div><div class="kpi-sub">${fmt(peakUnits)} units · ${scaledTimeline[peakYear]?.props||0} properties</div></div>
   </div>
   <div class="grid grid-2">
-    <div class="card"><h3>421-a Expiration Timeline — ${geoLabel} (${timeLabel})</h3><div class="chart-container"><canvas id="expireChart"></canvas></div></div>
-    <div class="card"><h3>Cumulative Units Losing Subsidy — ${geoLabel}</h3><div class="chart-container"><canvas id="cumExpireChart"></canvas></div></div>
+    <div class="card"><h3>421-a Expiration Timeline — ${geoLabel} (${timeLabel})<span class="info-tip">ⓘ<div class="tip-text">Year-by-year units expiring from 421-a program. Peak years show greatest affordability at risk.</div></span></h3><div class="chart-container"><canvas id="expireChart"></canvas></div></div>
+    <div class="card"><h3>Cumulative Units Losing Subsidy — ${geoLabel}<span class="info-tip">ⓘ<div class="tip-text">Running total of all units that have or will expire from 421-a through the selected period.</div></span></h3><div class="chart-container"><canvas id="cumExpireChart"></canvas></div></div>
   </div>
   ${boro?'<div class="grid grid-2" style="margin-top:14px"><div class="card"><h3>Borough 421-a Share</h3><div class="chart-container"><canvas id="subsidyBoroChart"></canvas></div></div><div class="card"><h3>Borough Detail — 421-a Portfolio</h3><table><thead><tr><th>Borough</th><th>Properties</th><th>Units</th><th>Share</th></tr></thead><tbody>'+DATA.boroughs.map(b=>{const d=DATA.subsidyBoroTotals[b];const isSel=b===boro;return`<tr style="${isSel?'background:rgba(59,130,246,.15)':''}"><td>${isSel?'<strong>▸ '+b+'</strong>':b}</td><td>${d.props.toLocaleString()}</td><td>${d.units.toLocaleString()}</td><td>${Math.round(DATA.subsidyBoroShare[b]*100)}%</td></tr>`;}).join('')+'</tbody></table></div></div>':''}
   <div class="card" style="margin-top:14px"><h3>421-a Expiration Detail — ${geoLabel} (${timeLabel})</h3>
@@ -921,20 +927,20 @@ function renderNYCHA(){
   el.innerHTML = `
   ${timeNote}
   <div class="grid grid-5" style="margin-bottom:14px">
-    <div class="card"><h3>5-Year Capital Need</h3><div class="kpi danger">$${boro?(pna.yr2025.fiveYr*unitShare).toFixed(1):pna.yr2025.fiveYr}B</div><div class="kpi-sub">${boro?geoLabel+' est. ('+pct(unitShare*100)+' share)':'2025 PNA · Portfolio-wide'}</div></div>
-    <div class="card"><h3>20-Year Capital Need</h3><div class="kpi purple">$${boro?(pna.yr2025.twentyYr*unitShare).toFixed(1):pna.yr2025.twentyYr}B</div><div class="kpi-sub">${boro?geoLabel+' est.':'2025 PNA · Portfolio-wide'}</div></div>
-    <div class="card"><h3>Active Developments</h3><div class="kpi accent">${boro?totalProps:pna.yr2025.devs}</div><div class="kpi-sub">${boro?geoLabel+' properties':'Down from '+pna.yr2023.devs+' in 2023'}</div></div>
-    <div class="card"><h3>Units${boro?' — '+geoLabel:''}</h3><div class="kpi accent">${totalUnits.toLocaleString()}</div><div class="kpi-sub">${boro?(unitShare*100).toFixed(1)+'% of portfolio':'152,781 in 2025 PNA'}</div></div>
-    <div class="card"><h3>Per-Unit 5yr Cost</h3><div class="kpi warn">$${(perUnit2025/1000).toFixed(0)}K</div><div class="kpi-sub">Up from $${(perUnit2023/1000).toFixed(0)}K in 2023</div></div>
+    <div class="card"><h3>5-Year Capital Need<span class="info-tip">ⓘ<div class="tip-text">Total estimated capital investment required across all NYCHA developments over 5 years, from the 2025 Physical Needs Assessment.</div></span></h3><div class="kpi danger">$${boro?(pna.yr2025.fiveYr*unitShare).toFixed(1):pna.yr2025.fiveYr}B</div><div class="kpi-sub">${boro?geoLabel+' est. ('+pct(unitShare*100)+' share)':'2025 PNA · Portfolio-wide'}</div></div>
+    <div class="card"><h3>20-Year Capital Need<span class="info-tip">ⓘ<div class="tip-text">Extended capital investment projection for 20-year horizon covering major system replacements and renovations.</div></span></h3><div class="kpi purple">$${boro?(pna.yr2025.twentyYr*unitShare).toFixed(1):pna.yr2025.twentyYr}B</div><div class="kpi-sub">${boro?geoLabel+' est.':'2025 PNA · Portfolio-wide'}</div></div>
+    <div class="card"><h3>Active Developments<span class="info-tip">ⓘ<div class="tip-text">Number of NYCHA developments (properties) that are currently active in the portfolio.</div></span></h3><div class="kpi accent">${boro?totalProps:pna.yr2025.devs}</div><div class="kpi-sub">${boro?geoLabel+' properties':'Down from '+pna.yr2023.devs+' in 2023'}</div></div>
+    <div class="card"><h3>Units${boro?' — '+geoLabel:''}<span class="info-tip">ⓘ<div class="tip-text">Total public housing units in NYCHA developments. Portfolio-wide total is 152,781 units.</div></span></h3><div class="kpi accent">${totalUnits.toLocaleString()}</div><div class="kpi-sub">${boro?(unitShare*100).toFixed(1)+'% of portfolio':'152,781 in 2025 PNA'}</div></div>
+    <div class="card"><h3>Per-Unit 5yr Cost<span class="info-tip">ⓘ<div class="tip-text">Average capital cost per unit over 5 years, indicating inflation and accelerating deterioration trends.</div></span></h3><div class="kpi warn">$${(perUnit2025/1000).toFixed(0)}K</div><div class="kpi-sub">Up from $${(perUnit2023/1000).toFixed(0)}K in 2023</div></div>
   </div>
   <div class="grid grid-3" style="margin-bottom:14px">
-    <div class="card"><h3>5-Year Need Change (2023→2025)</h3><div class="kpi danger">+$${fiveYrChange}B</div><div class="kpi-sub">+${fiveYrChangePct}% despite 31 fewer developments</div></div>
-    <div class="card"><h3>PACT/RAD Conversions</h3><div class="kpi warn">${pna.yr2023.devs - pna.yr2025.devs} Developments</div><div class="kpi-sub">${(pna.yr2023.units - pna.yr2025.units).toLocaleString()} units moved to private mgmt</div></div>
-    <div class="card"><h3>Per-Unit Cost Growth</h3><div class="kpi danger">+${perUnitGrowth}%</div><div class="kpi-sub">In 2 years · Accelerating deterioration</div></div>
+    <div class="card"><h3>5-Year Need Change (2023→2025)<span class="info-tip">ⓘ<div class="tip-text">Dollar increase in capital need over two years, reflecting accelerating deterioration despite fewer developments.</div></span></h3><div class="kpi danger">+$${fiveYrChange}B</div><div class="kpi-sub">+${fiveYrChangePct}% despite 31 fewer developments</div></div>
+    <div class="card"><h3>PACT/RAD Conversions<span class="info-tip">ⓘ<div class="tip-text">Developments moved to private management (PACT) or mixed financing (RAD), reducing direct NYCHA capital burden.</div></span></h3><div class="kpi warn">${pna.yr2023.devs - pna.yr2025.devs} Developments</div><div class="kpi-sub">${(pna.yr2023.units - pna.yr2025.units).toLocaleString()} units moved to private mgmt</div></div>
+    <div class="card"><h3>Per-Unit Cost Growth<span class="info-tip">ⓘ<div class="tip-text">Year-over-year cost inflation per unit; indicates buildings are aging faster than they can be repaired.</div></span></h3><div class="kpi danger">+${perUnitGrowth}%</div><div class="kpi-sub">In 2 years · Accelerating deterioration</div></div>
   </div>
   <div class="grid grid-2" style="margin-bottom:14px">
-    <div class="card"><h3>Capital Need by System — Top 10 (5-Year, $B)</h3><div class="chart-container"><canvas id="nychaSystemChart"></canvas></div></div>
-    <div class="card"><h3>Most Capital-Intensive Developments (5-Year, $B)</h3><div class="chart-container"><canvas id="nychaDevChart"></canvas></div></div>
+    <div class="card"><h3>Capital Need by System — Top 10 (5-Year, $B)<span class="info-tip">ⓘ<div class="tip-text">Building systems ranked by capital need; roof, windows, elevators, heating/plumbing are major cost drivers.</div></span></h3><div class="chart-container"><canvas id="nychaSystemChart"></canvas></div></div>
+    <div class="card"><h3>Most Capital-Intensive Developments (5-Year, $B)<span class="info-tip">ⓘ<div class="tip-text">Top 10 NYCHA developments by total capital need, showing where largest investments are concentrated.</div></span></h3><div class="chart-container"><canvas id="nychaDevChart"></canvas></div></div>
   </div>
   <div class="card" style="margin-top:14px"><h3>All 14 Building Systems — Capital Requirements (2025 PNA)</h3>
   <table><thead><tr><th>System</th><th style="text-align:right">5-Year Need</th><th style="text-align:right">20-Year Need</th><th style="text-align:right">Share</th><th style="text-align:right">Growth (5→20yr)</th></tr></thead><tbody>
@@ -1033,21 +1039,21 @@ function renderConditions(){
 
   el.innerHTML = `
   <div class="grid grid-5" style="margin-bottom:14px">
-    <div class="card"><h3>HPD Complaints (2025)</h3><div class="kpi accent">${fmt(hpd2025)}</div><div class="kpi-sub">HPD 311 Complaints</div></div>
-    <div class="card"><h3>vs 2019</h3><div class="kpi ${hpdVs2019>=0?'danger':'success'}">${hpdVs2019>=0?'+':''}${hpdVs2019}%</div><div class="kpi-sub">Year-over-year change</div></div>
-    <div class="card"><h3>Bronx + Brooklyn</h3><div class="kpi accent">${bronxBrooklynPct}%</div><div class="kpi-sub">Share of citywide 2025</div></div>
-    <div class="card"><h3>Median Resolution</h3><div class="kpi success">${medianResolution2025} days</div><div class="kpi-sub">Time to close (2025)</div></div>
-    <div class="card"><h3>Heat/Hot Water</h3><div class="kpi warn">${heatPct2025}%</div><div class="kpi-sub">Share of all complaints</div></div>
+    <div class="card"><h3>HPD Complaints (2025)<span class="info-tip">ⓘ<div class="tip-text">Total NYC 311 housing quality complaints directed to HPD in 2025, tracked by complaint type and borough.</div></span></h3><div class="kpi accent">${fmt(hpd2025)}</div><div class="kpi-sub">HPD 311 Complaints</div></div>
+    <div class="card"><h3>vs 2019<span class="info-tip">ⓘ<div class="tip-text">Percent change in complaint volume from pre-pandemic baseline (2019) to current year, indicating trend in housing quality.</div></span></h3><div class="kpi ${hpdVs2019>=0?'danger':'success'}">${hpdVs2019>=0?'+':''}${hpdVs2019}%</div><div class="kpi-sub">Year-over-year change</div></div>
+    <div class="card"><h3>Bronx + Brooklyn<span class="info-tip">ⓘ<div class="tip-text">Share of total NYC complaints concentrated in Bronx and Brooklyn, showing disproportionate housing quality challenges in outer boroughs.</div></span></h3><div class="kpi accent">${bronxBrooklynPct}%</div><div class="kpi-sub">Share of citywide 2025</div></div>
+    <div class="card"><h3>Median Resolution<span class="info-tip">ⓘ<div class="tip-text">Average number of days to close/resolve a housing complaint from filing to resolution by HPD.</div></span></h3><div class="kpi success">${medianResolution2025} days</div><div class="kpi-sub">Time to close (2025)</div></div>
+    <div class="card"><h3>Heat/Hot Water<span class="info-tip">ⓘ<div class="tip-text">Share of all complaints involving heating or hot water, indicating systemic failures in critical building systems.</div></span></h3><div class="kpi warn">${heatPct2025}%</div><div class="kpi-sub">Share of all complaints</div></div>
   </div>
 
   <div class="grid grid-2" style="margin-bottom:14px">
-    <div class="card"><h3>Annual HPD Complaint Volume (2010–2025) — ${geoLabel}</h3><div class="chart-container"><canvas id="hpd311AnnualChart"></canvas></div></div>
-    <div class="card"><h3>Borough Trends (2011–2025)</h3><div class="chart-container"><canvas id="hpd311BoroughChart"></canvas></div></div>
+    <div class="card"><h3>Annual HPD Complaint Volume (2010–2025) — ${geoLabel}<span class="info-tip">ⓘ<div class="tip-text">Trend of total housing complaints by year, showing overall trajectory of housing quality deterioration or improvement.</div></span></h3><div class="chart-container"><canvas id="hpd311AnnualChart"></canvas></div></div>
+    <div class="card"><h3>Borough Trends (2011–2025)<span class="info-tip">ⓘ<div class="tip-text">Comparison of complaint trends across boroughs, showing which areas have persistent or increasing housing quality issues.</div></span></h3><div class="chart-container"><canvas id="hpd311BoroughChart"></canvas></div></div>
   </div>
 
   <div class="grid grid-2" style="margin-bottom:14px">
-    <div class="card"><h3>Top Complaint Types (2025) — Citywide</h3><div class="chart-container"><canvas id="hpd311TypeChart"></canvas></div></div>
-    <div class="card"><h3>Seasonal Pattern (Monthly Total, 2010–2025)</h3><div class="chart-container"><canvas id="hpd311SeasonalChart"></canvas></div></div>
+    <div class="card"><h3>Top Complaint Types (2025) — Citywide<span class="info-tip">ⓘ<div class="tip-text">Distribution of housing complaints by type, showing most common issues (heat, plumbing, structural, etc.).</div></span></h3><div class="chart-container"><canvas id="hpd311TypeChart"></canvas></div></div>
+    <div class="card"><h3>Seasonal Pattern (Monthly Total, 2010–2025)<span class="info-tip">ⓘ<div class="tip-text">Aggregated monthly complaint patterns showing seasonal spikes in heating season (Dec-Feb) vs. off-season periods.</div></span></h3><div class="chart-container"><canvas id="hpd311SeasonalChart"></canvas></div></div>
   </div>
 
   <div class="card" style="margin-bottom:14px">
@@ -1164,13 +1170,13 @@ function renderLand(){
   const floodPct = totalParcels>0?Math.round(totalFlood/totalParcels*100):0;
   el.innerHTML = `
   <div class="grid grid-3" style="margin-bottom:14px">
-    <div class="card"><h3>Developable Parcels</h3><div class="kpi success">${totalParcels.toLocaleString()}</div><div class="kpi-sub">${geo==='Citywide'?'All NYC':geo} · Non-park, res-zoned</div></div>
-    <div class="card"><h3>Developable Acres</h3><div class="kpi accent">${totalAcres.toLocaleString()}</div><div class="kpi-sub">${totalVacant.toLocaleString()} vacant lots</div></div>
-    <div class="card"><h3>Potential Units (unused FAR)</h3><div class="kpi purple">${fmt(totalUnits)}</div><div class="kpi-sub">${floodPct}% in flood zone · PLUTO Feb 2026</div></div>
+    <div class="card"><h3>Developable Parcels<span class="info-tip">ⓘ<div class="tip-text">City-owned parcels zoned for residential development from PLUTO database (public land); excludes parks and special districts.</div></span></h3><div class="kpi success">${totalParcels.toLocaleString()}</div><div class="kpi-sub">${geo==='Citywide'?'All NYC':geo} · Non-park, res-zoned</div></div>
+    <div class="card"><h3>Developable Acres<span class="info-tip">ⓘ<div class="tip-text">Total acreage of publicly-owned land available for residential development; includes vacant lots and underutilized sites.</div></span></h3><div class="kpi accent">${totalAcres.toLocaleString()}</div><div class="kpi-sub">${totalVacant.toLocaleString()} vacant lots</div></div>
+    <div class="card"><h3>Potential Units (unused FAR)<span class="info-tip">ⓘ<div class="tip-text">Housing units that could be developed using current unused floor-area ratio (FAR) capacity on public land.</div></span></h3><div class="kpi purple">${fmt(totalUnits)}</div><div class="kpi-sub">${floodPct}% in flood zone · PLUTO Feb 2026</div></div>
   </div>
   <div class="grid grid-2">
-    <div class="card"><h3>Potential Units by Borough (Unused FAR)</h3><div class="chart-container"><canvas id="landBoroChart"></canvas></div></div>
-    <div class="card"><h3>Flood Zone Exposure by Borough (%)</h3><div class="chart-container"><canvas id="landFloodChart"></canvas></div></div>
+    <div class="card"><h3>Potential Units by Borough (Unused FAR)<span class="info-tip">ⓘ<div class="tip-text">Comparison across boroughs of development potential on public land, showing relative opportunity by geography.</div></span></h3><div class="chart-container"><canvas id="landBoroChart"></canvas></div></div>
+    <div class="card"><h3>Flood Zone Exposure by Borough (%)<span class="info-tip">ⓘ<div class="tip-text">Percentage of public land in flood zones by borough, indicating climate resilience and development constraints.</div></span></h3><div class="chart-container"><canvas id="landFloodChart"></canvas></div></div>
   </div>
   <div class="card" style="margin-top:14px"><h3>Borough Detail — Developable Public Land</h3>
   <table><thead><tr><th>Borough</th><th>Parcels</th><th>Acres</th><th>Potential Units</th><th>Vacant</th><th>Flood %</th><th>Priority</th></tr></thead><tbody>
@@ -1211,19 +1217,19 @@ function render421aTimeline(){
 
   el.innerHTML = `
   <div class="grid grid-3" style="margin-bottom:14px">
-    <div class="card"><h3>Total 421-a Units — ${geoLabel}</h3><div class="kpi danger">${fmt(totalUnits)}</div><div class="kpi-sub">Full 2026–2060 timeline</div></div>
-    <div class="card"><h3>First Wave (by 2035)</h3><div class="kpi warn">${fmt(by2035)}</div><div class="kpi-sub">${fmt(by2030)} by 2030 · Peak: ${peakY} (${fmt(getUnits(peakY))})</div></div>
-    <div class="card"><h3>Second Wave (2052–2060)</h3><div class="kpi accent">${fmt(wave2)}</div><div class="kpi-sub">From 2018–2024 construction boom</div></div>
+    <div class="card"><h3>Total 421-a Units — ${geoLabel}<span class="info-tip">ⓘ<div class="tip-text">All 421-a subsidized units expiring between 2026 and 2060; includes both current portfolio and new construction boom.</div></span></h3><div class="kpi danger">${fmt(totalUnits)}</div><div class="kpi-sub">Full 2026–2060 timeline</div></div>
+    <div class="card"><h3>First Wave (by 2035)<span class="info-tip">ⓘ<div class="tip-text">Units expiring by 2035, creating first major affordability cliff. Peak concentration usually around 2034-2035.</div></span></h3><div class="kpi warn">${fmt(by2035)}</div><div class="kpi-sub">${fmt(by2030)} by 2030 · Peak: ${peakY} (${fmt(getUnits(peakY))})</div></div>
+    <div class="card"><h3>Second Wave (2052–2060)<span class="info-tip">ⓘ<div class="tip-text">Units from recent construction boom (2018-2024) expiring later. Creates second major cliff 25+ years out.</div></span></h3><div class="kpi accent">${fmt(wave2)}</div><div class="kpi-sub">From 2018–2024 construction boom</div></div>
   </div>
   <div class="grid grid-2">
-    <div class="card" style="grid-column:1/-1"><h3>421-a Expiration Timeline — ${geoLabel} (2026–2060)</h3><div class="chart-container" style="height:300px"><canvas id="ft421Chart"></canvas></div>
+    <div class="card" style="grid-column:1/-1"><h3>421-a Expiration Timeline — ${geoLabel} (2026–2060)<span class="info-tip">ⓘ<div class="tip-text">Annual breakdown of 421-a units expiring by year. Red shows immediate crisis years (2026-2030); amber shows medium urgency (2031-2040); green shows longer-term.</div></span></h3><div class="chart-container" style="height:300px"><canvas id="ft421Chart"></canvas></div>
     <div style="color:var(--muted);font-size:.78rem;margin-top:6px">Red = within 5 yrs · Amber = 6–10 yrs · Green = 10+ yrs · Dashed line = annual average</div></div>
-    <div class="card"><h3>Cumulative Units Expiring — ${geoLabel}</h3><div class="chart-container"><canvas id="ft421CumChart"></canvas></div></div>
-    <div class="card"><h3>Borough Share of Expirations</h3><div class="chart-container"><canvas id="ft421BoroDonut"></canvas></div></div>
+    <div class="card"><h3>Cumulative Units Expiring — ${geoLabel}<span class="info-tip">ⓘ<div class="tip-text">Running total of all units that have or will expire through 2060, showing cumulative affordability at risk.</div></span></h3><div class="chart-container"><canvas id="ft421CumChart"></canvas></div></div>
+    <div class="card"><h3>Borough Share of Expirations<span class="info-tip">ⓘ<div class="tip-text">Pie chart showing which boroughs bear the largest burden of 421-a expirations across the full timeline.</div></span></h3><div class="chart-container"><canvas id="ft421BoroDonut"></canvas></div></div>
   </div>
   <div class="grid grid-2" style="margin-top:14px">
-    <div class="card"><h3>Borough Expiration Trends</h3><div class="chart-container" style="height:300px"><canvas id="ft421BoroTrend"></canvas></div></div>
-    <div class="card"><h3>Expiration Windows</h3>
+    <div class="card"><h3>Borough Expiration Trends<span class="info-tip">ⓘ<div class="tip-text">Line chart comparing 421-a expiration trajectories across all five boroughs, showing timing and magnitude of affordability risks.</div></span></h3><div class="chart-container" style="height:300px"><canvas id="ft421BoroTrend"></canvas></div></div>
+    <div class="card"><h3>Expiration Windows<span class="info-tip">ⓘ<div class="tip-text">Summary of units expiring in different time periods, color-coded by urgency level for policy planning.</div></span></h3>
     <table><thead><tr><th>Window</th><th>Units</th><th>Urgency</th></tr></thead><tbody>
     ${[{l:'2026 (Now)',r:[2026,2026],b:'crisis'},{l:'2027–2030',r:[2027,2030],b:'crisis'},{l:'2031–2035',r:[2031,2035],b:'high'},{l:'2036–2045',r:[2036,2045],b:'mod'},{l:'2046–2051',r:[2046,2051],b:'low'},{l:'2052–2060',r:[2052,2060],b:'high'}].map(w=>{
       const u=allYrs.filter(y=>y>=w.r[0]&&y<=w.r[1]).reduce((s,y)=>s+getUnits(y),0);
