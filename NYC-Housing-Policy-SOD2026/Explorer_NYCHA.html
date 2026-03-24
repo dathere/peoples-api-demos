@@ -1,0 +1,1069 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>NYCHA Portfolio Analysis — Interactive Explorer</title>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.min.js"></script>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', 'Oxygen', 'Ubuntu', 'Cantarell', sans-serif;
+            background-color: #0f172a;
+            color: #e2e8f0;
+            padding: 24px;
+            line-height: 1.6;
+        }
+
+        .container {
+            max-width: 1400px;
+            margin: 0 auto;
+        }
+
+        .header {
+            margin-bottom: 32px;
+        }
+
+        .header h1 {
+            font-size: 32px;
+            font-weight: 700;
+            margin-bottom: 8px;
+            color: #f1f5f9;
+        }
+
+        .header p {
+            font-size: 16px;
+            color: #cbd5e1;
+            margin-bottom: 24px;
+        }
+
+        .controls {
+            display: flex;
+            gap: 20px;
+            margin-bottom: 32px;
+            flex-wrap: wrap;
+            align-items: center;
+        }
+
+        .control-group {
+            display: flex;
+            gap: 12px;
+            align-items: center;
+        }
+
+        .control-group label {
+            font-size: 14px;
+            font-weight: 600;
+            color: #cbd5e1;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+
+        select {
+            background-color: #1e293b;
+            color: #e2e8f0;
+            border: 1px solid #334155;
+            padding: 8px 12px;
+            border-radius: 6px;
+            font-size: 14px;
+            cursor: pointer;
+            transition: border-color 0.2s;
+        }
+
+        select:hover {
+            border-color: #475569;
+        }
+
+        select:focus {
+            outline: none;
+            border-color: #64748b;
+            box-shadow: 0 0 0 3px rgba(100, 116, 139, 0.1);
+        }
+
+        .view-buttons {
+            display: flex;
+            gap: 8px;
+        }
+
+        .view-btn {
+            padding: 8px 16px;
+            background-color: #1e293b;
+            color: #cbd5e1;
+            border: 1px solid #334155;
+            border-radius: 6px;
+            cursor: pointer;
+            font-size: 13px;
+            font-weight: 600;
+            transition: all 0.2s;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+
+        .view-btn:hover {
+            border-color: #475569;
+            background-color: #334155;
+        }
+
+        .view-btn.active {
+            background-color: #3b82f6;
+            border-color: #3b82f6;
+            color: #f1f5f9;
+        }
+
+        .kpi-row {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 16px;
+            margin-bottom: 32px;
+        }
+
+        .kpi-card {
+            background-color: #1e293b;
+            border: 1px solid #334155;
+            border-radius: 8px;
+            padding: 20px;
+            text-align: center;
+        }
+
+        .kpi-label {
+            font-size: 12px;
+            font-weight: 600;
+            color: #94a3b8;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            margin-bottom: 8px;
+        }
+
+        .kpi-value {
+            font-size: 28px;
+            font-weight: 700;
+            color: #f1f5f9;
+            margin-bottom: 4px;
+        }
+
+        .kpi-unit {
+            font-size: 12px;
+            color: #64748b;
+        }
+
+        .chart-section {
+            background-color: #1e293b;
+            border: 1px solid #334155;
+            border-radius: 8px;
+            padding: 24px;
+            margin-bottom: 24px;
+            display: none;
+        }
+
+        .chart-section.active {
+            display: block;
+        }
+
+        .chart-title {
+            font-size: 18px;
+            font-weight: 700;
+            color: #f1f5f9;
+            margin-bottom: 20px;
+        }
+
+        .chart-container {
+            position: relative;
+            height: 400px;
+            margin-bottom: 16px;
+        }
+
+        .table-container {
+            overflow-x: auto;
+            margin-top: 16px;
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            font-size: 13px;
+        }
+
+        th {
+            background-color: #0f172a;
+            color: #cbd5e1;
+            padding: 12px;
+            text-align: left;
+            font-weight: 600;
+            border-bottom: 1px solid #334155;
+            text-transform: uppercase;
+            font-size: 11px;
+            letter-spacing: 0.5px;
+        }
+
+        td {
+            padding: 12px;
+            border-bottom: 1px solid #334155;
+            color: #e2e8f0;
+        }
+
+        tr:hover {
+            background-color: #0f172a;
+        }
+
+        .heatmap-cell {
+            padding: 8px;
+            border-radius: 4px;
+            text-align: center;
+            font-weight: 500;
+            color: #f1f5f9;
+        }
+
+        .heat-low {
+            background-color: #166534;
+        }
+
+        .heat-medium {
+            background-color: #ca8a04;
+        }
+
+        .heat-high {
+            background-color: #991b1b;
+        }
+
+        .grid-2 {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(600px, 1fr));
+            gap: 24px;
+            margin-bottom: 24px;
+        }
+
+        @media (max-width: 768px) {
+            .grid-2 {
+                grid-template-columns: 1fr;
+            }
+
+            .kpi-row {
+                grid-template-columns: 1fr;
+            }
+
+            .controls {
+                flex-direction: column;
+                align-items: flex-start;
+            }
+
+            .view-buttons {
+                flex-wrap: wrap;
+            }
+        }
+
+        .pyramid-container {
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
+        }
+
+        .pyramid-bar {
+            background-color: #1e293b;
+            border-left: 4px solid #3b82f6;
+            padding: 12px;
+            border-radius: 4px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .pyramid-bar.tier1 {
+            border-left-color: #dc2626;
+        }
+
+        .pyramid-bar.tier2 {
+            border-left-color: #f97316;
+        }
+
+        .pyramid-bar.tier3 {
+            border-left-color: #eab308;
+        }
+
+        .pyramid-bar.tier4 {
+            border-left-color: #10b981;
+        }
+
+        .pyramid-label {
+            font-weight: 600;
+            color: #f1f5f9;
+        }
+
+        .pyramid-data {
+            display: flex;
+            gap: 16px;
+            color: #cbd5e1;
+            font-size: 13px;
+        }
+
+        .disclaimer {
+            background-color: #1e293b;
+            border: 1px solid #334155;
+            border-radius: 8px;
+            padding: 16px;
+            margin-top: 32px;
+            font-size: 12px;
+            color: #94a3b8;
+            border-left: 4px solid #64748b;
+        }
+
+        .disclaimer strong {
+            color: #cbd5e1;
+            display: block;
+            margin-bottom: 8px;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <nav style="margin-bottom:8px"><a href="Explorer_Master_Dashboard.html" style="color:#94a3b8;text-decoration:none;font-size:.85rem;display:inline-flex;align-items:center;gap:4px;transition:color .2s" onmouseover="this.style.color='#3b82f6'" onmouseout="this.style.color='#94a3b8'">&larr; Back to Master Dashboard</a></nav>
+        <div class="header">
+            <h1>NYCHA Portfolio Analysis — Interactive Explorer</h1>
+            <p>Capital Backlog, Climate Risk & Preservation Strategy · 694 Properties · 193,448 Units</p>
+        </div>
+
+        <div class="controls">
+            <div class="control-group">
+                <label for="boroughSelect">Borough:</label>
+                <select id="boroughSelect">
+                    <option value="Citywide">Citywide</option>
+                    <option value="Manhattan">Manhattan</option>
+                    <option value="Brooklyn">Brooklyn</option>
+                    <option value="Bronx">Bronx</option>
+                    <option value="Queens">Queens</option>
+                    <option value="Staten_Island">Staten Island</option>
+                </select>
+            </div>
+
+            <div class="control-group">
+                <label>View:</label>
+                <div class="view-buttons">
+                    <button class="view-btn active" data-view="overview">Portfolio Overview</button>
+                    <button class="view-btn" data-view="capital">Capital Needs</button>
+                    <button class="view-btn" data-view="climate">Climate Risk</button>
+                    <button class="view-btn" data-view="condition">Condition Analysis</button>
+                </div>
+            </div>
+        </div>
+
+        <!-- KPI ROW -->
+        <div class="kpi-row">
+            <div class="kpi-card">
+                <div class="kpi-label">Total Units</div>
+                <div class="kpi-value" id="kpiUnits">193,448</div>
+                <div class="kpi-unit">Across Portfolio</div>
+            </div>
+            <div class="kpi-card">
+                <div class="kpi-label">Annual Capital Gap</div>
+                <div class="kpi-value" id="kpiCapGap">$2.76B</div>
+                <div class="kpi-unit">Unfunded Needs</div>
+            </div>
+            <div class="kpi-card">
+                <div class="kpi-label">Flood-Zone Properties</div>
+                <div class="kpi-value" id="kpiFlood">94</div>
+                <div class="kpi-unit">At Risk (100-yr)</div>
+            </div>
+            <div class="kpi-card">
+                <div class="kpi-label">Avg Building Age</div>
+                <div class="kpi-value" id="kpiAge">1947</div>
+                <div class="kpi-unit">76 Years Old</div>
+            </div>
+            <div class="kpi-card">
+                <div class="kpi-label">Violation Rate</div>
+                <div class="kpi-value" id="kpiViolation">22.8%</div>
+                <div class="kpi-unit">Housing Violations</div>
+            </div>
+        </div>
+
+        <!-- PORTFOLIO OVERVIEW VIEW -->
+        <div class="chart-section active" data-view-id="overview">
+            <div class="grid-2">
+                <div>
+                    <div class="chart-title">Units by Borough</div>
+                    <div class="chart-container">
+                        <canvas id="unitsChart"></canvas>
+                    </div>
+                </div>
+                <div>
+                    <div class="chart-title">Properties by Borough</div>
+                    <div class="chart-container">
+                        <canvas id="propsChart"></canvas>
+                    </div>
+                </div>
+            </div>
+
+            <div>
+                <div class="chart-title">Deferred Maintenance Priority Pyramid</div>
+                <div class="pyramid-container" id="pyramidContainer">
+                    <!-- Generated by JS -->
+                </div>
+            </div>
+
+            <div>
+                <div class="chart-title">Building Age Distribution</div>
+                <div class="chart-container">
+                    <canvas id="ageChart"></canvas>
+                </div>
+            </div>
+        </div>
+
+        <!-- CAPITAL NEEDS VIEW -->
+        <div class="chart-section" data-view-id="capital">
+            <div class="grid-2">
+                <div>
+                    <div class="chart-title">Annual Capital Gap by System</div>
+                    <div class="chart-container">
+                        <canvas id="capitalGapChart"></canvas>
+                    </div>
+                </div>
+                <div>
+                    <div class="chart-title">Capital Needs vs. Funding</div>
+                    <div class="chart-container">
+                        <canvas id="capitalFundingChart"></canvas>
+                    </div>
+                </div>
+            </div>
+
+            <div>
+                <div class="chart-title">Mamdani Funding Roadmap (2026-2030)</div>
+                <div class="chart-container">
+                    <canvas id="roadmapChart"></canvas>
+                </div>
+            </div>
+        </div>
+
+        <!-- CLIMATE RISK VIEW -->
+        <div class="chart-section" data-view-id="climate">
+            <div class="chart-title">Flood Zone Exposure by Borough</div>
+            <div class="chart-container">
+                <canvas id="floodChart"></canvas>
+            </div>
+
+            <div style="margin-top: 32px;">
+                <div class="chart-title">Climate & Flood Risk Summary</div>
+                <div class="table-container">
+                    <table id="climateTable">
+                        <!-- Generated by JS -->
+                    </table>
+                </div>
+            </div>
+        </div>
+
+        <!-- CONDITION ANALYSIS VIEW -->
+        <div class="chart-section" data-view-id="condition">
+            <div class="chart-title">Condition Heatmap: Borough × Metric</div>
+            <div class="table-container">
+                <table id="heatmapTable">
+                    <!-- Generated by JS -->
+                </table>
+            </div>
+
+            <div style="margin-top: 32px;">
+                <div class="chart-title">Average Metrics by Borough</div>
+                <div class="chart-container">
+                    <canvas id="conditionChart"></canvas>
+                </div>
+            </div>
+        </div>
+
+        <div class="disclaimer">
+            <strong>Disclaimer</strong>
+            This dashboard presents aggregated data on NYCHA portfolio characteristics, capital needs, climate exposure, and condition metrics. All figures are for analytical and planning purposes. Data reflects publicly available NYCHA records, flood zone designations (FEMA), and condition assessments as of 2026. Actual capital requirements, funding schedules, and climate risk assessments may vary based on ongoing maintenance cycles and policy changes. This tool does not constitute official NYCHA guidance and should be used in conjunction with official agency documentation and reports.
+        </div>
+    </div>
+
+    <script>
+        // Data
+        const boroughData = {
+            Citywide: { props: 694, units: 193448, yrBuilt: 1947, violationRate: 22.8, delinqRate: 33.3, floodProps: 94, floodUnits: 17848 },
+            Manhattan: { props: 206, units: 54616, yrBuilt: 1944, violationRate: 25.2, delinqRate: 26.2, floodProps: 32, floodUnits: 5800 },
+            Brooklyn: { props: 250, units: 60222, yrBuilt: 1930, violationRate: 36.8, delinqRate: 35.2, floodProps: 28, floodUnits: 5200 },
+            Bronx: { props: 187, units: 56966, yrBuilt: 1947, violationRate: 18.7, delinqRate: 31.0, floodProps: 18, floodUnits: 3600 },
+            Queens: { props: 38, units: 17138, yrBuilt: 1955, violationRate: 5.3, delinqRate: 47.4, floodProps: 12, floodUnits: 2400 },
+            Staten_Island: { props: 13, units: 4506, yrBuilt: 1962, violationRate: 7.7, delinqRate: 30.8, floodProps: 4, floodUnits: 848 }
+        };
+
+        const capitalNeeds = {
+            Roofs: { need: 380, funded: 140 },
+            Boiler_HVAC: { need: 520, funded: 180 },
+            Plumbing: { need: 360, funded: 90 },
+            Electrical: { need: 280, funded: 85 },
+            Windows: { need: 190, funded: 70 },
+            Exterior: { need: 420, funded: 160 },
+            Lead: { need: 180, funded: 55 },
+            ADA: { need: 140, funded: 45 }
+        };
+
+        const deferredMaintenance = [
+            { tier: 'Tier 1: Emergency', buildings: 170, cost: 3.2, timeframe: '1-2 years', items: 'Boiler failures, roof leaks, elevator', class: 'tier1' },
+            { tier: 'Tier 2: Urgent', buildings: 486, cost: 7.8, timeframe: '2-5 years', items: 'Electrical, lead paint, plumbing', class: 'tier2' },
+            { tier: 'Tier 3: Important', buildings: 694, cost: 12.4, timeframe: '5-10 years', items: 'Exterior, windows, ADA', class: 'tier3' },
+            { tier: 'Tier 4: Strategic', buildings: 694, cost: 8.7, timeframe: '10+ years', items: 'Modernization, climate retrofit', class: 'tier4' }
+        ];
+
+        const mamdaniFunding = {
+            2026: { current: 1.5, proposed: 3.0 },
+            2027: { current: 1.5, proposed: 3.5 },
+            2028: { current: 1.5, proposed: 4.0 },
+            2029: { current: 1.5, proposed: 4.0 },
+            2030: { current: 1.5, proposed: 4.0 }
+        };
+
+        const ageDistribution = {
+            'Pre-1940': 142,
+            '1940-1960': 380,
+            '1960-1980': 142,
+            '1980+': 30
+        };
+
+        let charts = {};
+        const CC = { primary: '#3b82f6', secondary: '#8b5cf6', success: '#10b981', warning: '#f97316', danger: '#dc2626', info: '#06b6d4', dimmed: 'rgba(51,65,85,0.4)' };
+        const chartColors = CC; // alias for existing refs
+
+        const boroKeys = ['Manhattan', 'Brooklyn', 'Bronx', 'Queens', 'Staten_Island'];
+        const cityTotalUnits = boroughData.Citywide.units;
+
+        function getBoroShare(borough) {
+            if (borough === 'Citywide') return 1;
+            return boroughData[borough].units / cityTotalUnits;
+        }
+
+        function boroHighlight(borough, colorActive, colorDim) {
+            if (borough === 'Citywide') return boroKeys.map(() => colorActive);
+            return boroKeys.map(b => b === borough ? colorActive : (colorDim || CC.dimmed));
+        }
+
+        // Initialize
+        document.addEventListener('DOMContentLoaded', () => {
+            initializeEventListeners();
+            fullRender();
+        });
+
+        function initializeEventListeners() {
+            document.getElementById('boroughSelect').addEventListener('change', () => fullRender());
+            document.querySelectorAll('.view-btn').forEach(btn => {
+                btn.addEventListener('click', (e) => {
+                    document.querySelectorAll('.view-btn').forEach(b => b.classList.remove('active'));
+                    e.target.classList.add('active');
+                    showView(e.target.dataset.view);
+                });
+            });
+        }
+
+        function fullRender() {
+            const borough = document.getElementById('boroughSelect').value;
+            Object.values(charts).forEach(c => c.destroy());
+            charts = {};
+            updateKPIs(borough);
+            renderPyramid(borough);
+            createUnitsChart(borough);
+            createPropsChart(borough);
+            createAgeChart(borough);
+            createCapitalGapChart(borough);
+            createCapitalFundingChart(borough);
+            createRoadmapChart(borough);
+            createFloodChart(borough);
+            createConditionChart(borough);
+            createClimateTable(borough);
+            createHeatmapTable(borough);
+        }
+
+        function updateKPIs(borough) {
+            const data = boroughData[borough] || boroughData.Citywide;
+            const share = getBoroShare(borough);
+            const geoLabel = borough === 'Citywide' ? 'All NYC' : borough.replace('_', ' ');
+
+            const totalNeed = Object.values(capitalNeeds).reduce((s, i) => s + i.need, 0);
+            const totalFunded = Object.values(capitalNeeds).reduce((s, i) => s + i.funded, 0);
+            const scaledGap = ((totalNeed - totalFunded) * share / 1000); // in $B
+
+            document.getElementById('kpiUnits').textContent = data.units.toLocaleString();
+            document.querySelector('#kpiUnits').closest('.kpi-card').querySelector('.kpi-unit').textContent = geoLabel;
+
+            document.getElementById('kpiCapGap').textContent = '$' + scaledGap.toFixed(2) + 'B';
+            document.querySelector('#kpiCapGap').closest('.kpi-card').querySelector('.kpi-unit').textContent = geoLabel + (borough !== 'Citywide' ? ' (est.)' : '');
+
+            document.getElementById('kpiFlood').textContent = data.floodProps;
+            document.querySelector('#kpiFlood').closest('.kpi-card').querySelector('.kpi-unit').textContent = geoLabel;
+
+            document.getElementById('kpiAge').textContent = data.yrBuilt;
+            document.querySelector('#kpiAge').closest('.kpi-card').querySelector('.kpi-unit').textContent = (2026 - data.yrBuilt) + ' years old · ' + geoLabel;
+
+            document.getElementById('kpiViolation').textContent = data.violationRate.toFixed(1) + '%';
+            document.querySelector('#kpiViolation').closest('.kpi-card').querySelector('.kpi-unit').textContent = geoLabel;
+        }
+
+        function renderPyramid(borough) {
+            const share = getBoroShare(borough);
+            const geoLabel = borough === 'Citywide' ? '' : ' (est.)';
+            const container = document.getElementById('pyramidContainer');
+            container.innerHTML = deferredMaintenance.map(tier => {
+                const bldgs = Math.round(tier.buildings * share);
+                const cost = (tier.cost * share).toFixed(1);
+                return `
+                <div class="pyramid-bar ${tier.class}">
+                    <div>
+                        <div class="pyramid-label">${tier.tier}</div>
+                        <div style="font-size: 12px; color: #94a3b8; margin-top: 4px;">${tier.items}</div>
+                    </div>
+                    <div class="pyramid-data">
+                        <div><strong>${bldgs}</strong> Buildings${geoLabel}</div>
+                        <div><strong>$${cost}B</strong></div>
+                        <div><strong>${tier.timeframe}</strong></div>
+                    </div>
+                </div>`;
+            }).join('');
+        }
+
+        function createUnitsChart(borough) {
+            const ctx = document.getElementById('unitsChart').getContext('2d');
+            charts.units = new Chart(ctx, {
+                type: 'bar',
+                data: {
+                    labels: boroKeys.map(b => b.replace('_', ' ')),
+                    datasets: [{
+                        label: 'Units',
+                        data: boroKeys.map(b => boroughData[b].units),
+                        backgroundColor: boroHighlight(borough, CC.primary),
+                        borderRadius: 6, borderSkipped: false
+                    }]
+                },
+                options: { responsive: true, maintainAspectRatio: false, plugins: { legend: { display: false }, tooltip: { backgroundColor: '#0f172a', titleColor: '#f1f5f9', bodyColor: '#e2e8f0', borderColor: '#334155', borderWidth: 1, padding: 12, callbacks: { label: (c) => 'Units: ' + c.parsed.y.toLocaleString() } } }, scales: { y: { beginAtZero: true, ticks: { color: '#94a3b8', callback: (v) => v.toLocaleString() }, grid: { color: '#334155', drawBorder: false }, title: { display: true, text: 'Units', color: '#cbd5e1' } }, x: { ticks: { color: '#94a3b8' }, grid: { display: false, drawBorder: false } } } }
+            });
+        }
+
+        function createPropsChart(borough) {
+            const ctx = document.getElementById('propsChart').getContext('2d');
+            charts.props = new Chart(ctx, {
+                type: 'bar',
+                data: {
+                    labels: boroKeys.map(b => b.replace('_', ' ')),
+                    datasets: [{ label: 'Properties', data: boroKeys.map(b => boroughData[b].props), backgroundColor: boroHighlight(borough, CC.secondary), borderRadius: 6, borderSkipped: false }]
+                },
+                options: { responsive: true, maintainAspectRatio: false, plugins: { legend: { display: false }, tooltip: { backgroundColor: '#0f172a', titleColor: '#f1f5f9', bodyColor: '#e2e8f0', borderColor: '#334155', borderWidth: 1, padding: 12 } }, scales: { y: { beginAtZero: true, ticks: { color: '#94a3b8' }, grid: { color: '#334155', drawBorder: false } }, x: { ticks: { color: '#94a3b8' }, grid: { display: false, drawBorder: false } } } }
+            });
+        }
+
+        function createAgeChart(borough) {
+            const share = getBoroShare(borough);
+            const scaledAge = Object.values(ageDistribution).map(v => Math.round(v * share));
+            const geoLabel = borough === 'Citywide' ? '' : ' (' + borough.replace('_', ' ') + ' est.)';
+            const ctx = document.getElementById('ageChart').getContext('2d');
+            charts.age = new Chart(ctx, {
+                type: 'bar',
+                data: {
+                    labels: Object.keys(ageDistribution),
+                    datasets: [{ label: 'Buildings' + geoLabel, data: scaledAge, backgroundColor: [CC.danger, CC.warning, CC.info, CC.success], borderRadius: 6, borderSkipped: false }]
+                },
+                options: { responsive: true, maintainAspectRatio: false, plugins: { legend: { display: false }, tooltip: { backgroundColor: '#0f172a', titleColor: '#f1f5f9', bodyColor: '#e2e8f0', borderColor: '#334155', borderWidth: 1, padding: 12 } }, scales: { y: { beginAtZero: true, ticks: { color: '#94a3b8' }, grid: { color: '#334155', drawBorder: false } }, x: { ticks: { color: '#94a3b8' }, grid: { display: false, drawBorder: false } } } }
+            });
+        }
+
+        function createCapitalGapChart(borough) {
+            const ctx = document.getElementById('capitalGapChart').getContext('2d');
+            const systems = Object.keys(capitalNeeds);
+            const share = getBoroShare(borough);
+            const geoLabel = borough === 'Citywide' ? '' : ' (' + borough.replace('_', ' ') + ' est.)';
+            charts.capitalGap = new Chart(ctx, {
+                type: 'bar',
+                data: {
+                    labels: systems.map(s => s.replace('_', ' ')),
+                    datasets: [
+                        {
+                            label: 'Funded' + geoLabel,
+                            data: systems.map(s => Math.round(capitalNeeds[s].funded * share)),
+                            backgroundColor: chartColors.success,
+                            borderRadius: 6,
+                            borderSkipped: false
+                        },
+                        {
+                            label: 'Gap' + geoLabel,
+                            data: systems.map(s => Math.round((capitalNeeds[s].need - capitalNeeds[s].funded) * share)),
+                            backgroundColor: chartColors.danger,
+                            borderRadius: 6,
+                            borderSkipped: false
+                        }
+                    ]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    indexAxis: 'y',
+                    plugins: {
+                        legend: {
+                            labels: { color: '#cbd5e1', font: { size: 12 } },
+                            position: 'top'
+                        },
+                        tooltip: {
+                            backgroundColor: '#0f172a',
+                            titleColor: '#f1f5f9',
+                            bodyColor: '#e2e8f0',
+                            borderColor: '#334155',
+                            borderWidth: 1,
+                            padding: 12,
+                            callbacks: {
+                                label: (context) => context.dataset.label + ': $' + context.parsed.x + 'M'
+                            }
+                        }
+                    },
+                    scales: {
+                        x: {
+                            beginAtZero: true,
+                            stacked: true,
+                            ticks: { color: '#94a3b8' },
+                            grid: { color: '#334155', drawBorder: false }
+                        },
+                        y: {
+                            stacked: true,
+                            ticks: { color: '#94a3b8' },
+                            grid: { display: false, drawBorder: false }
+                        }
+                    }
+                }
+            });
+        }
+
+        function createCapitalFundingChart(borough) {
+            const ctx = document.getElementById('capitalFundingChart').getContext('2d');
+            const share = getBoroShare(borough);
+            const totalFunded = Math.round(Object.values(capitalNeeds).reduce((sum, item) => sum + item.funded, 0) * share);
+            const totalGap = Math.round(Object.values(capitalNeeds).reduce((sum, item) => sum + (item.need - item.funded), 0) * share);
+            const geoLabel = borough === 'Citywide' ? '' : ' (' + borough.replace('_', ' ') + ' est.)';
+            charts.capitalFunding = new Chart(ctx, {
+                type: 'doughnut',
+                data: {
+                    labels: ['Total Funded' + geoLabel, 'Total Gap' + geoLabel],
+                    datasets: [{
+                        data: [totalFunded, totalGap],
+                        backgroundColor: [chartColors.success, chartColors.danger],
+                        borderColor: '#1e293b',
+                        borderWidth: 2
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: {
+                        legend: {
+                            labels: { color: '#cbd5e1', font: { size: 12 } },
+                            position: 'bottom'
+                        },
+                        tooltip: {
+                            backgroundColor: '#0f172a',
+                            titleColor: '#f1f5f9',
+                            bodyColor: '#e2e8f0',
+                            borderColor: '#334155',
+                            borderWidth: 1,
+                            padding: 12,
+                            callbacks: {
+                                label: (context) => '$' + context.parsed + 'M'
+                            }
+                        }
+                    }
+                }
+            });
+        }
+
+        function createRoadmapChart(borough) {
+            const ctx = document.getElementById('roadmapChart').getContext('2d');
+            const years = Object.keys(mamdaniFunding);
+            const share = getBoroShare(borough);
+            const geoLabel = borough !== 'Citywide' ? ' (' + borough.replace('_', ' ') + ' est.)' : '';
+            charts.roadmap = new Chart(ctx, {
+                type: 'line',
+                data: {
+                    labels: years,
+                    datasets: [
+                        {
+                            label: 'Current Spending' + geoLabel,
+                            data: years.map(y => +(mamdaniFunding[y].current * share).toFixed(2)),
+                            borderColor: chartColors.warning,
+                            backgroundColor: 'rgba(249, 115, 22, 0.1)',
+                            tension: 0.4,
+                            fill: true,
+                            pointRadius: 6,
+                            pointBackgroundColor: chartColors.warning,
+                            pointBorderColor: '#1e293b',
+                            pointBorderWidth: 2
+                        },
+                        {
+                            label: 'Proposed Spending' + geoLabel,
+                            data: years.map(y => +(mamdaniFunding[y].proposed * share).toFixed(2)),
+                            borderColor: chartColors.success,
+                            backgroundColor: 'rgba(16, 185, 129, 0.1)',
+                            tension: 0.4,
+                            fill: true,
+                            pointRadius: 6,
+                            pointBackgroundColor: chartColors.success,
+                            pointBorderColor: '#1e293b',
+                            pointBorderWidth: 2
+                        }
+                    ]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: {
+                        legend: {
+                            labels: { color: '#cbd5e1', font: { size: 12 } },
+                            position: 'top'
+                        },
+                        tooltip: {
+                            backgroundColor: '#0f172a',
+                            titleColor: '#f1f5f9',
+                            bodyColor: '#e2e8f0',
+                            borderColor: '#334155',
+                            borderWidth: 1,
+                            padding: 12,
+                            callbacks: {
+                                label: (context) => context.dataset.label + ': $' + context.parsed.y + 'B'
+                            }
+                        }
+                    },
+                    scales: {
+                        y: {
+                            beginAtZero: true,
+                            ticks: { color: '#94a3b8', callback: (v) => '$' + v + 'B' },
+                            grid: { color: '#334155', drawBorder: false }
+                        },
+                        x: {
+                            ticks: { color: '#94a3b8' },
+                            grid: { display: false, drawBorder: false }
+                        }
+                    }
+                }
+            });
+        }
+
+        function createFloodChart(borough) {
+            const ctx = document.getElementById('floodChart').getContext('2d');
+            const propColors = boroHighlight(borough, chartColors.danger, 'rgba(220,38,38,0.3)');
+            const unitColors = boroHighlight(borough, chartColors.warning, 'rgba(249,115,22,0.3)');
+            charts.flood = new Chart(ctx, {
+                type: 'bar',
+                data: {
+                    labels: boroKeys.map(b => b.replace('_', ' ')),
+                    datasets: [
+                        {
+                            label: 'Properties',
+                            data: boroKeys.map(b => boroughData[b].floodProps),
+                            backgroundColor: propColors,
+                            borderRadius: 6,
+                            borderSkipped: false,
+                            yAxisID: 'y'
+                        },
+                        {
+                            label: 'Units (100s)',
+                            data: boroKeys.map(b => Math.round(boroughData[b].floodUnits / 100)),
+                            backgroundColor: unitColors,
+                            borderRadius: 6,
+                            borderSkipped: false,
+                            yAxisID: 'y1'
+                        }
+                    ]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    interaction: { mode: 'index', intersect: false },
+                    plugins: {
+                        legend: {
+                            labels: { color: '#cbd5e1', font: { size: 12 } },
+                            position: 'top'
+                        },
+                        tooltip: {
+                            backgroundColor: '#0f172a',
+                            titleColor: '#f1f5f9',
+                            bodyColor: '#e2e8f0',
+                            borderColor: '#334155',
+                            borderWidth: 1,
+                            padding: 12
+                        }
+                    },
+                    scales: {
+                        y: {
+                            beginAtZero: true,
+                            position: 'left',
+                            ticks: { color: '#94a3b8' },
+                            grid: { color: '#334155', drawBorder: false },
+                            title: { display: true, text: 'Properties', color: '#cbd5e1' }
+                        },
+                        y1: {
+                            beginAtZero: true,
+                            position: 'right',
+                            ticks: { color: '#94a3b8' },
+                            grid: { display: false },
+                            title: { display: true, text: 'Units (100s)', color: '#cbd5e1' }
+                        },
+                        x: {
+                            ticks: { color: '#94a3b8' },
+                            grid: { display: false, drawBorder: false }
+                        }
+                    }
+                }
+            });
+        }
+
+        function createConditionChart(borough) {
+            const ctx = document.getElementById('conditionChart').getContext('2d');
+            // When a specific borough is selected, show it vs citywide for comparison
+            const datasets = [];
+            if (borough !== 'Citywide') {
+                const bd = boroughData[borough];
+                datasets.push({
+                    label: borough.replace('_', ' '),
+                    data: [bd.violationRate, bd.delinqRate, bd.floodProps / 10],
+                    borderColor: chartColors.primary,
+                    backgroundColor: 'rgba(59, 130, 246, 0.2)',
+                    pointRadius: 6,
+                    pointBackgroundColor: chartColors.primary,
+                    pointBorderColor: '#1e293b',
+                    pointBorderWidth: 2
+                });
+                const cw = boroughData.Citywide;
+                datasets.push({
+                    label: 'Citywide Avg',
+                    data: [cw.violationRate, cw.delinqRate, cw.floodProps / 10],
+                    borderColor: CC.dimmed,
+                    backgroundColor: 'rgba(51,65,85,0.05)',
+                    pointRadius: 4,
+                    pointBackgroundColor: CC.dimmed,
+                    pointBorderColor: '#1e293b',
+                    pointBorderWidth: 1,
+                    borderDash: [4, 4]
+                });
+            } else {
+                const cw = boroughData.Citywide;
+                datasets.push({
+                    label: 'Citywide',
+                    data: [cw.violationRate, cw.delinqRate, cw.floodProps / 10],
+                    borderColor: chartColors.primary,
+                    backgroundColor: 'rgba(59, 130, 246, 0.1)',
+                    pointRadius: 6,
+                    pointBackgroundColor: chartColors.primary,
+                    pointBorderColor: '#1e293b',
+                    pointBorderWidth: 2
+                });
+            }
+            charts.condition = new Chart(ctx, {
+                type: 'radar',
+                data: {
+                    labels: ['Violation Rate (%)', 'Delinq Rate (%)', 'Flood Risk (props÷10)'],
+                    datasets: datasets
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: {
+                        legend: { labels: { color: '#cbd5e1' } },
+                        tooltip: {
+                            backgroundColor: '#0f172a',
+                            titleColor: '#f1f5f9',
+                            bodyColor: '#e2e8f0',
+                            borderColor: '#334155',
+                            borderWidth: 1,
+                            padding: 12
+                        }
+                    },
+                    scales: {
+                        r: {
+                            beginAtZero: true,
+                            ticks: { color: '#94a3b8' },
+                            grid: { color: '#334155' },
+                            pointLabels: { color: '#cbd5e1', font: { size: 12 } }
+                        }
+                    }
+                }
+            });
+        }
+
+        function createClimateTable(borough) {
+            const table = document.getElementById('climateTable');
+            const isSelected = borough !== 'Citywide';
+            table.innerHTML = `
+                <thead>
+                    <tr>
+                        <th>Borough</th>
+                        <th>Flood Properties</th>
+                        <th>Flood Units</th>
+                        <th>% Units at Risk</th>
+                        <th>Risk Level</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    ${boroKeys.map(b => {
+                        const d = boroughData[b];
+                        const pctRisk = ((d.floodUnits / d.units) * 100).toFixed(1);
+                        const riskLevel = pctRisk > 10 ? 'High' : pctRisk > 5 ? 'Medium' : 'Low';
+                        const dimStyle = (isSelected && b !== borough) ? 'opacity:0.35;' : '';
+                        const highlightBg = (isSelected && b === borough) ? 'background:rgba(59,130,246,0.12);' : '';
+                        return `
+                            <tr style="${dimStyle}${highlightBg}">
+                                <td><strong>${b.replace('_', ' ')}</strong></td>
+                                <td>${d.floodProps}</td>
+                                <td>${d.floodUnits.toLocaleString()}</td>
+                                <td>${pctRisk}%</td>
+                                <td><span style="color: ${pctRisk > 10 ? '#dc2626' : pctRisk > 5 ? '#f97316' : '#10b981'}">${riskLevel}</span></td>
+                            </tr>
+                        `;
+                    }).join('')}
+                </tbody>
+            `;
+        }
+
+        function createHeatmapTable(borough) {
+            const table = document.getElementById('heatmapTable');
+            const metrics = ['Violation Rate (%)', 'Delinq Rate (%)', 'Avg Age (yrs)', 'Flood Props'];
+            const isSelected = borough !== 'Citywide';
+
+            let html = '<thead><tr><th>Borough</th>';
+            metrics.forEach(m => html += `<th>${m}</th>`);
+            html += '</tr></thead><tbody>';
+
+            boroKeys.forEach(b => {
+                const d = boroughData[b];
+                const values = [
+                    d.violationRate,
+                    d.delinqRate,
+                    2026 - d.yrBuilt,
+                    d.floodProps
+                ];
+                const maxValues = [40, 50, 96, 32];
+                const dimStyle = (isSelected && b !== borough) ? ' opacity:0.35;' : '';
+                const highlightBg = (isSelected && b === borough) ? ' background:rgba(59,130,246,0.12);' : '';
+
+                html += `<tr style="${dimStyle}${highlightBg}"><td><strong>${b.replace('_', ' ')}</strong></td>`;
+                values.forEach((v, i) => {
+                    const pct = (v / maxValues[i]) * 100;
+                    let heatClass = 'heat-low';
+                    if (pct > 66) heatClass = 'heat-high';
+                    else if (pct > 33) heatClass = 'heat-medium';
+
+                    html += `<td><span class="heatmap-cell ${heatClass}">${v.toFixed(1)}</span></td>`;
+                });
+                html += '</tr>';
+            });
+
+            html += '</tbody>';
+            table.innerHTML = html;
+        }
+
+        function showView(view) {
+            document.querySelectorAll('.chart-section').forEach(section => {
+                section.classList.remove('active');
+            });
+            const viewMap = {
+                'overview': 'overview',
+                'capital': 'capital',
+                'climate': 'climate',
+                'condition': 'condition'
+            };
+            document.querySelector(`[data-view-id="${viewMap[view]}"]`).classList.add('active');
+        }
+    </script>
+</body>
+</html>

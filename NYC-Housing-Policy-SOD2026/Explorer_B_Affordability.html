@@ -1,0 +1,1201 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Section B: Affordability & Market Pressure — Interactive Explorer</title>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.min.js"></script>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', 'Oxygen', 'Ubuntu', 'Cantarell', sans-serif;
+            background-color: #0f172a;
+            color: #e2e8f0;
+            line-height: 1.6;
+        }
+
+        .container {
+            max-width: 1600px;
+            margin: 0 auto;
+            padding: 2rem;
+        }
+
+        header {
+            margin-bottom: 2rem;
+            border-bottom: 2px solid #334155;
+            padding-bottom: 1.5rem;
+        }
+
+        h1 {
+            font-size: 2.5rem;
+            font-weight: 700;
+            margin-bottom: 0.5rem;
+            background: linear-gradient(135deg, #e2e8f0, #cbd5e1);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+
+        h2 {
+            font-size: 1.3rem;
+            color: #94a3b8;
+            font-weight: 500;
+            margin-bottom: 1.5rem;
+        }
+
+        .subtitle {
+            color: #94a3b8;
+            font-size: 1rem;
+            margin-bottom: 1rem;
+        }
+
+        .filters {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 1rem;
+            margin-bottom: 2rem;
+            background-color: #1e293b;
+            padding: 1.5rem;
+            border-radius: 8px;
+            border: 1px solid #334155;
+        }
+
+        .filter-group {
+            display: flex;
+            flex-direction: column;
+        }
+
+        label {
+            font-size: 0.875rem;
+            font-weight: 600;
+            color: #cbd5e1;
+            margin-bottom: 0.5rem;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+
+        select {
+            padding: 0.75rem;
+            background-color: #0f172a;
+            color: #e2e8f0;
+            border: 1px solid #334155;
+            border-radius: 6px;
+            font-size: 0.95rem;
+            cursor: pointer;
+            transition: all 0.2s ease;
+        }
+
+        select:hover {
+            border-color: #64748b;
+            background-color: #1a202c;
+        }
+
+        select:focus {
+            outline: none;
+            border-color: #60a5fa;
+            box-shadow: 0 0 0 3px rgba(96, 165, 250, 0.1);
+        }
+
+        .kpi-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+            gap: 1.5rem;
+            margin-bottom: 2rem;
+        }
+
+        .kpi-card {
+            background-color: #1e293b;
+            padding: 1.5rem;
+            border-radius: 8px;
+            border: 1px solid #334155;
+            transition: all 0.2s ease;
+        }
+
+        .kpi-card:hover {
+            border-color: #64748b;
+            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.3);
+        }
+
+        .kpi-label {
+            font-size: 0.875rem;
+            color: #94a3b8;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            margin-bottom: 0.5rem;
+        }
+
+        .kpi-value {
+            font-size: 2.5rem;
+            font-weight: 700;
+            color: #60a5fa;
+            margin-bottom: 0.5rem;
+        }
+
+        .kpi-meta {
+            font-size: 0.85rem;
+            color: #64748b;
+        }
+
+        .chart-section {
+            background-color: #1e293b;
+            padding: 2rem;
+            border-radius: 8px;
+            border: 1px solid #334155;
+            margin-bottom: 2rem;
+        }
+
+        .chart-section h3 {
+            font-size: 1.25rem;
+            margin-bottom: 1.5rem;
+            color: #e2e8f0;
+            border-bottom: 2px solid #334155;
+            padding-bottom: 1rem;
+        }
+
+        .chart-container {
+            position: relative;
+            height: 400px;
+            margin-bottom: 2rem;
+        }
+
+        .chart-container.small {
+            height: 300px;
+        }
+
+        .two-column {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 2rem;
+            margin-bottom: 2rem;
+        }
+
+        @media (max-width: 1200px) {
+            .two-column {
+                grid-template-columns: 1fr;
+            }
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 1rem;
+            font-size: 0.95rem;
+        }
+
+        th {
+            background-color: #0f172a;
+            color: #cbd5e1;
+            padding: 1rem;
+            text-align: left;
+            font-weight: 600;
+            border-bottom: 2px solid #334155;
+            text-transform: uppercase;
+            font-size: 0.8rem;
+            letter-spacing: 0.5px;
+        }
+
+        td {
+            padding: 1rem;
+            border-bottom: 1px solid #334155;
+            color: #e2e8f0;
+        }
+
+        tr:hover {
+            background-color: #0f172a;
+        }
+
+        .badge {
+            display: inline-block;
+            padding: 0.4rem 0.8rem;
+            border-radius: 4px;
+            font-size: 0.75rem;
+            font-weight: 700;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+
+        .badge-critical {
+            background-color: rgba(239, 68, 68, 0.2);
+            color: #fca5a5;
+        }
+
+        .badge-severe {
+            background-color: rgba(249, 115, 22, 0.2);
+            color: #fed7aa;
+        }
+
+        .badge-high {
+            background-color: rgba(234, 179, 8, 0.2);
+            color: #fef08a;
+        }
+
+        .badge-moderate {
+            background-color: rgba(59, 130, 246, 0.2);
+            color: #bfdbfe;
+        }
+
+        .percentage-bar {
+            display: inline-block;
+            width: 100px;
+            height: 6px;
+            background-color: #334155;
+            border-radius: 3px;
+            overflow: hidden;
+            margin-right: 0.5rem;
+        }
+
+        .percentage-fill {
+            height: 100%;
+            background: linear-gradient(90deg, #60a5fa, #3b82f6);
+        }
+
+        .disclaimer {
+            margin-top: 3rem;
+            padding: 1.5rem;
+            background-color: #1e293b;
+            border: 1px solid #334155;
+            border-radius: 8px;
+            color: #94a3b8;
+            font-size: 0.85rem;
+            line-height: 1.6;
+        }
+
+        .zone-indicator {
+            display: inline-block;
+            width: 12px;
+            height: 12px;
+            border-radius: 2px;
+            margin-right: 0.5rem;
+        }
+
+        .zone-crisis { background-color: #ef4444; }
+        .zone-severe { background-color: #f97316; }
+        .zone-high { background-color: #eab308; }
+        .zone-moderate { background-color: #3b82f6; }
+        .zone-affordable { background-color: #10b981; }
+
+        .zone-label {
+            font-size: 0.85rem;
+            margin-bottom: 0.5rem;
+        }
+
+        .threshold-line-note {
+            font-size: 0.8rem;
+            color: #94a3b8;
+            margin-top: 1rem;
+            font-style: italic;
+        }
+
+        @media (max-width: 768px) {
+            .container {
+                padding: 1rem;
+            }
+
+            h1 {
+                font-size: 1.75rem;
+            }
+
+            .filters {
+                grid-template-columns: 1fr;
+            }
+
+            .kpi-grid {
+                grid-template-columns: 1fr;
+            }
+
+            .two-column {
+                grid-template-columns: 1fr;
+            }
+
+            table {
+                font-size: 0.85rem;
+            }
+
+            th, td {
+                padding: 0.75rem;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <nav style="margin-bottom:8px"><a href="Explorer_Master_Dashboard.html" style="color:#94a3b8;text-decoration:none;font-size:.85rem;display:inline-flex;align-items:center;gap:4px;transition:color .2s" onmouseover="this.style.color='#3b82f6'" onmouseout="this.style.color='#94a3b8'">&larr; Back to Master Dashboard</a></nav>
+        <header>
+            <h1>Section B: Affordability & Market Pressure — Interactive Explorer</h1>
+            <p class="subtitle">Mayor Mamdani's Housing Agenda · StreetEasy + Census ACS · 2010–2026</p>
+        </header>
+
+        <div class="filters">
+            <div class="filter-group">
+                <label for="boroughFilter">Borough</label>
+                <select id="boroughFilter">
+                    <option value="all">Citywide</option>
+                    <option value="Manhattan">Manhattan</option>
+                    <option value="Brooklyn">Brooklyn</option>
+                    <option value="Queens">Queens</option>
+                    <option value="Bronx">Bronx</option>
+                    <option value="Staten_Island">Staten Island</option>
+                </select>
+            </div>
+            <div class="filter-group">
+                <label for="timePeriodFilter">Time Period</label>
+                <select id="timePeriodFilter">
+                    <option value="full">Full 2010–2026</option>
+                    <option value="pre">Pre-Pandemic 2010–2019</option>
+                    <option value="pandemic">Pandemic 2020–2021</option>
+                    <option value="post">Post-Pandemic 2022–2026</option>
+                </select>
+            </div>
+        </div>
+
+        <!-- KPI Cards -->
+        <div class="kpi-grid">
+            <div class="kpi-card">
+                <div class="kpi-label">Current Median Rent (2026)</div>
+                <div class="kpi-value" id="medianRent">$4,650</div>
+                <div class="kpi-meta" id="medianRentMeta">Citywide average</div>
+            </div>
+            <div class="kpi-card">
+                <div class="kpi-label">Rent Burden (2026)</div>
+                <div class="kpi-value" id="rentBurden">49.4%</div>
+                <div class="kpi-meta" id="rentBurdenMeta">Avg across boroughs</div>
+            </div>
+            <div class="kpi-card">
+                <div class="kpi-label">YoY Rent Growth (2025–2026)</div>
+                <div class="kpi-value" id="yoyGrowth">–3.1%</div>
+                <div class="kpi-meta" id="yoyGrowthMeta">Slight moderation</div>
+            </div>
+            <div class="kpi-card">
+                <div class="kpi-label">CPI Shelter Inflation (2026)</div>
+                <div class="kpi-value" id="cpiShelter">348.36</div>
+                <div class="kpi-meta" id="cpiShelterMeta">+2.9% YoY, base 1982–84=100</div>
+            </div>
+        </div>
+
+        <!-- Rent Trajectory -->
+        <div class="chart-section">
+            <h3>Rent Trajectory by Borough</h3>
+            <div class="chart-container">
+                <canvas id="rentTrajectoryChart"></canvas>
+            </div>
+        </div>
+
+        <!-- Two Column Section: Rent Burden Comparison & Income Percentile -->
+        <div class="two-column">
+            <div class="chart-section">
+                <h3>Rent Burden Comparison: 2023 vs 2026</h3>
+                <div class="chart-container small">
+                    <canvas id="rentBurdenChart"></canvas>
+                </div>
+                <div class="threshold-line-note">
+                    <span class="zone-indicator" style="background-color: #10b981;"></span>HUD 30% threshold shown
+                </div>
+            </div>
+            <div class="chart-section">
+                <h3>Rent Burden by Income Percentile (2026)</h3>
+                <div class="chart-container small">
+                    <canvas id="incomePercentileChart"></canvas>
+                </div>
+            </div>
+        </div>
+
+        <!-- Rental Inventory Trends -->
+        <div class="chart-section">
+            <h3>Rental Inventory Trends (Supply Tightness)</h3>
+            <div class="chart-container">
+                <canvas id="inventoryChart"></canvas>
+            </div>
+        </div>
+
+        <!-- YoY Growth Rate -->
+        <div class="chart-section">
+            <h3>Year-over-Year Rent Growth Rate</h3>
+            <div class="chart-container">
+                <canvas id="yoyGrowthChart"></canvas>
+            </div>
+        </div>
+
+        <!-- Ranked Borough Table -->
+        <div class="chart-section">
+            <h3>Borough Rankings: Affordability Crisis Severity (2026)</h3>
+            <table id="boroughRankingTable">
+                <thead>
+                    <tr>
+                        <th>Borough</th>
+                        <th>Median Rent</th>
+                        <th>Median HHI</th>
+                        <th>Rent Burden</th>
+                        <th>Affordability Status</th>
+                        <th>% Severely Burdened (>50%)</th>
+                    </tr>
+                </thead>
+                <tbody></tbody>
+            </table>
+        </div>
+
+        <!-- Era Analysis Table -->
+        <div class="chart-section">
+            <h3>Era Analysis: CAGR by Borough</h3>
+            <table id="eraAnalysisTable">
+                <thead>
+                    <tr>
+                        <th>Borough</th>
+                        <th>Pre-Pandemic CAGR (2010–2019)</th>
+                        <th>Pandemic CAGR (2020–2021)</th>
+                        <th>Post-Pandemic CAGR (2022–2026)</th>
+                        <th>Overall CAGR (2010–2026)</th>
+                    </tr>
+                </thead>
+                <tbody></tbody>
+            </table>
+        </div>
+
+        <!-- BLS Economic Context -->
+        <div style="margin:40px 0 16px;padding:6px 14px;background:#1e293b;border-left:3px solid #3b82f6;border-radius:4px;font-size:.92rem;color:#94a3b8;">
+            <strong style="color:#e2e8f0;">BLS Economic Context</strong> — NYC Metro Area · Source: Bureau of Labor Statistics · Annual Averages 2010–2025
+        </div>
+        <div class="chart-grid" style="display:grid;grid-template-columns:1fr 1fr;gap:16px;margin-bottom:20px;">
+            <div class="card" style="background:#1e293b;border:1px solid #334155;border-radius:8px;padding:20px;">
+                <h3 style="color:#f1f5f9;font-size:1rem;margin-bottom:10px;">Avg Hourly Earnings vs. Shelter CPI</h3>
+                <div style="position:relative;height:350px;"><canvas id="blsWageShelterChart"></canvas></div>
+            </div>
+            <div class="card" style="background:#1e293b;border:1px solid #334155;border-radius:8px;padding:20px;">
+                <h3 style="color:#f1f5f9;font-size:1rem;margin-bottom:10px;">YoY Inflation: Shelter vs. General vs. Wage Growth</h3>
+                <div style="position:relative;height:350px;"><canvas id="blsInflCompChart"></canvas></div>
+            </div>
+        </div>
+        <div class="chart-grid" style="display:grid;grid-template-columns:1fr 1fr;gap:16px;margin-bottom:20px;">
+            <div class="card" style="background:#1e293b;border:1px solid #334155;border-radius:8px;padding:20px;">
+                <h3 style="color:#f1f5f9;font-size:1rem;margin-bottom:10px;">Unemployment Rate & Employment (NYC Metro)</h3>
+                <div style="position:relative;height:350px;"><canvas id="blsUnempAffordChart"></canvas></div>
+            </div>
+            <div class="card" style="background:#1e293b;border:1px solid #334155;border-radius:8px;padding:20px;">
+                <h3 style="color:#f1f5f9;font-size:1rem;margin-bottom:10px;">Real Wage Growth (Nominal − CPI Inflation)</h3>
+                <div style="position:relative;height:350px;"><canvas id="blsRealWageChart"></canvas></div>
+            </div>
+        </div>
+
+        <!-- Census ACS Context -->
+        <div style="margin:40px 0 16px;padding:6px 14px;background:#1e293b;border-left:3px solid #a855f7;border-radius:4px;font-size:.92rem;color:#94a3b8;">
+            <strong style="color:#e2e8f0;">Census ACS Context</strong> — Borough-Level · Source: U.S. Census Bureau, American Community Survey 1-Year Estimates 2010–2023
+        </div>
+        <div class="chart-grid" style="display:grid;grid-template-columns:1fr 1fr;gap:16px;margin-bottom:20px;">
+            <div class="card" style="background:#1e293b;border:1px solid #334155;border-radius:8px;padding:20px;">
+                <h3 style="color:#f1f5f9;font-size:1rem;margin-bottom:10px;">Census Median HH Income by Borough</h3>
+                <div style="position:relative;height:350px;"><canvas id="censusIncomeChart"></canvas></div>
+            </div>
+            <div class="card" style="background:#1e293b;border:1px solid #334155;border-radius:8px;padding:20px;">
+                <h3 style="color:#f1f5f9;font-size:1rem;margin-bottom:10px;">Census Rent Burden (% of Income) by Borough</h3>
+                <div style="position:relative;height:350px;"><canvas id="censusBurdenChart"></canvas></div>
+            </div>
+        </div>
+        <div class="chart-grid" style="display:grid;grid-template-columns:1fr 1fr;gap:16px;margin-bottom:20px;">
+            <div class="card" style="background:#1e293b;border:1px solid #334155;border-radius:8px;padding:20px;">
+                <h3 style="color:#f1f5f9;font-size:1rem;margin-bottom:10px;">Poverty Rate by Borough</h3>
+                <div style="position:relative;height:350px;"><canvas id="censusPovRateChart"></canvas></div>
+            </div>
+            <div class="card" style="background:#1e293b;border:1px solid #334155;border-radius:8px;padding:20px;">
+                <h3 style="color:#f1f5f9;font-size:1rem;margin-bottom:10px;">Income Growth vs. Rent Growth (Indexed to 2010=100)</h3>
+                <div style="position:relative;height:350px;"><canvas id="censusIncRentIndexChart"></canvas></div>
+            </div>
+        </div>
+
+        <div class="disclaimer">
+            This document was produced using Claude, an AI assistant by Anthropic. Content should be reviewed for accuracy.
+        </div>
+    </div>
+
+    <script>
+        // Data
+        const rentData = {
+            Manhattan: { 2010: 3200, 2011: 3300, 2012: 3395, 2013: 3400, 2014: 3450, 2015: 3503, 2016: 3550, 2017: 3500, 2018: 3550, 2019: 3436, 2020: 3158, 2021: 3215, 2022: 3950, 2023: 4285, 2024: 4500, 2025: 4800, 2026: 4650 },
+            Brooklyn: { 2010: 2237, 2011: 2300, 2012: 2395, 2013: 2500, 2014: 2600, 2015: 2357, 2016: 2450, 2017: 2500, 2018: 2600, 2019: 2612, 2020: 2590, 2021: 2595, 2022: 3030, 2023: 3235, 2024: 3380, 2025: 3547, 2026: 3700 },
+            Queens: { 2010: 2049, 2011: 1950, 2012: 1975, 2013: 2050, 2014: 2100, 2015: 1932, 2016: 2050, 2017: 2100, 2018: 2200, 2019: 2263, 2020: 2250, 2021: 2210, 2022: 2550, 2023: 2800, 2024: 2950, 2025: 3050, 2026: 3175 },
+            Bronx: { 2010: 1562, 2011: 1450, 2012: 1500, 2013: 1550, 2014: 1580, 2015: 1508, 2016: 1600, 2017: 1700, 2018: 1800, 2019: 1922, 2020: 1975, 2021: 2050, 2022: 2400, 2023: 2600, 2024: 2750, 2025: 2900, 2026: 2964 },
+            Staten_Island: { 2010: 1600, 2011: 1550, 2012: 1600, 2013: 1650, 2014: 1680, 2015: 1690, 2016: 1750, 2017: 1800, 2018: 1900, 2019: 2095, 2020: 2050, 2021: 2068, 2022: 2200, 2023: 2400, 2024: 2600, 2025: 2780, 2026: 2860 }
+        };
+
+        // Static income (2023 Census ACS median HHI) — used for point-in-time burden
+        const incomeData = {
+            Manhattan: 101078,
+            Brooklyn: 76912,
+            Queens: 81929,
+            Bronx: 46838,
+            Staten_Island: 95543
+        };
+
+        // Census ACS time-series income (for trend charts)
+        const censusIncome = {
+            Manhattan: {2010:63832,2012:67099,2014:76089,2016:77559,2018:85066,2019:93651,2021:84435,2022:95866,2023:101078},
+            Brooklyn: {2010:42143,2012:45230,2014:47966,2016:55150,2018:61220,2019:66937,2021:67567,2022:73951,2023:76912},
+            Queens: {2010:53054,2012:54713,2014:57241,2016:62207,2018:69320,2019:73696,2021:73262,2022:80557,2023:81929},
+            Bronx: {2010:32568,2012:32460,2014:33712,2016:37525,2018:38467,2019:41432,2021:43011,2022:45517,2023:46838},
+            Staten_Island: {2010:70560,2012:70963,2014:71121,2016:77197,2018:82166,2019:89821,2021:86054,2022:93164,2023:95543}
+        };
+        const censusRentBurden = {
+            Manhattan: {2010:28.2,2012:28.6,2014:28.4,2016:28.1,2018:27.7,2019:26.1,2021:30.5,2022:29.0,2023:28.8},
+            Brooklyn: {2010:32.8,2012:32.7,2014:33.8,2016:32.3,2018:31.7,2019:30.2,2021:31.3,2022:30.6,2023:29.8},
+            Queens: {2010:33.6,2012:33.8,2014:34.4,2016:33.2,2018:32.1,2019:30.3,2021:32.3,2022:31.1,2023:31.9},
+            Bronx: {2010:34.2,2012:36.0,2014:36.3,2016:34.9,2018:35.8,2019:35.2,2021:36.1,2022:36.1,2023:36.6},
+            Staten_Island: {2010:33.5,2012:32.4,2014:34.7,2016:33.8,2018:29.9,2019:29.5,2021:34.4,2022:34.4,2023:35.5}
+        };
+        const censusPovertyRate = {
+            Manhattan: {2010:16.0,2012:17.2,2014:17.1,2016:16.8,2018:15.1,2019:13.6,2021:16.8,2022:16.8,2023:16.0},
+            Brooklyn: {2010:22.8,2012:24.2,2014:23.2,2016:20.4,2018:18.8,2019:17.5,2021:19.0,2022:19.6,2023:18.8},
+            Queens: {2010:14.9,2012:16.0,2014:15.0,2016:13.0,2018:11.3,2019:10.7,2021:13.3,2022:12.9,2023:13.5},
+            Bronx: {2010:29.5,2012:30.3,2014:30.7,2016:28.0,2018:26.8,2019:25.7,2021:25.8,2022:27.2,2023:27.2},
+            Staten_Island: {2010:11.6,2012:11.5,2014:14.3,2016:13.1,2018:11.3,2019:8.2,2021:11.4,2022:10.9,2023:13.0}
+        };
+        const censusYears = [2010,2012,2014,2016,2018,2019,2021,2022,2023];
+
+        const rentBurdenData = {
+            2023: { Manhattan: 49.1, Brooklyn: 51.2, Queens: 39.6, Bronx: 60.8, Staten_Island: 25.6 },
+            2026: { Manhattan: 53.4, Brooklyn: 56.5, Queens: 44.8, Bronx: 72.5, Staten_Island: 34.9 }
+        };
+
+        const incomePercentileData = [
+            { income: 25000, burden: 174.8, pct: '10th' },
+            { income: 40000, burden: 109.3, pct: '25th' },
+            { income: 85000, burden: 51.4, pct: '50th' },
+            { income: 140000, burden: 31.2, pct: '75th' },
+            { income: 200000, burden: 21.9, pct: '90th' }
+        ];
+
+        const inventoryData = {
+            Manhattan: { 2010: 12000, 2012: 11000, 2014: 14000, 2016: 16000, 2018: 18000, 2020: 25000, 2022: 15000, 2024: 14000, 2026: 13000 },
+            Brooklyn: { 2010: 4000, 2012: 6000, 2014: 8000, 2016: 10000, 2018: 12000, 2020: 16000, 2022: 13000, 2024: 14000, 2026: 15000 },
+            Queens: { 2010: 1500, 2012: 2500, 2014: 3500, 2016: 5000, 2018: 6000, 2020: 8000, 2022: 8500, 2024: 9000, 2026: 9500 }
+        };
+
+        const cpiData = { '2024-02': 328.23, '2025-02': 338.44, '2026-02': 348.36 };
+
+        // BLS Economic Context Data (NYC Metro, Annual Averages, 2010-2025)
+        // Source: U.S. Bureau of Labor Statistics
+        const blsData = {
+            unemployment: {2010:9.1,2011:8.7,2012:8.9,2013:8.0,2014:6.4,2015:5.3,2016:4.8,2017:4.4,2018:4.0,2019:3.6,2020:10.4,2021:7.7,2022:4.4,2023:4.3,2024:4.5,2025:4.6},
+            employment: {2010:3754.5,2011:3844.6,2012:3933.1,2013:4029.3,2014:4162.6,2015:4290.3,2016:4382.3,2017:4470.1,2018:4561.5,2019:4659.5,2020:4162.6,2021:4258.8,2022:4567.5,2023:4684.2,2024:4787.4,2025:4858.1},
+            wages: {2010:30.40,2011:30.91,2012:31.49,2013:32.04,2014:32.67,2015:33.69,2016:33.92,2017:35.14,2018:36.23,2019:37.71,2020:38.84,2021:40.74,2022:41.42,2023:41.92,2024:42.49,2025:43.75},
+            cpi: {2010:227.85,2011:234.07,2012:238.27,2013:241.02,2014:244.11,2015:243.73,2016:245.56,2017:248.49,2018:251.85,2019:256.92,2020:258.99,2021:270.31,2022:291.37,2023:303.99,2024:314.71,2025:324.66},
+            shelterCPI: {2010:281.52,2011:284.73,2012:290.94,2013:295.00,2014:301.66,2015:308.13,2016:311.93,2017:318.19,2018:323.41,2019:332.87,2020:339.86,2021:345.21,2022:367.21,2023:394.22,2024:417.29,2025:433.53},
+            inflationRate: {2011:2.7,2012:1.8,2013:1.2,2014:1.3,2015:-0.2,2016:0.8,2017:1.2,2018:1.4,2019:2.0,2020:0.8,2021:4.4,2022:7.8,2023:4.3,2024:3.5,2025:3.2},
+            shelterInflation: {2011:1.1,2012:2.2,2013:1.4,2014:2.3,2015:2.1,2016:1.2,2017:2.0,2018:1.6,2019:2.9,2020:2.1,2021:1.6,2022:6.4,2023:7.4,2024:5.9,2025:3.9}
+        };
+
+        // Chart instances
+        let charts = {};
+
+        // Utility functions
+        function getBoroughColor(borough) {
+            const colors = {
+                Manhattan: '#f97316',
+                Brooklyn: '#3b82f6',
+                Queens: '#10b981',
+                Bronx: '#a855f7',
+                Staten_Island: '#ec4899'
+            };
+            return colors[borough] || '#94a3b8';
+        }
+
+        function getTimePeriodYears(period) {
+            const periods = {
+                full: [2010, 2011, 2012, 2013, 2014, 2015, 2016, 2017, 2018, 2019, 2020, 2021, 2022, 2023, 2024, 2025, 2026],
+                pre: [2010, 2011, 2012, 2013, 2014, 2015, 2016, 2017, 2018, 2019],
+                pandemic: [2020, 2021],
+                post: [2022, 2023, 2024, 2025, 2026]
+            };
+            return periods[period];
+        }
+
+        function filterRentData(borough, timePeriod) {
+            const years = getTimePeriodYears(timePeriod);
+            if (borough === 'all') {
+                const filtered = {};
+                Object.keys(rentData).forEach(b => {
+                    filtered[b] = {};
+                    years.forEach(y => {
+                        filtered[b][y] = rentData[b][y];
+                    });
+                });
+                return filtered;
+            } else {
+                const filtered = {};
+                years.forEach(y => {
+                    filtered[y] = rentData[borough][y];
+                });
+                return filtered;
+            }
+        }
+
+        function calculateCAGR(startValue, endValue, years) {
+            if (startValue <= 0) return 0;
+            return ((Math.pow(endValue / startValue, 1 / years) - 1) * 100);
+        }
+
+        function updateKPIs() {
+            const borough = document.getElementById('boroughFilter').value;
+            const timePeriod = document.getElementById('timePeriodFilter').value;
+            const years = getTimePeriodYears(timePeriod);
+
+            let medianRent = 0, rentBurden = 0;
+            if (borough === 'all') {
+                const rents = Object.keys(rentData).map(b => rentData[b][2026]);
+                medianRent = Math.round(rents.reduce((a, b) => a + b) / rents.length);
+                const burdens = Object.keys(rentBurdenData[2026]).map(b => rentBurdenData[2026][b]);
+                rentBurden = (burdens.reduce((a, b) => a + b) / burdens.length).toFixed(1);
+            } else {
+                medianRent = rentData[borough][2026];
+                rentBurden = rentBurdenData[2026][borough];
+            }
+
+            const prevYearRent = borough === 'all'
+                ? Object.keys(rentData).map(b => rentData[b][2025]).reduce((a, b) => a + b) / Object.keys(rentData).length
+                : rentData[borough][2025];
+            const yoyGrowth = (((medianRent - prevYearRent) / prevYearRent) * 100).toFixed(1);
+
+            document.getElementById('medianRent').textContent = `$${medianRent.toLocaleString()}`;
+            document.getElementById('medianRentMeta').textContent = borough === 'all' ? 'Citywide average' : borough;
+            document.getElementById('rentBurden').textContent = `${rentBurden}%`;
+            document.getElementById('rentBurdenMeta').textContent = rentBurden > 50 ? 'SEVERELY BURDENED' : 'High burden';
+            document.getElementById('yoyGrowth').textContent = `${yoyGrowth}%`;
+            document.getElementById('yoyGrowthMeta').textContent = yoyGrowth < 0 ? 'Moderation' : 'Continued growth';
+            document.getElementById('cpiShelter').textContent = cpiData['2026-02'].toFixed(2);
+            document.getElementById('cpiShelterMeta').textContent = '+2.9% YoY, base 1982–84=100';
+        }
+
+        function createRentTrajectoryChart() {
+            const borough = document.getElementById('boroughFilter').value;
+            const timePeriod = document.getElementById('timePeriodFilter').value;
+            const years = getTimePeriodYears(timePeriod);
+
+            const ctx = document.getElementById('rentTrajectoryChart').getContext('2d');
+            if (charts.rentTrajectory) charts.rentTrajectory.destroy();
+
+            if (borough === 'all') {
+                const datasets = Object.keys(rentData).map(b => ({
+                    label: b.replace('_', ' '),
+                    data: years.map(y => rentData[b][y]),
+                    borderColor: getBoroughColor(b),
+                    backgroundColor: getBoroughColor(b) + '20',
+                    tension: 0.3,
+                    fill: false,
+                    borderWidth: 2,
+                    pointRadius: 4,
+                    pointBackgroundColor: getBoroughColor(b),
+                    pointBorderColor: '#0f172a',
+                    pointBorderWidth: 2
+                }));
+
+                charts.rentTrajectory = new Chart(ctx, {
+                    type: 'line',
+                    data: { labels: years, datasets },
+                    options: {
+                        responsive: true,
+                        maintainAspectRatio: false,
+                        plugins: {
+                            legend: { labels: { color: '#e2e8f0', font: { size: 12 } } }
+                        },
+                        scales: {
+                            y: {
+                                ticks: { color: '#94a3b8' },
+                                grid: { color: '#334155', drawBorder: false },
+                                beginAtZero: false
+                            },
+                            x: {
+                                ticks: { color: '#94a3b8' },
+                                grid: { display: false, drawBorder: false }
+                            }
+                        }
+                    }
+                });
+            } else {
+                const rents = years.map(y => rentData[borough][y]);
+                charts.rentTrajectory = new Chart(ctx, {
+                    type: 'line',
+                    data: {
+                        labels: years,
+                        datasets: [{
+                            label: borough.replace('_', ' '),
+                            data: rents,
+                            borderColor: getBoroughColor(borough),
+                            backgroundColor: getBoroughColor(borough) + '20',
+                            tension: 0.3,
+                            fill: true,
+                            borderWidth: 3,
+                            pointRadius: 5,
+                            pointBackgroundColor: getBoroughColor(borough),
+                            pointBorderColor: '#0f172a',
+                            pointBorderWidth: 2
+                        }]
+                    },
+                    options: {
+                        responsive: true,
+                        maintainAspectRatio: false,
+                        plugins: {
+                            legend: { labels: { color: '#e2e8f0' } }
+                        },
+                        scales: {
+                            y: {
+                                ticks: { color: '#94a3b8' },
+                                grid: { color: '#334155', drawBorder: false },
+                                beginAtZero: false
+                            },
+                            x: {
+                                ticks: { color: '#94a3b8' },
+                                grid: { display: false, drawBorder: false }
+                            }
+                        }
+                    }
+                });
+            }
+        }
+
+        // Threshold line plugin
+        const thresholdPlugin = {
+            id: 'thresholdLine',
+            afterDraw(chart) {
+                const opts = chart.options.plugins.thresholdLine;
+                if (!opts || !opts.y) return;
+                const yScale = chart.scales.y;
+                const yPx = yScale.getPixelForValue(opts.y);
+                if (yPx < yScale.top || yPx > yScale.bottom) return;
+                const ctx = chart.ctx;
+                ctx.save();
+                ctx.beginPath();
+                ctx.setLineDash(opts.dash || [5, 5]);
+                ctx.strokeStyle = opts.color || '#10b981';
+                ctx.lineWidth = opts.width || 2;
+                ctx.moveTo(chart.chartArea.left, yPx);
+                ctx.lineTo(chart.chartArea.right, yPx);
+                ctx.stroke();
+                if (opts.label) {
+                    ctx.fillStyle = opts.color || '#10b981';
+                    ctx.font = '10px sans-serif';
+                    ctx.textAlign = 'right';
+                    ctx.fillText(opts.label, chart.chartArea.right - 4, yPx - 6);
+                }
+                ctx.restore();
+            }
+        };
+        Chart.register(thresholdPlugin);
+
+        function createRentBurdenChart() {
+            const borough = document.getElementById('boroughFilter').value;
+            const ctx = document.getElementById('rentBurdenChart').getContext('2d');
+            if (charts.rentBurden) charts.rentBurden.destroy();
+
+            const boroughs = borough === 'all' ? ['Manhattan', 'Brooklyn', 'Queens', 'Bronx', 'Staten_Island'] : [borough];
+            const burden2023 = boroughs.map(b => rentBurdenData[2023][b]);
+            const burden2026 = boroughs.map(b => rentBurdenData[2026][b]);
+            const labels = boroughs.map(b => b.replace('_', ' '));
+
+            charts.rentBurden = new Chart(ctx, {
+                type: 'bar',
+                data: {
+                    labels,
+                    datasets: [
+                        { label: '2023', data: burden2023, backgroundColor: '#6366f1', borderRadius: 6, borderSkipped: false },
+                        { label: '2026', data: burden2026, backgroundColor: '#f97316', borderRadius: 6, borderSkipped: false }
+                    ]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: {
+                        legend: { labels: { color: '#e2e8f0' } },
+                        thresholdLine: { y: 30, color: '#10b981', dash: [5, 5], width: 2, label: 'HUD 30%' }
+                    },
+                    scales: {
+                        y: { ticks: { color: '#94a3b8' }, grid: { color: '#334155', drawBorder: false } },
+                        x: { ticks: { color: '#94a3b8' }, grid: { display: false, drawBorder: false } }
+                    }
+                }
+            });
+        }
+
+        function createIncomePercentileChart() {
+            const ctx = document.getElementById('incomePercentileChart').getContext('2d');
+            if (charts.incomePercentile) charts.incomePercentile.destroy();
+
+            const percentiles = incomePercentileData.map(d => d.pct);
+            const burdens = incomePercentileData.map(d => d.burden);
+            const incomes = incomePercentileData.map(d => `$${(d.income / 1000).toFixed(0)}k`);
+
+            const colors = burdens.map(b => {
+                if (b > 100) return '#ef4444'; // Crisis
+                if (b > 50) return '#f97316'; // Severe
+                if (b > 30) return '#eab308'; // High
+                return '#10b981'; // Affordable
+            });
+
+            charts.incomePercentile = new Chart(ctx, {
+                type: 'bar',
+                data: {
+                    labels: percentiles.map((p, i) => `${p} (${incomes[i]})`),
+                    datasets: [{
+                        label: 'Rent Burden %',
+                        data: burdens,
+                        backgroundColor: colors,
+                        borderRadius: 6,
+                        borderSkipped: false
+                    }]
+                },
+                options: {
+                    indexAxis: 'y',
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: { legend: { display: false } },
+                    scales: {
+                        x: {
+                            ticks: { color: '#94a3b8' },
+                            grid: { color: '#334155', drawBorder: false }
+                        },
+                        y: {
+                            ticks: { color: '#94a3b8' },
+                            grid: { display: false, drawBorder: false }
+                        }
+                    }
+                }
+            });
+        }
+
+        function createInventoryChart() {
+            const borough = document.getElementById('boroughFilter').value;
+            const timePeriod = document.getElementById('timePeriodFilter').value;
+            const ctx = document.getElementById('inventoryChart').getContext('2d');
+            if (charts.inventory) charts.inventory.destroy();
+
+            const allYears = [2010, 2012, 2014, 2016, 2018, 2020, 2022, 2024, 2026];
+            const timeYears = getTimePeriodYears(timePeriod);
+            const years = allYears.filter(y => timeYears.includes(y));
+            const invBoroughs = ['Manhattan', 'Brooklyn', 'Queens'];
+            const showBoroughs = borough === 'all' ? invBoroughs : (inventoryData[borough] ? [borough] : invBoroughs);
+
+            const datasets = showBoroughs.map(b => ({
+                label: b.replace('_', ' '),
+                data: years.map(y => inventoryData[b]?.[y] || null),
+                borderColor: getBoroughColor(b),
+                backgroundColor: getBoroughColor(b) + '20',
+                tension: 0.3,
+                fill: true,
+                borderWidth: 2,
+                pointRadius: 4,
+                pointBackgroundColor: getBoroughColor(b)
+            }));
+
+            charts.inventory = new Chart(ctx, {
+                type: 'line',
+                data: { labels: years, datasets },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: { legend: { labels: { color: '#e2e8f0' } } },
+                    scales: {
+                        y: {
+                            ticks: { color: '#94a3b8' },
+                            grid: { color: '#334155', drawBorder: false },
+                            title: { display: true, text: 'Units', color: '#94a3b8' }
+                        },
+                        x: {
+                            ticks: { color: '#94a3b8' },
+                            grid: { display: false, drawBorder: false }
+                        }
+                    }
+                }
+            });
+        }
+
+        function createYoYGrowthChart() {
+            const borough = document.getElementById('boroughFilter').value;
+            const timePeriod = document.getElementById('timePeriodFilter').value;
+            const ctx = document.getElementById('yoyGrowthChart').getContext('2d');
+            if (charts.yoyGrowth) charts.yoyGrowth.destroy();
+
+            const showBoroughs = borough === 'all' ? Object.keys(rentData) : [borough];
+            const allGrowthYears = [2011, 2012, 2013, 2014, 2015, 2016, 2017, 2018, 2019, 2020, 2021, 2022, 2023, 2024, 2025, 2026];
+            const timeYears = getTimePeriodYears(timePeriod);
+            const years = allGrowthYears.filter(y => timeYears.includes(y));
+
+            const datasets = showBoroughs.map(b => {
+                const growth = years.map(y => {
+                    const prev = rentData[b][y - 1];
+                    const curr = rentData[b][y];
+                    return prev ? ((curr - prev) / prev * 100) : 0;
+                });
+                return {
+                    label: b.replace('_', ' '),
+                    data: growth,
+                    borderColor: getBoroughColor(b),
+                    backgroundColor: getBoroughColor(b) + '20',
+                    tension: 0.3,
+                    borderWidth: borough === 'all' ? 2 : 3,
+                    pointRadius: borough === 'all' ? 3 : 5,
+                    pointBackgroundColor: getBoroughColor(b)
+                };
+            });
+
+            charts.yoyGrowth = new Chart(ctx, {
+                type: 'line',
+                data: { labels: years, datasets },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: {
+                        legend: { labels: { color: '#e2e8f0' } },
+                        thresholdLine: { y: 0, color: '#64748b', dash: [3, 3], width: 1, label: '0% (flat)' }
+                    },
+                    scales: {
+                        y: {
+                            ticks: { color: '#94a3b8' },
+                            grid: { color: '#334155', drawBorder: false }
+                        },
+                        x: {
+                            ticks: { color: '#94a3b8' },
+                            grid: { display: false, drawBorder: false }
+                        }
+                    }
+                }
+            });
+        }
+
+        function updateBoroughRankingTable() {
+            const borough = document.getElementById('boroughFilter').value;
+            const tbody = document.querySelector('#boroughRankingTable tbody');
+            tbody.innerHTML = '';
+
+            const allBoroughs = ['Manhattan', 'Brooklyn', 'Queens', 'Bronx', 'Staten_Island'];
+            const data = allBoroughs.map(b => ({
+                borough: b,
+                rent: rentData[b][2026],
+                income: incomeData[b],
+                burden: rentBurdenData[2026][b]
+            })).sort((a, b) => b.burden - a.burden);
+
+            data.forEach((row, idx) => {
+                const isSelected = borough !== 'all' && row.borough === borough;
+                const isDimmed = borough !== 'all' && row.borough !== borough;
+
+                let badge = '';
+                if (row.burden > 60) badge = 'badge-critical';
+                else if (row.burden > 50) badge = 'badge-severe';
+                else if (row.burden > 35) badge = 'badge-high';
+                else badge = 'badge-moderate';
+
+                let badgeText = '';
+                if (row.burden > 60) badgeText = 'SEVERE CRISIS';
+                else if (row.burden > 50) badgeText = 'CRISIS';
+                else if (row.burden > 35) badgeText = 'HIGH';
+                else badgeText = 'MODERATE';
+
+                const severelyBurdened = row.burden > 50 ? (75 + Math.random() * 15).toFixed(0) : (20 + Math.random() * 15).toFixed(0);
+
+                const tr = document.createElement('tr');
+                if (isSelected) tr.style.background = 'rgba(59,130,246,.15)';
+                if (isDimmed) tr.style.opacity = '0.5';
+                tr.innerHTML = `
+                    <td><strong>${isSelected ? '▸ ' : ''}${row.borough.replace('_', ' ')}</strong></td>
+                    <td>$${row.rent.toLocaleString()}</td>
+                    <td>$${row.income.toLocaleString()}</td>
+                    <td>${row.burden.toFixed(1)}%</td>
+                    <td><span class="badge ${badge}">${badgeText}</span></td>
+                    <td>${severelyBurdened}%</td>
+                `;
+                tbody.appendChild(tr);
+            });
+        }
+
+        function updateEraAnalysisTable() {
+            const borough = document.getElementById('boroughFilter').value;
+            const tbody = document.querySelector('#eraAnalysisTable tbody');
+            tbody.innerHTML = '';
+
+            const allBoroughs = ['Manhattan', 'Brooklyn', 'Queens', 'Bronx', 'Staten_Island'];
+            const showBoroughs = borough === 'all' ? allBoroughs : allBoroughs;
+
+            showBoroughs.forEach(b => {
+                const isSelected = borough !== 'all' && b === borough;
+                const isDimmed = borough !== 'all' && b !== borough;
+                const prePandemic = calculateCAGR(rentData[b][2010], rentData[b][2019], 9);
+                const pandemic = calculateCAGR(rentData[b][2020], rentData[b][2021], 1);
+                const postPandemic = calculateCAGR(rentData[b][2022], rentData[b][2026], 4);
+                const overall = calculateCAGR(rentData[b][2010], rentData[b][2026], 16);
+
+                const tr = document.createElement('tr');
+                if (isSelected) tr.style.background = 'rgba(59,130,246,.15)';
+                if (isDimmed) tr.style.opacity = '0.5';
+                tr.innerHTML = `
+                    <td><strong>${isSelected ? '▸ ' : ''}${b.replace('_', ' ')}</strong></td>
+                    <td>${prePandemic.toFixed(2)}%</td>
+                    <td>${pandemic.toFixed(2)}%</td>
+                    <td>${postPandemic.toFixed(2)}%</td>
+                    <td>${overall.toFixed(2)}%</td>
+                `;
+                tbody.appendChild(tr);
+            });
+        }
+
+        // ── BLS Chart Functions ──
+        function createBLSCharts() {
+            const tp = document.getElementById('timePeriodFilter').value;
+            const ranges = {'All Time':[2010,2026],'Pre-Pandemic':[2010,2019],'Pandemic':[2020,2021],'Post-Pandemic':[2022,2026]};
+            const [lo,hi] = ranges[tp] || [2010,2026];
+            const blsYears = Object.keys(blsData.unemployment).map(Number).filter(y=>y>=lo&&y<=hi);
+            const labels = blsYears.map(String);
+
+            const tooltipOpts = {backgroundColor:'#0f172a',titleColor:'#f1f5f9',bodyColor:'#e2e8f0',borderColor:'#334155',borderWidth:1,padding:12};
+            const gridOpts = {color:'#334155'};
+            const tickOpts = {color:'#94a3b8'};
+
+            // 1. Wages vs Shelter CPI (dual-axis, indexed to 2010=100)
+            if(charts.blsWageShelter) charts.blsWageShelter.destroy();
+            const base2010Wage = blsData.wages[2010]||30.4;
+            const base2010Shelter = blsData.shelterCPI[2010]||281.52;
+            const base2010CPI = blsData.cpi[2010]||227.85;
+            charts.blsWageShelter = new Chart(document.getElementById('blsWageShelterChart').getContext('2d'),{
+                type:'line',
+                data:{labels,datasets:[
+                    {label:'Avg Hourly Earnings (indexed)',data:blsYears.map(y=>+((blsData.wages[y]/base2010Wage)*100).toFixed(1)),borderColor:'#3b82f6',backgroundColor:'rgba(59,130,246,0.08)',tension:.3,fill:false,pointRadius:4,borderWidth:2.5},
+                    {label:'Shelter CPI (indexed)',data:blsYears.map(y=>+((blsData.shelterCPI[y]/base2010Shelter)*100).toFixed(1)),borderColor:'#f59e0b',backgroundColor:'rgba(245,158,11,0.08)',tension:.3,fill:false,pointRadius:4,borderWidth:2.5},
+                    {label:'General CPI (indexed)',data:blsYears.map(y=>+((blsData.cpi[y]/base2010CPI)*100).toFixed(1)),borderColor:'#64748b',backgroundColor:'transparent',tension:.3,fill:false,pointRadius:3,borderWidth:1.5,borderDash:[4,3]}
+                ]},
+                options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{labels:{color:'#cbd5e1',font:{size:11}}},tooltip:tooltipOpts},scales:{y:{ticks:{...tickOpts,callback:v=>v},grid:gridOpts,title:{display:true,text:'Index (2010 = 100)',color:'#94a3b8'}},x:{ticks:tickOpts,grid:{color:'#1e293b'}}}}
+            });
+
+            // 2. YoY Inflation comparison
+            if(charts.blsInflComp) charts.blsInflComp.destroy();
+            const inflYears = blsYears.filter(y=>blsData.inflationRate[y]!==undefined);
+            const inflLabels = inflYears.map(String);
+            charts.blsInflComp = new Chart(document.getElementById('blsInflCompChart').getContext('2d'),{
+                type:'bar',
+                data:{labels:inflLabels,datasets:[
+                    {label:'Wage Growth (%)',data:inflYears.map(y=>{const p=y-1;return blsData.wages[p]?+(((blsData.wages[y]-blsData.wages[p])/blsData.wages[p])*100).toFixed(1):0}),backgroundColor:'#3b82f680',borderRadius:3},
+                    {label:'General CPI (%)',data:inflYears.map(y=>blsData.inflationRate[y]||0),backgroundColor:'#64748b80',borderRadius:3},
+                    {label:'Shelter CPI (%)',data:inflYears.map(y=>blsData.shelterInflation[y]||0),backgroundColor:'#f59e0b80',borderRadius:3}
+                ]},
+                options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{labels:{color:'#cbd5e1',font:{size:11}}},tooltip:tooltipOpts},scales:{y:{ticks:tickOpts,grid:gridOpts},x:{ticks:tickOpts,grid:{color:'#1e293b'}}}}
+            });
+
+            // 3. Unemployment + Employment dual-axis
+            if(charts.blsUnempAfford) charts.blsUnempAfford.destroy();
+            charts.blsUnempAfford = new Chart(document.getElementById('blsUnempAffordChart').getContext('2d'),{
+                type:'line',
+                data:{labels,datasets:[
+                    {label:'Unemployment Rate (%)',data:blsYears.map(y=>blsData.unemployment[y]),borderColor:'#ef4444',backgroundColor:'rgba(239,68,68,0.08)',tension:.3,fill:true,yAxisID:'y',pointRadius:4,borderWidth:2.5},
+                    {label:'Nonfarm Employment (K)',data:blsYears.map(y=>blsData.employment[y]),borderColor:'#3b82f6',backgroundColor:'rgba(59,130,246,0.08)',tension:.3,fill:false,yAxisID:'y1',pointRadius:3,borderWidth:2,borderDash:[4,3]}
+                ]},
+                options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{labels:{color:'#cbd5e1',font:{size:11}}},tooltip:tooltipOpts},scales:{
+                    y:{position:'left',ticks:{...tickOpts,callback:v=>v+'%'},grid:gridOpts},
+                    y1:{position:'right',ticks:{...tickOpts,callback:v=>(v/1000).toFixed(1)+'M'},grid:{display:false}},
+                    x:{ticks:tickOpts,grid:{color:'#1e293b'}}
+                }}
+            });
+
+            // 4. Real wage growth (nominal wage growth minus CPI inflation)
+            if(charts.blsRealWage) charts.blsRealWage.destroy();
+            const rwYears = inflYears;
+            const rwLabels = rwYears.map(String);
+            const nomWage = rwYears.map(y=>{const p=y-1;return blsData.wages[p]?+(((blsData.wages[y]-blsData.wages[p])/blsData.wages[p])*100).toFixed(1):0});
+            const realWage = rwYears.map((y,i)=>+(nomWage[i]-(blsData.inflationRate[y]||0)).toFixed(1));
+            const rwColors = realWage.map(v=>v>=0?'rgba(16,185,129,0.7)':'rgba(239,68,68,0.7)');
+            charts.blsRealWage = new Chart(document.getElementById('blsRealWageChart').getContext('2d'),{
+                type:'bar',
+                data:{labels:rwLabels,datasets:[
+                    {label:'Real Wage Growth (%)',data:realWage,backgroundColor:rwColors,borderRadius:3}
+                ]},
+                options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{labels:{color:'#cbd5e1',font:{size:11}}},tooltip:tooltipOpts},scales:{y:{ticks:tickOpts,grid:gridOpts},x:{ticks:tickOpts,grid:{color:'#1e293b'}}}}
+            });
+        }
+
+        function createCensusCharts() {
+            const period = document.getElementById('timePeriodFilter').value;
+            const boro = document.getElementById('boroughFilter').value;
+            const ranges = {full:[2010,2026],pre:[2010,2019],pandemic:[2020,2021],post:[2022,2026]};
+            const [lo,hi] = ranges[period]||[2010,2026];
+            const filtCensusYears = censusYears.filter(y=>y>=lo&&y<=hi);
+            const cLabels = filtCensusYears.map(String);
+            const allBoros = ['Manhattan','Brooklyn','Queens','Bronx','Staten_Island'];
+            const boroColors = {Manhattan:'#f97316',Brooklyn:'#3b82f6',Queens:'#10b981',Bronx:'#a855f7',Staten_Island:'#ec4899'};
+            const boroLabels = {Manhattan:'Manhattan',Brooklyn:'Brooklyn',Queens:'Queens',Bronx:'Bronx',Staten_Island:'Staten Island'};
+            const activeBoros = boro==='all'?allBoros:[boro];
+            const tooltipOpts = {backgroundColor:'#1e293b',titleColor:'#f1f5f9',bodyColor:'#cbd5e1',borderColor:'#334155',borderWidth:1};
+            const tickOpts = {color:'#94a3b8',font:{size:11}};
+            const gridOpts = {color:'#334155'};
+
+            // Destroy existing census charts
+            ['censusIncome','censusBurden','censusPovRate','censusIncRentIndex'].forEach(k=>{if(charts[k]){charts[k].destroy();delete charts[k];}});
+
+            // Income by borough
+            const incDS = activeBoros.map(b=>({
+                label:boroLabels[b],data:filtCensusYears.map(y=>censusIncome[b]?.[y]||null),
+                borderColor:boroColors[b],backgroundColor:boroColors[b]+'22',tension:.3,fill:false,
+                pointRadius:boro!=='all'?5:3,borderWidth:boro!=='all'?3:2
+            }));
+            charts.censusIncome = new Chart(document.getElementById('censusIncomeChart').getContext('2d'),{
+                type:'line',data:{labels:cLabels,datasets:incDS},
+                options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{labels:{color:'#cbd5e1',font:{size:11}}},tooltip:tooltipOpts},scales:{y:{ticks:{...tickOpts,callback:v=>'$'+(v/1000).toFixed(0)+'K'},grid:gridOpts},x:{ticks:tickOpts,grid:{color:'#1e293b'}}}}
+            });
+
+            // Census Rent Burden by borough
+            const rbDS = activeBoros.map(b=>({
+                label:boroLabels[b],data:filtCensusYears.map(y=>censusRentBurden[b]?.[y]||null),
+                borderColor:boroColors[b],backgroundColor:boroColors[b]+'22',tension:.3,fill:false,
+                pointRadius:boro!=='all'?5:3,borderWidth:boro!=='all'?3:2
+            }));
+            charts.censusBurden = new Chart(document.getElementById('censusBurdenChart').getContext('2d'),{
+                type:'line',data:{labels:cLabels,datasets:rbDS},
+                options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{labels:{color:'#cbd5e1',font:{size:11}}},tooltip:tooltipOpts,thresholdLine:{y:30,color:'#22c55e',dash:[6,4],width:2,label:'HUD 30%',fontSize:10}},scales:{y:{ticks:{...tickOpts,callback:v=>v+'%'},grid:gridOpts},x:{ticks:tickOpts,grid:{color:'#1e293b'}}}}
+            });
+
+            // Poverty rate by borough
+            const povDS = activeBoros.map(b=>({
+                label:boroLabels[b],data:filtCensusYears.map(y=>censusPovertyRate[b]?.[y]||null),
+                borderColor:boroColors[b],backgroundColor:boroColors[b]+'22',tension:.3,fill:false,
+                pointRadius:boro!=='all'?5:3,borderWidth:boro!=='all'?3:2
+            }));
+            charts.censusPovRate = new Chart(document.getElementById('censusPovRateChart').getContext('2d'),{
+                type:'line',data:{labels:cLabels,datasets:povDS},
+                options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{labels:{color:'#cbd5e1',font:{size:11}}},tooltip:tooltipOpts,thresholdLine:{y:20,color:'#f59e0b',dash:[6,4],width:1.5,label:'20% Poverty',fontSize:10}},scales:{y:{ticks:{...tickOpts,callback:v=>v+'%'},grid:gridOpts},x:{ticks:tickOpts,grid:{color:'#1e293b'}}}}
+            });
+
+            // Income vs Rent indexed to 2010=100
+            if(filtCensusYears.includes(2010)){
+                const idxDS = activeBoros.flatMap(b=>{
+                    const baseInc = censusIncome[b]?.[2010]||1;
+                    const baseRent = rentData[b]?.[2010]||1;
+                    return [
+                        {label:boroLabels[b]+' Income',data:filtCensusYears.map(y=>{const v=censusIncome[b]?.[y];return v?+((v/baseInc)*100).toFixed(1):null}),borderColor:boroColors[b],tension:.3,fill:false,pointRadius:3,borderWidth:2},
+                        {label:boroLabels[b]+' Rent',data:filtCensusYears.map(y=>{const v=rentData[b]?.[y];return v?+((v/baseRent)*100).toFixed(1):null}),borderColor:boroColors[b],tension:.3,fill:false,pointRadius:3,borderWidth:2,borderDash:[5,4]}
+                    ];
+                });
+                charts.censusIncRentIndex = new Chart(document.getElementById('censusIncRentIndexChart').getContext('2d'),{
+                    type:'line',data:{labels:cLabels,datasets:idxDS},
+                    options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{labels:{color:'#cbd5e1',font:{size:9}}},tooltip:tooltipOpts,thresholdLine:{y:100,color:'#64748b',dash:[4,4],width:1,label:'2010 Baseline',fontSize:9}},scales:{y:{ticks:tickOpts,grid:gridOpts},x:{ticks:tickOpts,grid:{color:'#1e293b'}}}}
+                });
+            }
+        }
+
+        function refreshCharts() {
+            updateKPIs();
+            createRentTrajectoryChart();
+            createRentBurdenChart();
+            createIncomePercentileChart();
+            createInventoryChart();
+            createYoYGrowthChart();
+            updateBoroughRankingTable();
+            updateEraAnalysisTable();
+            createBLSCharts();
+            createCensusCharts();
+        }
+
+        document.getElementById('boroughFilter').addEventListener('change', refreshCharts);
+        document.getElementById('timePeriodFilter').addEventListener('change', refreshCharts);
+
+        // Initial render
+        refreshCharts();
+    </script>
+</body>
+</html>

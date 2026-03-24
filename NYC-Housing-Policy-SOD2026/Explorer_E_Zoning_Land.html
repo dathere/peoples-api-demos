@@ -1,0 +1,1113 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Section E: Zoning Capacity & Public Land — Interactive Explorer</title>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.min.js"></script>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
+            background-color: #0f172a;
+            color: #e2e8f0;
+            padding: 20px;
+            line-height: 1.6;
+        }
+
+        .container {
+            max-width: 1400px;
+            margin: 0 auto;
+        }
+
+        header {
+            margin-bottom: 30px;
+            border-bottom: 1px solid #334155;
+            padding-bottom: 20px;
+        }
+
+        h1 {
+            font-size: 28px;
+            font-weight: 700;
+            margin-bottom: 8px;
+            color: #f1f5f9;
+        }
+
+        .subtitle {
+            font-size: 14px;
+            color: #94a3b8;
+            font-weight: 500;
+            letter-spacing: 0.5px;
+        }
+
+        .controls {
+            display: flex;
+            gap: 20px;
+            margin-bottom: 30px;
+            flex-wrap: wrap;
+            align-items: center;
+        }
+
+        .control-group {
+            display: flex;
+            gap: 10px;
+            align-items: center;
+            flex-wrap: wrap;
+        }
+
+        label {
+            font-size: 13px;
+            font-weight: 600;
+            color: #cbd5e1;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+
+        select, button {
+            padding: 10px 16px;
+            border-radius: 6px;
+            border: 1px solid #334155;
+            background-color: #1e293b;
+            color: #e2e8f0;
+            cursor: pointer;
+            font-size: 13px;
+            font-weight: 500;
+            transition: all 0.2s ease;
+        }
+
+        select:hover, button:hover {
+            background-color: #334155;
+            border-color: #64748b;
+        }
+
+        button.active {
+            background-color: #3b82f6;
+            border-color: #3b82f6;
+            color: #ffffff;
+        }
+
+        .view-toggle {
+            display: flex;
+            gap: 8px;
+            background-color: #1e293b;
+            padding: 4px;
+            border-radius: 6px;
+            border: 1px solid #334155;
+        }
+
+        .view-toggle button {
+            border: none;
+            background-color: transparent;
+            padding: 8px 12px;
+            font-size: 12px;
+            flex: 1;
+            border-radius: 4px;
+        }
+
+        .view-toggle button.active {
+            background-color: #3b82f6;
+        }
+
+        .kpi-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 16px;
+            margin-bottom: 30px;
+        }
+
+        .kpi-card {
+            background-color: #1e293b;
+            border: 1px solid #334155;
+            border-radius: 8px;
+            padding: 20px;
+            text-align: center;
+        }
+
+        .kpi-label {
+            font-size: 12px;
+            color: #94a3b8;
+            text-transform: uppercase;
+            font-weight: 600;
+            letter-spacing: 0.5px;
+            margin-bottom: 8px;
+        }
+
+        .kpi-value {
+            font-size: 32px;
+            font-weight: 700;
+            color: #3b82f6;
+            margin-bottom: 4px;
+        }
+
+        .kpi-unit {
+            font-size: 12px;
+            color: #64748b;
+        }
+
+        .chart-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(500px, 1fr));
+            gap: 20px;
+            margin-bottom: 30px;
+        }
+
+        .chart-container {
+            background-color: #1e293b;
+            border: 1px solid #334155;
+            border-radius: 8px;
+            padding: 20px;
+        }
+
+        .chart-title {
+            font-size: 14px;
+            font-weight: 600;
+            color: #f1f5f9;
+            margin-bottom: 16px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .chart-legend {
+            font-size: 11px;
+            color: #94a3b8;
+            margin-top: 8px;
+        }
+
+        .full-width {
+            grid-column: 1 / -1;
+        }
+
+        .table-container {
+            background-color: #1e293b;
+            border: 1px solid #334155;
+            border-radius: 8px;
+            padding: 20px;
+            margin-bottom: 30px;
+            overflow-x: auto;
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            font-size: 13px;
+        }
+
+        thead {
+            border-bottom: 2px solid #334155;
+        }
+
+        th {
+            text-align: left;
+            padding: 12px 8px;
+            color: #cbd5e1;
+            font-weight: 600;
+            text-transform: uppercase;
+            font-size: 11px;
+            letter-spacing: 0.5px;
+        }
+
+        td {
+            padding: 12px 8px;
+            border-bottom: 1px solid #334155;
+        }
+
+        tr:hover {
+            background-color: #0f172a;
+        }
+
+        .badge {
+            display: inline-block;
+            padding: 4px 8px;
+            border-radius: 4px;
+            font-size: 10px;
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            white-space: nowrap;
+        }
+
+        .badge-priority {
+            background-color: #dc2626;
+            color: #ffffff;
+        }
+
+        .badge-high {
+            background-color: #f97316;
+            color: #ffffff;
+        }
+
+        .badge-moderate {
+            background-color: #eab308;
+            color: #000000;
+        }
+
+        .timeline {
+            margin-top: 16px;
+        }
+
+        .timeline-item {
+            display: flex;
+            gap: 16px;
+            margin-bottom: 16px;
+            align-items: center;
+        }
+
+        .timeline-marker {
+            min-width: 100px;
+            font-weight: 600;
+            color: #3b82f6;
+            font-size: 12px;
+        }
+
+        .timeline-content {
+            flex: 1;
+            color: #cbd5e1;
+            font-size: 13px;
+            padding: 8px 12px;
+            background-color: #0f172a;
+            border-left: 2px solid #3b82f6;
+            padding-left: 12px;
+        }
+
+        .disclaimer {
+            background-color: #1e293b;
+            border: 1px solid #334155;
+            border-radius: 8px;
+            padding: 16px;
+            margin-top: 30px;
+            font-size: 11px;
+            color: #94a3b8;
+            line-height: 1.6;
+        }
+
+        .disclaimer-title {
+            font-weight: 600;
+            color: #cbd5e1;
+            margin-bottom: 8px;
+        }
+
+        .hidden {
+            display: none;
+        }
+
+        @media (max-width: 768px) {
+            .chart-grid {
+                grid-template-columns: 1fr;
+            }
+
+            .kpi-grid {
+                grid-template-columns: repeat(2, 1fr);
+            }
+
+            h1 {
+                font-size: 20px;
+            }
+
+            .controls {
+                flex-direction: column;
+                align-items: stretch;
+            }
+
+            .control-group {
+                flex-direction: column;
+            }
+        }
+
+        .affordability-table {
+            font-size: 12px;
+        }
+
+        .cost-high {
+            color: #dc2626;
+            font-weight: 600;
+        }
+
+        .cost-mid {
+            color: #f97316;
+            font-weight: 600;
+        }
+
+        .cost-low {
+            color: #22c55e;
+            font-weight: 600;
+        }
+
+        .permanence {
+            color: #22c55e;
+        }
+
+        .time-limited {
+            color: #f97316;
+        }
+
+        .market-rate {
+            color: #dc2626;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <nav style="margin-bottom:8px"><a href="Explorer_Master_Dashboard.html" style="color:#94a3b8;text-decoration:none;font-size:.85rem;display:inline-flex;align-items:center;gap:4px;transition:color .2s" onmouseover="this.style.color='#3b82f6'" onmouseout="this.style.color='#94a3b8'">&larr; Back to Master Dashboard</a></nav>
+        <header>
+            <h1>Section E: Zoning Capacity & Public Land — Interactive Explorer</h1>
+            <p class="subtitle">'Public Land for Public Good' · PLUTO Feb 2026 · 10,502 City-Owned Parcels</p>
+        </header>
+
+        <div class="controls">
+            <div class="control-group">
+                <label for="boroughSelect">Borough:</label>
+                <select id="boroughSelect" onchange="updateDashboard()">
+                    <option value="citywide">Citywide</option>
+                    <option value="manhattan">Manhattan</option>
+                    <option value="brooklyn">Brooklyn</option>
+                    <option value="queens">Queens</option>
+                    <option value="bronx">Bronx</option>
+                    <option value="staten_island">Staten Island</option>
+                </select>
+            </div>
+
+            <div class="control-group">
+                <label>View:</label>
+                <div class="view-toggle">
+                    <button class="active" onclick="switchView('inventory')">Land Inventory</button>
+                    <button onclick="switchView('districts')">Community Districts</button>
+                    <button onclick="switchView('climate')">Climate Risk</button>
+                    <button onclick="switchView('development')">Dev. Potential</button>
+                </div>
+            </div>
+        </div>
+
+        <div id="inventory-view">
+            <!-- KPI Cards -->
+            <div class="kpi-grid">
+                <div class="kpi-card">
+                    <div class="kpi-label">Total Parcels</div>
+                    <div class="kpi-value" id="kpiParcels">10,502</div>
+                    <div class="kpi-unit">city-owned lots</div>
+                </div>
+                <div class="kpi-card">
+                    <div class="kpi-label">Total Acres</div>
+                    <div class="kpi-value" id="kpiAcres">2,050</div>
+                    <div class="kpi-unit">available inventory</div>
+                </div>
+                <div class="kpi-card">
+                    <div class="kpi-label">Potential Units</div>
+                    <div class="kpi-value" id="kpiUnits">29,170</div>
+                    <div class="kpi-unit">housing capacity</div>
+                </div>
+                <div class="kpi-card">
+                    <div class="kpi-label">Underutilized</div>
+                    <div class="kpi-value" id="kpiUnderutilized">3,200</div>
+                    <div class="kpi-unit">actively prioritized</div>
+                </div>
+                <div class="kpi-card">
+                    <div class="kpi-label">Flood Zone Exposure</div>
+                    <div class="kpi-value" id="kpiFlood">14.9%</div>
+                    <div class="kpi-unit">at-risk parcels</div>
+                </div>
+            </div>
+
+            <!-- Charts -->
+            <div class="chart-grid">
+                <div class="chart-container">
+                    <div class="chart-title">Parcels & Units by Borough</div>
+                    <canvas id="parcelsUnitsChart"></canvas>
+                </div>
+
+                <div class="chart-container">
+                    <div class="chart-title">Flood Zone Exposure by Borough</div>
+                    <canvas id="floodRiskChart"></canvas>
+                </div>
+
+                <div class="chart-container full-width">
+                    <div class="chart-title">Community District Opportunities (Top 5 Areas)</div>
+                    <canvas id="communityChart"></canvas>
+                </div>
+
+                <div class="chart-container">
+                    <div class="chart-title">Acquisition Source Distribution</div>
+                    <canvas id="acquisitionChart"></canvas>
+                </div>
+
+                <div class="chart-container full-width">
+                    <div class="chart-title">Development Cost Comparison (per unit)</div>
+                    <canvas id="costChart"></canvas>
+                </div>
+            </div>
+
+            <!-- Borough Detail Table -->
+            <div class="table-container">
+                <div class="chart-title">Borough Rankings & Priority Assessment</div>
+                <table>
+                    <thead>
+                        <tr>
+                            <th>Borough</th>
+                            <th>Parcels</th>
+                            <th>Acres</th>
+                            <th>Potential Units</th>
+                            <th>Avg Parcel Size</th>
+                            <th>Flood Risk %</th>
+                            <th>Priority</th>
+                        </tr>
+                    </thead>
+                    <tbody id="boroughTableBody">
+                    </tbody>
+                </table>
+            </div>
+
+            <!-- Affordability Comparison -->
+            <div class="table-container">
+                <div class="chart-title">Affordability & Development Models Comparison</div>
+                <table class="affordability-table">
+                    <thead>
+                        <tr>
+                            <th>Development Model</th>
+                            <th>Cost per Unit</th>
+                            <th>Affordability</th>
+                            <th>Timeline</th>
+                            <th>Public Land Advantage</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <td><strong>Public Land + Nonprofit</strong></td>
+                            <td class="cost-low">$200,000</td>
+                            <td class="permanence">Permanent</td>
+                            <td>3-4 years</td>
+                            <td>Land value subsidy enables deep affordability</td>
+                        </tr>
+                        <tr>
+                            <td><strong>Public Land + Mixed Finance</strong></td>
+                            <td class="cost-mid">$300,000</td>
+                            <td>30-50 years</td>
+                            <td>2-3 years</td>
+                            <td>Faster timeline, mixed income targeting</td>
+                        </tr>
+                        <tr>
+                            <td><strong>Private Market Rate</strong></td>
+                            <td class="cost-high">$500,000</td>
+                            <td class="market-rate">None</td>
+                            <td>2-3 years</td>
+                            <td>No affordability—baseline for comparison</td>
+                        </tr>
+                        <tr>
+                            <td><strong>Private + 421-a Tax Credit</strong></td>
+                            <td class="cost-high">$400,000</td>
+                            <td class="time-limited">25 years</td>
+                            <td>2-3 years</td>
+                            <td>Time-limited affordability via tax incentive</td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+
+            <!-- Implementation Timeline -->
+            <div class="table-container">
+                <div class="chart-title">Mamdani Implementation Timeline</div>
+                <div class="timeline">
+                    <div class="timeline-item">
+                        <div class="timeline-marker">Q2 2026</div>
+                        <div class="timeline-content">Inventory audit complete</div>
+                    </div>
+                    <div class="timeline-item">
+                        <div class="timeline-marker">Q3 2026</div>
+                        <div class="timeline-content">RFP for first 20 parcels</div>
+                    </div>
+                    <div class="timeline-item">
+                        <div class="timeline-marker">Q4 2026</div>
+                        <div class="timeline-content">Developer selection</div>
+                    </div>
+                    <div class="timeline-item">
+                        <div class="timeline-marker">Q2 2027</div>
+                        <div class="timeline-content">Construction begins (first wave)</div>
+                    </div>
+                    <div class="timeline-item">
+                        <div class="timeline-marker">Q4 2028</div>
+                        <div class="timeline-content">First 2,000 units delivered</div>
+                    </div>
+                    <div class="timeline-item">
+                        <div class="timeline-marker">2030</div>
+                        <div class="timeline-content">Target: 10,000 units on public land</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div id="districts-view" class="hidden">
+            <div class="chart-grid">
+                <div class="chart-container full-width">
+                    <div class="chart-title">Community District Opportunity Areas</div>
+                    <canvas id="districtDetailChart"></canvas>
+                </div>
+            </div>
+            <div class="table-container">
+                <table>
+                    <thead>
+                        <tr>
+                            <th>Opportunity Area</th>
+                            <th>Community Districts</th>
+                            <th>Parcels</th>
+                            <th>Acres</th>
+                            <th>Potential Units</th>
+                            <th>Units/Acre</th>
+                        </tr>
+                    </thead>
+                    <tbody id="districtTableBody">
+                    </tbody>
+                </table>
+            </div>
+        </div>
+
+        <div id="climate-view" class="hidden">
+            <div class="chart-grid">
+                <div class="chart-container full-width">
+                    <div class="chart-title">Climate Risk Analysis: Flood Zone Exposure</div>
+                    <canvas id="climateDetailChart"></canvas>
+                </div>
+            </div>
+            <div class="table-container">
+                <table>
+                    <thead>
+                        <tr>
+                            <th>Borough</th>
+                            <th>Parcels in Flood Zone</th>
+                            <th>% of Borough Total</th>
+                            <th>Acres at Risk</th>
+                            <th>Adaptation Strategy</th>
+                        </tr>
+                    </thead>
+                    <tbody id="climateTableBody">
+                    </tbody>
+                </table>
+            </div>
+        </div>
+
+        <div id="development-view" class="hidden">
+            <div class="chart-grid">
+                <div class="chart-container full-width">
+                    <div class="chart-title">Development Potential: Units per Acre by Borough</div>
+                    <canvas id="devPotentialChart"></canvas>
+                </div>
+            </div>
+            <div class="table-container">
+                <table>
+                    <thead>
+                        <tr>
+                            <th>Borough</th>
+                            <th>Total Units Potential</th>
+                            <th>Units per Acre</th>
+                            <th>Density Benchmark</th>
+                            <th>Development Timeline Estimate</th>
+                        </tr>
+                    </thead>
+                    <tbody id="devTableBody">
+                    </tbody>
+                </table>
+            </div>
+        </div>
+
+        <div class="disclaimer">
+            <div class="disclaimer-title">Disclaimer & Data Notes</div>
+            <p>This dashboard presents exploratory analysis of NYC's public land inventory as of PLUTO February 2026. Data includes 10,502 city-owned parcels across five boroughs. Potential unit estimates assume medium density development (14 units per acre) and are for planning purposes only. Flood zone exposure reflects FEMA 100-year floodplain data. Development costs are illustrative and based on comparable NYC projects; actual per-unit costs will vary by location, parcel characteristics, and market conditions. Acquisition sources represent historical patterns and do not guarantee future land availability. Timeline projections reflect optimistic planning scenarios and are subject to policy, funding, and community engagement outcomes. This analysis does not constitute a commitment to specific development or policy direction. For official public land policy information, consult NYC Department of City Planning (DCP), NYC Housing & Development Administration (HDA), or NYC Economic Development Corporation (NYCEDC).</p>
+        </div>
+    </div>
+
+    <script>
+        const data = {
+            boroughs: {
+                manhattan: { name: 'Manhattan', parcels: 1893, acres: 284, units: 4300, flood: 16, avgSize: 0.07 },
+                brooklyn: { name: 'Brooklyn', parcels: 2804, acres: 612, units: 8640, flood: 18, avgSize: 0.11 },
+                queens: { name: 'Queens', parcels: 2847, acres: 521, units: 7340, flood: 14, avgSize: 0.09 },
+                bronx: { name: 'Bronx', parcels: 2156, acres: 487, units: 6840, flood: 12, avgSize: 0.10 },
+                staten_island: { name: 'Staten Island', parcels: 802, acres: 146, units: 2060, flood: 8, avgSize: 0.09 }
+            },
+            districts: {
+                'South_Bronx': { districts: ['BX303 Mott Haven', 'BX304 Hunts Point', 'BX305 Morrisania'], parcels: 547, acres: 128, units: 1820 },
+                'East_Brooklyn': { districts: ['BK306 Williamsburg', 'BK309 Brownsville', 'BK310 East Flatbush'], parcels: 579, acres: 133, units: 1880 },
+                'West_Queens': { districts: ['QN401 LIC', 'QN402 Astoria'], parcels: 329, acres: 68, units: 960 },
+                'Central_Harlem': { districts: ['MN310 Central Harlem'], parcels: 210, acres: 42, units: 630 },
+                'North_Shore_SI': { districts: ['SI501 North Shore'], parcels: 89, acres: 22, units: 310 }
+            },
+            acquisition: {
+                'Tax Foreclosure': 40,
+                'Public Facility': 35,
+                'Planned Acquisition': 15,
+                'NYCHA Surplus': 10
+            },
+            development: {
+                'Public Land\n+ Nonprofit': 200000,
+                'Public Land\n+ Mixed Finance': 300000,
+                'Private\nMarket Rate': 500000,
+                'Private\n+ 421-a': 400000
+            }
+        };
+
+        let currentBorough = 'citywide';
+        let currentView = 'inventory';
+        let charts = {};
+
+        function getCurrentBoroughData() {
+            if (currentBorough === 'citywide') {
+                return {
+                    parcels: 10502,
+                    acres: 2050,
+                    units: 29170,
+                    flood: 14.9,
+                    avgSize: 0.095
+                };
+            }
+            return data.boroughs[currentBorough];
+        }
+
+        function updateKPIs() {
+            const boroughData = getCurrentBoroughData();
+            document.getElementById('kpiParcels').textContent = boroughData.parcels.toLocaleString();
+            document.getElementById('kpiAcres').textContent = boroughData.acres.toLocaleString();
+            document.getElementById('kpiUnits').textContent = boroughData.units.toLocaleString();
+            document.getElementById('kpiFlood').textContent = boroughData.flood.toFixed(1) + '%';
+            document.getElementById('kpiUnderutilized').textContent = Math.round(boroughData.parcels * 0.305).toLocaleString();
+        }
+
+        function updateBoroughTable() {
+            const tbody = document.getElementById('boroughTableBody');
+            tbody.innerHTML = '';
+
+            const boroughs = ['manhattan', 'brooklyn', 'queens', 'bronx', 'staten_island'];
+            const priorityMap = {
+                'brooklyn': { badge: 'badge-priority', text: 'TOP PRIORITY' },
+                'queens': { badge: 'badge-priority', text: 'TOP PRIORITY' },
+                'bronx': { badge: 'badge-high', text: 'HIGH' },
+                'manhattan': { badge: 'badge-high', text: 'HIGH' },
+                'staten_island': { badge: 'badge-moderate', text: 'MODERATE' }
+            };
+
+            boroughs.forEach(b => {
+                const d = data.boroughs[b];
+                const priority = priorityMap[b];
+                const row = document.createElement('tr');
+                row.innerHTML = `
+                    <td><strong>${d.name}</strong></td>
+                    <td>${d.parcels.toLocaleString()}</td>
+                    <td>${d.acres}</td>
+                    <td>${d.units.toLocaleString()}</td>
+                    <td>${d.avgSize.toFixed(2)} acres</td>
+                    <td>${d.flood}%</td>
+                    <td><span class="badge ${priority.badge}">${priority.text}</span></td>
+                `;
+                tbody.appendChild(row);
+            });
+        }
+
+        function updateDistrictTable() {
+            const tbody = document.getElementById('districtTableBody');
+            tbody.innerHTML = '';
+
+            const districtOrder = ['South_Bronx', 'East_Brooklyn', 'West_Queens', 'Central_Harlem', 'North_Shore_SI'];
+            districtOrder.forEach(key => {
+                const d = data.districts[key];
+                const row = document.createElement('tr');
+                row.innerHTML = `
+                    <td><strong>${key.replace(/_/g, ' ')}</strong></td>
+                    <td>${d.districts.join(', ')}</td>
+                    <td>${d.parcels}</td>
+                    <td>${d.acres}</td>
+                    <td>${d.units.toLocaleString()}</td>
+                    <td>${(d.units / d.acres).toFixed(1)}</td>
+                `;
+                tbody.appendChild(row);
+            });
+        }
+
+        function updateClimateTable() {
+            const tbody = document.getElementById('climateTableBody');
+            tbody.innerHTML = '';
+
+            const boroughs = ['manhattan', 'brooklyn', 'queens', 'bronx', 'staten_island'];
+            const strategies = {
+                'manhattan': 'Elevate infrastructure; stormwater management',
+                'brooklyn': 'Coastal resilience; green infrastructure',
+                'queens': 'Wetland restoration; retention systems',
+                'bronx': 'Stream daylighting; waterfront parks',
+                'staten_island': 'Living shorelines; floodplain restoration'
+            };
+
+            boroughs.forEach(b => {
+                const d = data.boroughs[b];
+                const parcelsAtRisk = Math.round(d.parcels * (d.flood / 100));
+                const acresAtRisk = Math.round(d.acres * (d.flood / 100));
+                const row = document.createElement('tr');
+                row.innerHTML = `
+                    <td><strong>${d.name}</strong></td>
+                    <td>${parcelsAtRisk}</td>
+                    <td>${d.flood}%</td>
+                    <td>${acresAtRisk}</td>
+                    <td>${strategies[b]}</td>
+                `;
+                tbody.appendChild(row);
+            });
+        }
+
+        function updateDevTable() {
+            const tbody = document.getElementById('devTableBody');
+            tbody.innerHTML = '';
+
+            const boroughs = ['manhattan', 'brooklyn', 'queens', 'bronx', 'staten_island'];
+            const densityBench = {
+                'manhattan': 'High density (20+ units/acre)',
+                'brooklyn': 'High density (18+ units/acre)',
+                'queens': 'Medium-high density (14+ units/acre)',
+                'bronx': 'Medium density (14 units/acre)',
+                'staten_island': 'Medium density (14 units/acre)'
+            };
+            const timeline = {
+                'manhattan': '18-24 months',
+                'brooklyn': '18-24 months',
+                'queens': '24-36 months',
+                'bronx': '24-36 months',
+                'staten_island': '30-42 months'
+            };
+
+            boroughs.forEach(b => {
+                const d = data.boroughs[b];
+                const unitsPerAcre = (d.units / d.acres).toFixed(1);
+                const row = document.createElement('tr');
+                row.innerHTML = `
+                    <td><strong>${d.name}</strong></td>
+                    <td>${d.units.toLocaleString()}</td>
+                    <td>${unitsPerAcre}</td>
+                    <td>${densityBench[b]}</td>
+                    <td>${timeline[b]}</td>
+                `;
+                tbody.appendChild(row);
+            });
+        }
+
+        function getChartColors() {
+            return {
+                primary: '#3b82f6',
+                secondary: '#1e40af',
+                accent: '#06b6d4',
+                success: '#22c55e',
+                warning: '#f97316',
+                danger: '#dc2626',
+                grid: '#334155'
+            };
+        }
+
+        function createParcelsUnitsChart() {
+            const ctx = document.getElementById('parcelsUnitsChart').getContext('2d');
+            const boroughs = ['Manhattan', 'Brooklyn', 'Queens', 'Bronx', 'Staten Island'];
+            const parcelCounts = [1893, 2804, 2847, 2156, 802];
+            const unitCounts = [4300, 8640, 7340, 6840, 2060];
+            const colors = getChartColors();
+
+            if (charts.parcelsUnits) charts.parcelsUnits.destroy();
+            charts.parcelsUnits = new Chart(ctx, {
+                type: 'bar',
+                data: {
+                    labels: boroughs,
+                    datasets: [
+                        {
+                            label: 'Parcels',
+                            data: parcelCounts,
+                            backgroundColor: colors.primary,
+                            borderColor: colors.secondary,
+                            borderWidth: 1
+                        },
+                        {
+                            label: 'Potential Units',
+                            data: unitCounts,
+                            backgroundColor: colors.accent,
+                            borderColor: '#0891b2',
+                            borderWidth: 1
+                        }
+                    ]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: true,
+                    plugins: {
+                        legend: { labels: { color: '#cbd5e1', font: { size: 11 } } }
+                    },
+                    scales: {
+                        x: { ticks: { color: '#cbd5e1', font: { size: 11 } }, grid: { color: colors.grid } },
+                        y: { ticks: { color: '#cbd5e1', font: { size: 11 } }, grid: { color: colors.grid } }
+                    }
+                }
+            });
+        }
+
+        function createFloodRiskChart() {
+            const ctx = document.getElementById('floodRiskChart').getContext('2d');
+            const boroughs = ['Manhattan', 'Brooklyn', 'Queens', 'Bronx', 'Staten Island'];
+            const floodPcts = [16, 18, 14, 12, 8];
+            const colors = getChartColors();
+
+            if (charts.floodRisk) charts.floodRisk.destroy();
+            charts.floodRisk = new Chart(ctx, {
+                type: 'bar',
+                data: {
+                    labels: boroughs,
+                    datasets: [{
+                        label: 'Flood Zone %',
+                        data: floodPcts,
+                        backgroundColor: floodPcts.map(pct => pct > 15 ? colors.danger : pct > 10 ? colors.warning : colors.success),
+                        borderColor: colors.grid,
+                        borderWidth: 1
+                    }]
+                },
+                options: {
+                    indexAxis: 'y',
+                    responsive: true,
+                    maintainAspectRatio: true,
+                    plugins: {
+                        legend: { labels: { color: '#cbd5e1', font: { size: 11 } } }
+                    },
+                    scales: {
+                        x: { ticks: { color: '#cbd5e1', font: { size: 11 } }, grid: { color: colors.grid }, max: 20 },
+                        y: { ticks: { color: '#cbd5e1', font: { size: 11 } }, grid: { color: colors.grid } }
+                    }
+                }
+            });
+        }
+
+        function createCommunityChart() {
+            const ctx = document.getElementById('communityChart').getContext('2d');
+            const areas = ['East Brooklyn', 'South Bronx', 'West Queens', 'Central Harlem', 'North Shore SI'];
+            const units = [1880, 1820, 960, 630, 310];
+            const colors = getChartColors();
+
+            if (charts.community) charts.community.destroy();
+            charts.community = new Chart(ctx, {
+                type: 'bar',
+                data: {
+                    labels: areas,
+                    datasets: [{
+                        label: 'Potential Units',
+                        data: units,
+                        backgroundColor: [colors.primary, colors.primary, colors.accent, colors.accent, colors.accent],
+                        borderColor: colors.secondary,
+                        borderWidth: 1
+                    }]
+                },
+                options: {
+                    indexAxis: 'y',
+                    responsive: true,
+                    maintainAspectRatio: true,
+                    plugins: {
+                        legend: { labels: { color: '#cbd5e1', font: { size: 11 } } }
+                    },
+                    scales: {
+                        x: { ticks: { color: '#cbd5e1', font: { size: 11 } }, grid: { color: colors.grid } },
+                        y: { ticks: { color: '#cbd5e1', font: { size: 11 } }, grid: { color: colors.grid } }
+                    }
+                }
+            });
+        }
+
+        function createAcquisitionChart() {
+            const ctx = document.getElementById('acquisitionChart').getContext('2d');
+            const sources = Object.keys(data.acquisition);
+            const values = Object.values(data.acquisition);
+            const colors = getChartColors();
+            const chartColors = ['#3b82f6', '#06b6d4', '#22c55e', '#f97316'];
+
+            if (charts.acquisition) charts.acquisition.destroy();
+            charts.acquisition = new Chart(ctx, {
+                type: 'doughnut',
+                data: {
+                    labels: sources,
+                    datasets: [{
+                        data: values,
+                        backgroundColor: chartColors,
+                        borderColor: '#1e293b',
+                        borderWidth: 2
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: true,
+                    plugins: {
+                        legend: { labels: { color: '#cbd5e1', font: { size: 11 } }, position: 'bottom' }
+                    }
+                }
+            });
+        }
+
+        function createCostChart() {
+            const ctx = document.getElementById('costChart').getContext('2d');
+            const models = Object.keys(data.development);
+            const costs = Object.values(data.development);
+            const colors = getChartColors();
+
+            if (charts.cost) charts.cost.destroy();
+            charts.cost = new Chart(ctx, {
+                type: 'bar',
+                data: {
+                    labels: models,
+                    datasets: [{
+                        label: 'Cost per Unit ($)',
+                        data: costs,
+                        backgroundColor: costs.map(c => c <= 200000 ? colors.success : c <= 300000 ? colors.accent : c <= 400000 ? colors.warning : colors.danger),
+                        borderColor: colors.grid,
+                        borderWidth: 1
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: true,
+                    plugins: {
+                        legend: { labels: { color: '#cbd5e1', font: { size: 11 } } }
+                    },
+                    scales: {
+                        y: {
+                            ticks: {
+                                color: '#cbd5e1',
+                                font: { size: 11 },
+                                callback: (value) => '$' + (value / 1000).toFixed(0) + 'k'
+                            },
+                            grid: { color: colors.grid }
+                        },
+                        x: { ticks: { color: '#cbd5e1', font: { size: 11 } }, grid: { color: colors.grid } }
+                    }
+                }
+            });
+        }
+
+        function createDistrictDetailChart() {
+            const ctx = document.getElementById('districtDetailChart').getContext('2d');
+            const districtOrder = ['South_Bronx', 'East_Brooklyn', 'West_Queens', 'Central_Harlem', 'North_Shore_SI'];
+            const areas = districtOrder.map(k => k.replace(/_/g, ' '));
+            const units = districtOrder.map(k => data.districts[k].units);
+            const colors = getChartColors();
+
+            if (charts.districtDetail) charts.districtDetail.destroy();
+            charts.districtDetail = new Chart(ctx, {
+                type: 'bar',
+                data: {
+                    labels: areas,
+                    datasets: [{
+                        label: 'Potential Units',
+                        data: units,
+                        backgroundColor: colors.primary,
+                        borderColor: colors.secondary,
+                        borderWidth: 1
+                    }]
+                },
+                options: {
+                    indexAxis: 'y',
+                    responsive: true,
+                    maintainAspectRatio: true,
+                    plugins: { legend: { labels: { color: '#cbd5e1', font: { size: 11 } } } },
+                    scales: {
+                        x: { ticks: { color: '#cbd5e1', font: { size: 11 } }, grid: { color: colors.grid } },
+                        y: { ticks: { color: '#cbd5e1', font: { size: 11 } }, grid: { color: colors.grid } }
+                    }
+                }
+            });
+        }
+
+        function createClimateDetailChart() {
+            const ctx = document.getElementById('climateDetailChart').getContext('2d');
+            const boroughs = ['Manhattan', 'Brooklyn', 'Queens', 'Bronx', 'Staten Island'];
+            const floodPcts = [16, 18, 14, 12, 8];
+            const colors = getChartColors();
+
+            if (charts.climateDetail) charts.climateDetail.destroy();
+            charts.climateDetail = new Chart(ctx, {
+                type: 'bar',
+                data: {
+                    labels: boroughs,
+                    datasets: [{
+                        label: 'Flood Zone %',
+                        data: floodPcts,
+                        backgroundColor: floodPcts.map(pct => pct > 15 ? colors.danger : pct > 10 ? colors.warning : colors.success),
+                        borderColor: colors.grid,
+                        borderWidth: 1
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: true,
+                    plugins: { legend: { labels: { color: '#cbd5e1', font: { size: 11 } } } },
+                    scales: {
+                        y: { ticks: { color: '#cbd5e1', font: { size: 11 } }, grid: { color: colors.grid }, max: 20 },
+                        x: { ticks: { color: '#cbd5e1', font: { size: 11 } }, grid: { color: colors.grid } }
+                    }
+                }
+            });
+        }
+
+        function createDevPotentialChart() {
+            const ctx = document.getElementById('devPotentialChart').getContext('2d');
+            const boroughs = ['Manhattan', 'Brooklyn', 'Queens', 'Bronx', 'Staten Island'];
+            const unitsPerAcre = [15.1, 14.1, 14.1, 14.1, 14.1];
+            const colors = getChartColors();
+
+            if (charts.devPotential) charts.devPotential.destroy();
+            charts.devPotential = new Chart(ctx, {
+                type: 'bar',
+                data: {
+                    labels: boroughs,
+                    datasets: [{
+                        label: 'Units per Acre',
+                        data: unitsPerAcre,
+                        backgroundColor: colors.accent,
+                        borderColor: '#0891b2',
+                        borderWidth: 1
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: true,
+                    plugins: { legend: { labels: { color: '#cbd5e1', font: { size: 11 } } } },
+                    scales: {
+                        y: { ticks: { color: '#cbd5e1', font: { size: 11 } }, grid: { color: colors.grid }, max: 20 },
+                        x: { ticks: { color: '#cbd5e1', font: { size: 11 } }, grid: { color: colors.grid } }
+                    }
+                }
+            });
+        }
+
+        function updateDashboard() {
+            currentBorough = document.getElementById('boroughSelect').value;
+            updateKPIs();
+        }
+
+        function switchView(view) {
+            currentView = view;
+            document.getElementById('inventory-view').classList.toggle('hidden', view !== 'inventory');
+            document.getElementById('districts-view').classList.toggle('hidden', view !== 'districts');
+            document.getElementById('climate-view').classList.toggle('hidden', view !== 'climate');
+            document.getElementById('development-view').classList.toggle('hidden', view !== 'development');
+
+            document.querySelectorAll('.view-toggle button').forEach((btn, idx) => {
+                btn.classList.toggle('active', false);
+            });
+            event.target.classList.add('active');
+
+            if (view === 'districts' && !charts.districtDetail) createDistrictDetailChart();
+            if (view === 'climate' && !charts.climateDetail) createClimateDetailChart();
+            if (view === 'development' && !charts.devPotential) createDevPotentialChart();
+        }
+
+        // Initialize
+        updateKPIs();
+        updateBoroughTable();
+        updateDistrictTable();
+        updateClimateTable();
+        updateDevTable();
+        createParcelsUnitsChart();
+        createFloodRiskChart();
+        createCommunityChart();
+        createAcquisitionChart();
+        createCostChart();
+    </script>
+</body>
+</html>

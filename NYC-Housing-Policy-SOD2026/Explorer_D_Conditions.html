@@ -1,0 +1,486 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Section D: Housing Conditions & 311 HPD Complaints — Interactive Explorer</title>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.min.js"></script>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body { background-color: #0f172a; color: #e2e8f0; font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; line-height: 1.6; padding: 20px; }
+        .container { max-width: 1400px; margin: 0 auto; }
+        header { margin-bottom: 30px; border-bottom: 2px solid #334155; padding-bottom: 20px; }
+        h1 { font-size: 2.2rem; font-weight: 700; margin-bottom: 8px; color: #f1f5f9; }
+        .subtitle { font-size: 1.1rem; color: #94a3b8; }
+        .filters { display: flex; gap: 20px; margin: 24px 0; flex-wrap: wrap; align-items: center; }
+        .filter-group { display: flex; flex-direction: column; gap: 6px; }
+        .filter-group label { font-size: 0.9rem; font-weight: 600; color: #cbd5e1; }
+        select { background-color: #1e293b; color: #e2e8f0; border: 1px solid #334155; padding: 10px 12px; border-radius: 6px; font-size: 1rem; cursor: pointer; min-width: 200px; }
+        select:hover { border-color: #64748b; }
+        select:focus { outline: none; border-color: #3b82f6; box-shadow: 0 0 0 3px rgba(59,130,246,0.1); }
+        .kpi-cards { display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 16px; margin: 24px 0; }
+        .card { background-color: #1e293b; border: 1px solid #334155; border-radius: 8px; padding: 18px; }
+        .kpi-label { font-size: 0.85rem; color: #94a3b8; margin-bottom: 6px; }
+        .kpi-value { font-size: 2rem; font-weight: 700; color: #f1f5f9; line-height: 1.2; }
+        .kpi-detail { font-size: 0.8rem; color: #64748b; margin-top: 4px; }
+        .kpi-change { font-size: 0.85rem; font-weight: 600; margin-top: 4px; }
+        .kpi-up { color: #ef4444; }
+        .kpi-down { color: #10b981; }
+        .section { background-color: #1e293b; border: 1px solid #334155; border-radius: 8px; padding: 24px; margin: 24px 0; }
+        .section-title { font-size: 1.2rem; font-weight: 600; margin-bottom: 16px; color: #f1f5f9; border-left: 4px solid #3b82f6; padding-left: 12px; }
+        .chart-container { position: relative; height: 380px; margin-top: 16px; }
+        .chart-container.tall { height: 420px; }
+        .chart-wrapper { position: relative; height: 100%; width: 100%; }
+        canvas { width: 100% !important; height: 100% !important; }
+        .grid-2col { display: grid; grid-template-columns: 1fr 1fr; gap: 24px; }
+        table { width: 100%; border-collapse: collapse; font-size: 0.9rem; }
+        th, td { padding: 10px 12px; text-align: left; border-bottom: 1px solid #334155; }
+        th { color: #94a3b8; font-weight: 600; font-size: 0.8rem; text-transform: uppercase; letter-spacing: 0.05em; }
+        td { color: #e2e8f0; }
+        .highlight-negative { color: #ef4444; font-weight: 600; }
+        .highlight-positive { color: #10b981; font-weight: 600; }
+        .heatmap-cell { text-align: center; font-weight: 600; font-size: 0.85rem; }
+        .heatmap-low { background: rgba(59,130,246,0.1); color: #93c5fd; }
+        .heatmap-medium { background: rgba(245,158,11,0.15); color: #fbbf24; }
+        .heatmap-high { background: rgba(239,68,68,0.15); color: #f87171; }
+        .heatmap-very-high { background: rgba(239,68,68,0.3); color: #fca5a5; }
+        .disclaimer { margin-top: 40px; padding: 16px; background: #1e293b; border: 1px solid #334155; border-radius: 8px; font-size: 0.8rem; color: #64748b; line-height: 1.5; }
+        .footer { text-align: center; margin-top: 20px; font-size: 0.8rem; color: #475569; }
+        @media (max-width: 768px) {
+            .grid-2col { grid-template-columns: 1fr; }
+            h1 { font-size: 1.6rem; }
+            .chart-container { height: 300px; }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <nav style="margin-bottom:8px"><a href="Explorer_Master_Dashboard.html" style="color:#94a3b8;text-decoration:none;font-size:.85rem;display:inline-flex;align-items:center;gap:4px;transition:color .2s" onmouseover="this.style.color='#3b82f6'" onmouseout="this.style.color='#94a3b8'">&larr; Back to Master Dashboard</a></nav>
+        <header>
+            <h1>Section D: Housing Conditions & 311 HPD Complaints</h1>
+            <p class="subtitle" id="headerSubtitle">HPD Service Requests · 10.06 Million Complaints · 2010–2026</p>
+        </header>
+
+        <div class="filters">
+            <div class="filter-group">
+                <label for="boroughFilter">Borough</label>
+                <select id="boroughFilter">
+                    <option value="all">All Boroughs (Citywide)</option>
+                    <option value="Manhattan">Manhattan</option>
+                    <option value="Brooklyn">Brooklyn</option>
+                    <option value="Queens">Queens</option>
+                    <option value="Bronx">Bronx</option>
+                    <option value="Staten Island">Staten Island</option>
+                </select>
+            </div>
+            <div class="filter-group">
+                <label for="periodFilter">Time Period</label>
+                <select id="periodFilter">
+                    <option value="all">Full Period (2011–2025)</option>
+                    <option value="pre">Pre-Pandemic (2011–2019)</option>
+                    <option value="pandemic">Pandemic (2020–2021)</option>
+                    <option value="post">Post-Pandemic (2022–2025)</option>
+                </select>
+            </div>
+        </div>
+
+        <!-- KPI Cards -->
+        <div class="kpi-cards" id="kpiCards">
+            <div class="card"><div class="kpi-label">Total Complaints</div><div class="kpi-value" id="kpiTotal">—</div><div class="kpi-detail" id="kpiTotalDetail"></div></div>
+            <div class="card"><div class="kpi-label">Peak Year</div><div class="kpi-value" id="kpiPeak">—</div><div class="kpi-detail" id="kpiPeakDetail"></div></div>
+            <div class="card"><div class="kpi-label">2025 vs 2019</div><div class="kpi-value" id="kpiVs2019">—</div><div class="kpi-change" id="kpiVs2019Change"></div></div>
+            <div class="card"><div class="kpi-label">Heat/Hot Water Share</div><div class="kpi-value" id="kpiHeat">—</div><div class="kpi-detail" id="kpiHeatDetail"></div></div>
+            <div class="card"><div class="kpi-label">Median Resolution</div><div class="kpi-value" id="kpiRes">—</div><div class="kpi-detail" id="kpiResDetail"></div></div>
+            <div class="card"><div class="kpi-label">Bronx + Brooklyn Share</div><div class="kpi-value" id="kpiBxBk">—</div><div class="kpi-detail" id="kpiBxBkDetail"></div></div>
+        </div>
+
+        <!-- Annual Volume -->
+        <div class="section">
+            <h2 class="section-title">Annual HPD Complaint Volume</h2>
+            <div class="chart-container"><div class="chart-wrapper"><canvas id="annualChart"></canvas></div></div>
+        </div>
+
+        <!-- Borough Trends -->
+        <div class="section">
+            <h2 class="section-title">Complaints by Borough (Annual Trend)</h2>
+            <div class="chart-container"><div class="chart-wrapper"><canvas id="boroughTrendChart"></canvas></div></div>
+        </div>
+
+        <!-- Complaint Types -->
+        <div class="section">
+            <h2 class="section-title">Top Complaint Types (Stacked)</h2>
+            <div class="chart-container tall"><div class="chart-wrapper"><canvas id="typeStackChart"></canvas></div></div>
+        </div>
+
+        <!-- Borough Distribution + Table -->
+        <div class="section">
+            <div class="grid-2col">
+                <div>
+                    <h2 class="section-title">Borough Distribution</h2>
+                    <div class="chart-container"><div class="chart-wrapper"><canvas id="boroughDonut"></canvas></div></div>
+                </div>
+                <div>
+                    <h2 class="section-title">Borough Ranking</h2>
+                    <div><table id="boroughTable"><thead><tr><th>Borough</th><th>Total</th><th>Share</th><th>Trend vs 2019</th></tr></thead><tbody></tbody></table></div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Seasonal Pattern -->
+        <div class="section">
+            <h2 class="section-title">Seasonal Pattern (Monthly Totals, All Years)</h2>
+            <div class="chart-container tall"><div class="chart-wrapper"><canvas id="seasonalChart"></canvas></div></div>
+        </div>
+
+        <!-- Heat Share + Resolution -->
+        <div class="section">
+            <div class="grid-2col">
+                <div>
+                    <h2 class="section-title">Heat Complaint % by Month</h2>
+                    <div class="chart-container"><div class="chart-wrapper"><canvas id="heatShareChart"></canvas></div></div>
+                </div>
+                <div>
+                    <h2 class="section-title">Median Resolution Days (Trend)</h2>
+                    <div class="chart-container"><div class="chart-wrapper"><canvas id="resolutionChart"></canvas></div></div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Growth Table -->
+        <div class="section">
+            <h2 class="section-title">Complaint Growth by Borough (2019 → 2025)</h2>
+            <div><table id="growthTable"></table></div>
+        </div>
+
+        <div class="disclaimer">
+            <strong>Data Source & Disclaimer:</strong> NYC Open Data 311 Service Requests (42.96M total rows), filtered to Agency=HPD (10.06M rows, 2010–2026). Complaint type names merged across the 2014 schema change (e.g., "HEATING" + "HEAT/HOT WATER"). 2010 borough data excluded (Borough field not populated). 2026 data is partial (Jan–Feb only) and excluded from trend analysis. Resolution times are median values for closed complaints within 365 days. This explorer is for informational purposes; consult NYC HPD for official statistics.
+        </div>
+        <div class="footer">Interactive Explorer — 311 HPD Housing Conditions Data 2011–2025 · Built from 10.06M complaint records</div>
+    </div>
+
+    <script>
+    // ── HPD 311 Complaint Data (2010–2026) ──
+    const HPD = {
+      annualTotal: {"2010":678791,"2011":665754,"2012":568216,"2013":581442,"2014":613464,"2015":631217,"2016":598748,"2017":569510,"2018":609927,"2019":466566,"2020":415213,"2021":569804,"2022":661853,"2023":686947,"2024":733927,"2025":774437},
+      byBorough: {
+        "Manhattan":{"2011":92870,"2012":108985,"2013":115205,"2014":124552,"2015":139105,"2016":128077,"2017":115633,"2018":125486,"2019":97790,"2020":86103,"2021":121039,"2022":140802,"2023":148056,"2024":154982,"2025":175667},
+        "Brooklyn":{"2011":191166,"2012":200565,"2013":200721,"2014":206801,"2015":202323,"2016":191145,"2017":187782,"2018":202001,"2019":146761,"2020":124581,"2021":170146,"2022":192930,"2023":198131,"2024":209334,"2025":217798},
+        "Queens":{"2011":64878,"2012":71777,"2013":70360,"2014":75635,"2015":78704,"2016":73304,"2017":71487,"2018":74847,"2019":60048,"2020":51889,"2021":69931,"2022":83062,"2023":86883,"2024":97625,"2025":97961},
+        "Bronx":{"2011":149893,"2012":171713,"2013":181201,"2014":194146,"2015":188057,"2016":191858,"2017":181557,"2018":193465,"2019":153118,"2020":145067,"2021":197910,"2022":232847,"2023":239711,"2024":259983,"2025":271112},
+        "Staten Island":{"2011":10221,"2012":9721,"2013":9779,"2014":10456,"2015":9664,"2016":9626,"2017":9214,"2018":10840,"2019":7610,"2020":7570,"2021":10768,"2022":12211,"2023":14129,"2024":12003,"2025":11897}
+      },
+      byType: {
+        "Heat/Hot Water":{"2011":190184,"2012":182974,"2013":202896,"2014":230364,"2015":225706,"2016":227959,"2017":213521,"2018":223835,"2019":212565,"2020":165016,"2021":199618,"2022":264390,"2023":231323,"2024":264750,"2025":315946},
+        "Unsanitary":{"2014":61789,"2015":82888,"2016":80469,"2017":79282,"2018":86621,"2019":63225,"2020":62111,"2021":90405,"2022":99248,"2023":116702,"2024":120854,"2025":117720},
+        "Plumbing":{"2011":113218,"2012":87561,"2013":86564,"2014":63221,"2015":55418,"2016":52592,"2017":49969,"2018":53359,"2019":36016,"2020":37161,"2021":51914,"2022":57550,"2023":62869,"2024":65904,"2025":69535},
+        "Paint/Plaster":{"2011":100692,"2012":77281,"2013":77952,"2014":75619,"2015":69698,"2016":60336,"2017":57076,"2018":59570,"2019":34302,"2020":33077,"2021":52376,"2022":51774,"2023":61394,"2024":64381,"2025":59234},
+        "Electric":{"2011":37802,"2012":35398,"2013":35101,"2014":30403,"2015":30133,"2016":28007,"2017":25920,"2018":27545,"2019":17166,"2020":17523,"2021":23553,"2022":26971,"2023":28402,"2024":28123,"2025":30590},
+        "Door/Window":{"2014":28925,"2015":40005,"2016":37524,"2017":35012,"2018":38107,"2019":24589,"2020":24451,"2021":36506,"2022":41730,"2023":45496,"2024":46362,"2025":45454},
+        "Water Leak":{"2014":28929,"2015":35570,"2016":31954,"2017":32181,"2018":39266,"2019":24694,"2020":21823,"2021":36555,"2022":35679,"2023":46211,"2024":45169,"2025":38392}
+      },
+      seasonal: {
+        total:{"1":1436235,"2":1065348,"3":875893,"4":673946,"5":569833,"6":539309,"7":577398,"8":588301,"9":585153,"10":887797,"11":1100432,"12":1161512},
+        heat:{"1":808848,"2":530390,"3":355917,"4":211187,"5":99221,"6":45833,"7":39768,"8":37569,"9":46479,"10":316010,"11":578158,"12":633880}
+      },
+      medianResDays: {"2011":6,"2012":6,"2013":6,"2014":6,"2015":6,"2016":5,"2017":5,"2018":5,"2019":4,"2020":4,"2021":5,"2022":4,"2023":4,"2024":3,"2025":3},
+      closedRate: {"2011":85.1,"2012":98.6,"2013":99.8,"2014":99.9,"2015":99.8,"2016":99.8,"2017":99.7,"2018":99.7,"2019":99.9,"2020":99.9,"2021":99.9,"2022":99.8,"2023":99.5,"2024":99.5,"2025":97.8}
+    };
+
+    // ── Config ──
+    const BOROUGHS = ['Manhattan','Brooklyn','Queens','Bronx','Staten Island'];
+    const BORO_COLORS = {Manhattan:'#10b981',Brooklyn:'#3b82f6',Queens:'#f59e0b',Bronx:'#ef4444','Staten Island':'#8b5cf6'};
+    const TYPE_NAMES = ['Heat/Hot Water','Unsanitary','Plumbing','Paint/Plaster','Electric','Door/Window','Water Leak'];
+    const TYPE_COLORS = {'Heat/Hot Water':'#ef4444','Unsanitary':'#8b5cf6','Plumbing':'#3b82f6','Paint/Plaster':'#f59e0b','Electric':'#ec4899','Door/Window':'#10b981','Water Leak':'#06b6d4'};
+    const MONTHS = ['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
+    const PERIODS = {all:[2011,2025],pre:[2011,2019],pandemic:[2020,2021],post:[2022,2025]};
+    const DIM = 'rgba(51,65,85,0.3)';
+
+    // Custom threshold plugin
+    const thresholdLinePlugin = {id:'thresholdLine',afterDraw(chart){
+      const ann = chart.options?.plugins?.thresholdLine; if(!ann) return;
+      if(!chart.scales?.y) return;
+      const yScale=chart.scales.y; const yPx=yScale.getPixelForValue(ann.value);
+      const c=chart.ctx; c.save(); c.beginPath(); c.setLineDash([6,4]);
+      c.strokeStyle=ann.color||'#94a3b8'; c.lineWidth=ann.lineWidth||1.5;
+      c.moveTo(chart.chartArea.left,yPx); c.lineTo(chart.chartArea.right,yPx);
+      c.stroke(); c.restore();
+    }};
+    Chart.register(thresholdLinePlugin);
+
+    let charts = {};
+
+    function getYears(period) {
+      const [lo,hi] = PERIODS[period];
+      const yrs = [];
+      for(let y=lo;y<=hi;y++) yrs.push(String(y));
+      return yrs;
+    }
+
+    function getVal(obj, yr) { return obj[yr] || 0; }
+    function sum(obj, years) { return years.reduce((s,y)=>s+getVal(obj,y),0); }
+    function fmt(n) { return n>=1e6?(n/1e6).toFixed(1)+'M':n>=1e3?(n/1e3).toFixed(0)+'K':String(n); }
+    function fmtFull(n) { return n.toLocaleString(); }
+    function pctChange(a,b) { return b===0?0:((a-b)/b*100); }
+
+    function destroyAll() { Object.values(charts).forEach(c=>{try{c.destroy();}catch(e){}}); charts={}; }
+
+    function getState() {
+      return {
+        borough: document.getElementById('boroughFilter').value,
+        period: document.getElementById('periodFilter').value
+      };
+    }
+
+    // ── Init ──
+    document.addEventListener('DOMContentLoaded', () => {
+      document.getElementById('boroughFilter').addEventListener('change', render);
+      document.getElementById('periodFilter').addEventListener('change', render);
+      render();
+    });
+
+    function render() {
+      const st = getState();
+      const years = getYears(st.period);
+      const isAll = st.borough === 'all';
+      destroyAll();
+      updateKPIs(st, years, isAll);
+      renderAnnualChart(st, years, isAll);
+      renderBoroughTrend(st, years, isAll);
+      renderTypeStack(st, years, isAll);
+      renderBoroughDonut(st, years, isAll);
+      renderBoroughTable(st, years, isAll);
+      renderSeasonalChart(st);
+      renderHeatShare(st);
+      renderResolutionChart(st, years);
+      renderGrowthTable(st);
+    }
+
+    // ── KPIs ──
+    function updateKPIs(st, years, isAll) {
+      // Total complaints in selected period/borough
+      let total;
+      if(isAll) {
+        total = sum(HPD.annualTotal, years);
+      } else {
+        total = sum(HPD.byBorough[st.borough], years);
+      }
+      document.getElementById('kpiTotal').textContent = fmt(total);
+      document.getElementById('kpiTotalDetail').textContent = fmtFull(total)+' complaints';
+
+      // Peak year
+      let peakVal=0, peakYr='';
+      years.forEach(y=>{
+        const v = isAll ? getVal(HPD.annualTotal,y) : getVal(HPD.byBorough[st.borough],y);
+        if(v>peakVal){peakVal=v;peakYr=y;}
+      });
+      document.getElementById('kpiPeak').textContent = peakYr;
+      document.getElementById('kpiPeakDetail').textContent = fmtFull(peakVal)+' complaints';
+
+      // 2025 vs 2019
+      const v2025 = isAll ? getVal(HPD.annualTotal,'2025') : getVal(HPD.byBorough[st.borough],'2025');
+      const v2019 = isAll ? getVal(HPD.annualTotal,'2019') : getVal(HPD.byBorough[st.borough],'2019');
+      const pct = pctChange(v2025, v2019);
+      document.getElementById('kpiVs2019').textContent = (pct>=0?'+':'')+pct.toFixed(1)+'%';
+      const changeEl = document.getElementById('kpiVs2019Change');
+      changeEl.textContent = fmtFull(v2025)+' vs '+fmtFull(v2019);
+      changeEl.className = 'kpi-change '+(pct>0?'kpi-up':'kpi-down');
+
+      // Heat share (2025)
+      const heatTotal = getVal(HPD.byType['Heat/Hot Water'],'2025');
+      const allTotal = getVal(HPD.annualTotal,'2025');
+      const heatPct = allTotal>0?(heatTotal/allTotal*100).toFixed(1):'0';
+      document.getElementById('kpiHeat').textContent = heatPct+'%';
+      document.getElementById('kpiHeatDetail').textContent = fmtFull(heatTotal)+' of '+fmtFull(allTotal)+' (2025)';
+
+      // Median resolution (latest year in period)
+      const latestYr = years[years.length-1];
+      const resDays = HPD.medianResDays[latestYr] || '—';
+      document.getElementById('kpiRes').textContent = resDays+' days';
+      document.getElementById('kpiResDetail').textContent = latestYr+' · improved from 6 days (2011)';
+
+      // Bronx + Brooklyn share (2025)
+      const bx25 = getVal(HPD.byBorough['Bronx'],'2025');
+      const bk25 = getVal(HPD.byBorough['Brooklyn'],'2025');
+      const bxbkPct = allTotal>0?((bx25+bk25)/allTotal*100).toFixed(1):'0';
+      document.getElementById('kpiBxBk').textContent = bxbkPct+'%';
+      document.getElementById('kpiBxBkDetail').textContent = fmtFull(bx25+bk25)+' of '+fmtFull(allTotal)+' (2025)';
+    }
+
+    // ── Chart defaults ──
+    const gridColor = '#334155';
+    const tickColor = '#94a3b8';
+    const legendColor = '#e2e8f0';
+    function chartOpts(extra){return Object.assign({responsive:true,maintainAspectRatio:false,plugins:{legend:{labels:{color:legendColor,font:{size:11}}}}},extra);}
+    function scaleXY(yOpts,xOpts){return{scales:Object.assign({y:Object.assign({ticks:{color:tickColor},grid:{color:gridColor}},yOpts||{}),x:Object.assign({ticks:{color:tickColor},grid:{color:gridColor}},xOpts||{})})}}
+
+    // ── 1. Annual Volume ──
+    function renderAnnualChart(st, years, isAll) {
+      const ctx = document.getElementById('annualChart').getContext('2d');
+      const vals = years.map(y=> isAll ? getVal(HPD.annualTotal,y) : getVal(HPD.byBorough[st.borough],y));
+      const bgColors = years.map(y=> y==='2020'?'#475569':'#60a5fa');
+      // Average line value
+      const avg = vals.reduce((a,b)=>a+b,0)/vals.length;
+
+      charts.annual = new Chart(ctx, {
+        type:'bar',
+        data:{labels:years,datasets:[{label:'HPD Complaints',data:vals,backgroundColor:bgColors,borderColor:bgColors,borderWidth:0}]},
+        options:{...chartOpts(),...scaleXY({ticks:{color:tickColor,callback:v=>fmt(v)}}),plugins:{legend:{labels:{color:legendColor}},thresholdLine:{value:avg,color:'#94a3b8',lineWidth:1.5}}}
+      });
+    }
+
+    // ── 2. Borough Trends ──
+    function renderBoroughTrend(st, years, isAll) {
+      const ctx = document.getElementById('boroughTrendChart').getContext('2d');
+      const datasets = BOROUGHS.map(b=>{
+        const isSel = !isAll && b===st.borough;
+        const isDim = !isAll && b!==st.borough;
+        return {
+          label:b,
+          data:years.map(y=>getVal(HPD.byBorough[b],y)),
+          borderColor: isDim ? DIM : BORO_COLORS[b],
+          backgroundColor:'transparent',
+          borderWidth: isSel?3.5:isDim?1:2,
+          borderDash: isDim?[4,3]:[],
+          pointRadius: isSel?5:isDim?0:3,
+          pointBackgroundColor: BORO_COLORS[b],
+          tension:0.3
+        };
+      });
+      charts.boroTrend = new Chart(ctx, {
+        type:'line',
+        data:{labels:years,datasets},
+        options:{...chartOpts(),...scaleXY({ticks:{color:tickColor,callback:v=>fmt(v)}})}
+      });
+    }
+
+    // ── 3. Complaint Type Stacked ──
+    function renderTypeStack(st, years, isAll) {
+      const ctx = document.getElementById('typeStackChart').getContext('2d');
+      // For borough filter, we don't have per-borough-per-type data,
+      // so show citywide types (note this in the chart if borough selected)
+      const datasets = TYPE_NAMES.map(t=>({
+        label:t,
+        data:years.map(y=>getVal(HPD.byType[t],y)),
+        backgroundColor:TYPE_COLORS[t],
+        borderColor:TYPE_COLORS[t],
+        borderWidth:0
+      }));
+      charts.typeStack = new Chart(ctx, {
+        type:'bar',
+        data:{labels:years,datasets},
+        options:{...chartOpts(),...scaleXY({stacked:true,ticks:{color:tickColor,callback:v=>fmt(v)}},{stacked:true})}
+      });
+    }
+
+    // ── 4. Borough Donut ──
+    function renderBoroughDonut(st, years, isAll) {
+      const ctx = document.getElementById('boroughDonut').getContext('2d');
+      const totals = BOROUGHS.map(b=>sum(HPD.byBorough[b],years));
+      const bgColors = isAll
+        ? BOROUGHS.map(b=>BORO_COLORS[b])
+        : BOROUGHS.map(b=>b===st.borough?BORO_COLORS[b]:DIM);
+      charts.donut = new Chart(ctx, {
+        type:'doughnut',
+        data:{labels:BOROUGHS,datasets:[{data:totals,backgroundColor:bgColors,borderColor:'#0f172a',borderWidth:2}]},
+        options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{labels:{color:legendColor,font:{size:12},padding:15}}}}
+      });
+    }
+
+    // ── 5. Borough Table ──
+    function renderBoroughTable(st, years, isAll) {
+      const tbody = document.querySelector('#boroughTable tbody');
+      const totals = BOROUGHS.map(b=>({name:b,total:sum(HPD.byBorough[b],years),v2019:getVal(HPD.byBorough[b],'2019'),v2025:getVal(HPD.byBorough[b],'2025')}));
+      const grand = totals.reduce((s,i)=>s+i.total,0);
+      totals.sort((a,b)=>b.total-a.total);
+      tbody.innerHTML = totals.map(item=>{
+        const share = ((item.total/grand)*100).toFixed(1);
+        const trend = item.v2019>0?pctChange(item.v2025,item.v2019):0;
+        const trendStr = (trend>=0?'+':'')+trend.toFixed(1)+'%';
+        const trendCls = trend>0?'highlight-negative':'highlight-positive';
+        const isSel = !isAll && item.name===st.borough;
+        const isDim = !isAll && item.name!==st.borough;
+        const style = isDim?'opacity:0.35;':isSel?'background:rgba(59,130,246,0.12);':'';
+        return `<tr style="${style}"><td>${item.name}</td><td>${fmtFull(item.total)}</td><td>${share}%</td><td class="${trendCls}">${trendStr}</td></tr>`;
+      }).join('');
+    }
+
+    // ── 6. Seasonal ──
+    function renderSeasonalChart(st) {
+      const ctx = document.getElementById('seasonalChart').getContext('2d');
+      const totalVals = MONTHS.map((_,i)=>HPD.seasonal.total[String(i+1)]);
+      const heatVals = MONTHS.map((_,i)=>HPD.seasonal.heat[String(i+1)]);
+      const otherVals = totalVals.map((t,i)=>t-heatVals[i]);
+      charts.seasonal = new Chart(ctx, {
+        type:'bar',
+        data:{labels:MONTHS,datasets:[
+          {label:'Heat/Hot Water',data:heatVals,backgroundColor:'#ef4444',borderWidth:0},
+          {label:'Other Complaints',data:otherVals,backgroundColor:'#3b82f6',borderWidth:0}
+        ]},
+        options:{...chartOpts(),...scaleXY({stacked:true,ticks:{color:tickColor,callback:v=>fmt(v)}},{stacked:true})}
+      });
+    }
+
+    // ── 7. Heat Share ──
+    function renderHeatShare(st) {
+      const ctx = document.getElementById('heatShareChart').getContext('2d');
+      const vals = MONTHS.map((_,i)=>{
+        const t=HPD.seasonal.total[String(i+1)];
+        const h=HPD.seasonal.heat[String(i+1)];
+        return t>0?(h/t*100).toFixed(1):0;
+      });
+      charts.heatShare = new Chart(ctx, {
+        type:'line',
+        data:{labels:MONTHS,datasets:[{
+          label:'Heat/Hot Water %',data:vals,borderColor:'#f59e0b',
+          backgroundColor:'rgba(245,158,11,0.1)',borderWidth:3,fill:true,tension:0.3,
+          pointBackgroundColor:'#f59e0b',pointBorderColor:'#0f172a',pointBorderWidth:2,pointRadius:5
+        }]},
+        options:{...chartOpts(),...scaleXY({min:0,max:65,ticks:{color:tickColor,callback:v=>v+'%'}}),plugins:{legend:{labels:{color:legendColor}},thresholdLine:{value:30,color:'#ef4444',lineWidth:1}}}
+      });
+    }
+
+    // ── 8. Resolution ──
+    function renderResolutionChart(st, years) {
+      const ctx = document.getElementById('resolutionChart').getContext('2d');
+      const resYears = years.filter(y=>HPD.medianResDays[y]!==undefined);
+      const vals = resYears.map(y=>HPD.medianResDays[y]);
+      charts.resolution = new Chart(ctx, {
+        type:'line',
+        data:{labels:resYears,datasets:[{
+          label:'Median Resolution Days',data:vals,borderColor:'#10b981',
+          backgroundColor:'rgba(16,185,129,0.1)',borderWidth:3,fill:true,tension:0.3,
+          pointBackgroundColor:'#10b981',pointBorderColor:'#0f172a',pointBorderWidth:2,pointRadius:5
+        }]},
+        options:{...chartOpts(),...scaleXY({min:0,max:8})}
+      });
+    }
+
+    // ── 9. Growth Table ──
+    function renderGrowthTable(st) {
+      const table = document.getElementById('growthTable');
+      let html = '<thead><tr><th>Borough</th><th>2019</th><th>2020 (Pandemic)</th><th>2025</th><th>2019→2025</th><th>CAGR</th></tr></thead><tbody>';
+      const isAll = st.borough === 'all';
+      BOROUGHS.forEach(b=>{
+        const v19 = getVal(HPD.byBorough[b],'2019');
+        const v20 = getVal(HPD.byBorough[b],'2020');
+        const v25 = getVal(HPD.byBorough[b],'2025');
+        const chg = v19>0?pctChange(v25,v19):0;
+        const cagr = v19>0?((Math.pow(v25/v19,1/6)-1)*100):0;
+        const chgStr = (chg>=0?'+':'')+chg.toFixed(1)+'%';
+        const cagrStr = (cagr>=0?'+':'')+cagr.toFixed(1)+'%';
+        const cls = chg>0?'highlight-negative':'highlight-positive';
+        const isSel = !isAll && b===st.borough;
+        const isDim = !isAll && b!==st.borough;
+        const style = isDim?'opacity:0.35;':isSel?'background:rgba(59,130,246,0.12);':'';
+        html += `<tr style="${style}"><td><strong>${b}</strong></td><td>${fmtFull(v19)}</td><td>${fmtFull(v20)}</td><td>${fmtFull(v25)}</td><td class="${cls}">${chgStr}</td><td class="${cls}">${cagrStr}</td></tr>`;
+      });
+      // Citywide row
+      const c19=getVal(HPD.annualTotal,'2019'),c20=getVal(HPD.annualTotal,'2020'),c25=getVal(HPD.annualTotal,'2025');
+      const cChg=pctChange(c25,c19),cCagr=(Math.pow(c25/c19,1/6)-1)*100;
+      html += `<tr style="border-top:2px solid #475569;font-weight:600"><td>NYC Total</td><td>${fmtFull(c19)}</td><td>${fmtFull(c20)}</td><td>${fmtFull(c25)}</td><td class="highlight-negative">+${cChg.toFixed(1)}%</td><td class="highlight-negative">+${cCagr.toFixed(1)}%</td></tr>`;
+      html += '</tbody>';
+      table.innerHTML = html;
+    }
+    </script>
+</body>
+</html>

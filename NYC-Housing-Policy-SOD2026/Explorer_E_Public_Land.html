@@ -1,0 +1,349 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1.0">
+<title>Public Land Inventory — Interactive Explorer</title>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.min.js"></script>
+<style>
+:root{--bg:#0f172a;--card:#1e293b;--border:#334155;--text:#e2e8f0;--muted:#94a3b8;--accent:#3b82f6;--danger:#ef4444;--warn:#f59e0b;--ok:#22c55e;--purple:#a78bfa}
+*{margin:0;padding:0;box-sizing:border-box}
+body{font-family:'Segoe UI',system-ui,-apple-system,sans-serif;background:var(--bg);color:var(--text);line-height:1.6;padding:24px}
+h1{font-size:1.7rem;margin-bottom:4px}
+.subtitle{color:var(--muted);font-size:.95rem;margin-bottom:20px}
+.controls{display:flex;gap:12px;flex-wrap:wrap;margin-bottom:20px}
+.controls select{background:var(--card);color:var(--text);border:1px solid var(--border);border-radius:6px;padding:8px 14px;font-size:.9rem;cursor:pointer}
+.controls select:hover{border-color:var(--accent)}
+.kpi-row{display:grid;grid-template-columns:repeat(auto-fit,minmax(165px,1fr));gap:14px;margin-bottom:24px}
+.kpi{background:var(--card);border:1px solid var(--border);border-radius:10px;padding:16px;text-align:center}
+.kpi .val{font-size:1.7rem;font-weight:700;color:var(--accent)}
+.kpi .val.danger{color:var(--danger)}
+.kpi .val.warn{color:var(--warn)}
+.kpi .val.ok{color:var(--ok)}
+.kpi .val.purple{color:var(--purple)}
+.kpi .label{color:var(--muted);font-size:.78rem;margin-top:4px}
+.grid{display:grid;grid-template-columns:1fr 1fr;gap:20px;margin-bottom:24px}
+.chart-card{background:var(--card);border:1px solid var(--border);border-radius:10px;padding:20px}
+.chart-card h3{font-size:1rem;margin-bottom:12px;color:var(--text)}
+.chart-wrap{position:relative;height:380px}
+.chart-wrap.short{height:300px}
+.full-width{grid-column:1/-1}
+table{width:100%;border-collapse:collapse;font-size:.85rem}
+th,td{padding:8px 10px;text-align:left;border-bottom:1px solid var(--border)}
+th{color:var(--muted);font-weight:600;font-size:.78rem;text-transform:uppercase}
+.badge{display:inline-block;padding:2px 8px;border-radius:4px;font-size:.75rem;font-weight:600}
+.badge.highest{background:#7c2d12;color:#fed7aa}
+.badge.high{background:#991b1b;color:#fecaca}
+.badge.mod{background:#065f46;color:#a7f3d0}
+.badge.low{background:#1e3a5f;color:#93c5fd}
+.note{color:var(--muted);font-size:.78rem;font-style:italic;margin-top:8px}
+@media(max-width:900px){.grid{grid-template-columns:1fr}}
+</style>
+</head>
+<body>
+
+<h1>Public Land Inventory — "Public Land for Public Good"</h1>
+<p class="subtitle">PLUTO Feb 2026 &mdash; 13,015 city-owned parcels &mdash; 6,632 developable (non-park, residentially zoned) &mdash; 453,910 potential units</p>
+<p style="margin-top:8px"><a href="Explorer_Master_Dashboard.html" style="color:#3b82f6;text-decoration:none;font-size:.9rem">&#8592; Back to Master Dashboard</a></p>
+
+<div class="controls">
+  <select id="boroFilter" onchange="render()">
+    <option value="all">All Boroughs</option>
+    <option value="Manhattan">Manhattan</option>
+    <option value="Brooklyn">Brooklyn</option>
+    <option value="Queens">Queens</option>
+    <option value="Bronx">Bronx</option>
+    <option value="Staten Island">Staten Island</option>
+  </select>
+  <select id="viewFilter" onchange="render()">
+    <option value="dev">Developable Only</option>
+    <option value="all">All City-Owned</option>
+  </select>
+</div>
+
+<div class="kpi-row" id="kpis"></div>
+
+<div class="grid">
+  <div class="chart-card">
+    <h3>Potential Units by Borough (Unused FAR)</h3>
+    <div class="chart-wrap short"><canvas id="unitsChart"></canvas></div>
+  </div>
+  <div class="chart-card">
+    <h3>Borough Share of Developable Parcels</h3>
+    <div class="chart-wrap short"><canvas id="shareDonut"></canvas></div>
+  </div>
+
+  <div class="chart-card">
+    <h3>Acreage vs. Potential Units by Borough</h3>
+    <div class="chart-wrap short"><canvas id="scatterChart"></canvas></div>
+  </div>
+  <div class="chart-card">
+    <h3>Flood Zone Exposure by Borough</h3>
+    <div class="chart-wrap short"><canvas id="floodChart"></canvas></div>
+  </div>
+
+  <div class="chart-card full-width">
+    <h3>Top 20 Community Districts by Development Potential</h3>
+    <div class="chart-wrap"><canvas id="cdChart"></canvas></div>
+  </div>
+
+  <div class="chart-card full-width">
+    <h3>Borough Summary</h3>
+    <div style="overflow-x:auto"><table id="boroTable"></table></div>
+  </div>
+
+  <div class="chart-card full-width">
+    <h3>Top 20 Individual Development Opportunities</h3>
+    <div style="overflow-x:auto;max-height:500px"><table id="oppsTable"></table></div>
+    <p class="note">Ranked by unused residential FAR capacity. Parks excluded. Potential units = unused FAR sqft / 800.</p>
+  </div>
+</div>
+
+<p class="note" style="margin-top:12px">Data source: NYC DCP PLUTO (Feb 2026), 858,284 tax lots. City-owned = ownertype='C'. Developable = non-park, residfar > 0. FEMA FIRM 2015 flood zones. Analysis date: March 24, 2026.</p>
+
+<script>
+const BOROS = ['Manhattan','Brooklyn','Queens','Bronx','Staten Island'];
+const BORO_COLORS = {Manhattan:'#f59e0b',Brooklyn:'#3b82f6',Queens:'#22c55e',Bronx:'#ef4444','Staten Island':'#a78bfa'};
+
+const ALL = {
+  Manhattan:{parcels:1358,acres:3662,res_zoned:1013,flood:382,units:14677},
+  Brooklyn:{parcels:3114,acres:6778,res_zoned:2135,flood:601,units:1844},
+  Queens:{parcels:3202,acres:14551,res_zoned:2279,flood:1346,units:1113},
+  Bronx:{parcels:1758,acres:8717,res_zoned:1186,flood:393,units:2043},
+  'Staten Island':{parcels:3583,acres:10338,res_zoned:2395,flood:1618,units:130}
+};
+
+const DEV = {
+  Manhattan:{parcels:736,acres:703,potential:144161,vacant:250,flood:151,existing:14677},
+  Brooklyn:{parcels:1549,acres:1664,potential:98613,vacant:937,flood:192,existing:1664},
+  Queens:{parcels:1775,acres:1204,potential:61941,vacant:1373,flood:662,existing:1101},
+  Bronx:{parcels:827,acres:1389,potential:99358,vacant:467,flood:114,existing:1940},
+  'Staten Island':{parcels:1745,acres:1314,potential:49838,vacant:1583,flood:1057,existing:119}
+};
+
+const CD = [
+  {boro:'Manhattan',cd:'101',parcels:57,acres:100.7,units:43886,vacant:14,flood:30},
+  {boro:'Bronx',cd:'210',parcels:129,acres:552.8,units:37585,vacant:106,flood:74},
+  {boro:'Brooklyn',cd:'318',parcels:85,acres:612.7,units:24868,vacant:53,flood:17},
+  {boro:'Queens',cd:'414',parcels:489,acres:334.8,units:22290,vacant:462,flood:464},
+  {boro:'Staten Island',cd:'502',parcels:700,acres:590.1,units:20408,vacant:655,flood:563},
+  {boro:'Manhattan',cd:'103',parcels:93,acres:77.0,units:19972,vacant:28,flood:20},
+  {boro:'Staten Island',cd:'503',parcels:783,acres:509.6,units:18452,vacant:733,flood:467},
+  {boro:'Manhattan',cd:'108',parcels:51,acres:148.9,units:18406,vacant:16,flood:20},
+  {boro:'Manhattan',cd:'111',parcels:118,acres:87.1,units:12502,vacant:64,flood:44},
+  {boro:'Bronx',cd:'204',parcels:82,acres:84.2,units:12137,vacant:28,flood:15},
+  {boro:'Manhattan',cd:'112',parcels:75,acres:67.3,units:11882,vacant:18,flood:6},
+  {boro:'Bronx',cd:'208',parcels:48,acres:231.2,units:11326,vacant:33,flood:12},
+  {boro:'Staten Island',cd:'501',parcels:261,acres:214.0,units:10973,vacant:194,flood:26},
+  {boro:'Manhattan',cd:'106',parcels:42,acres:50.2,units:10768,vacant:18,flood:21},
+  {boro:'Brooklyn',cd:'315',parcels:82,acres:164.0,units:10282,vacant:51,flood:48},
+  {boro:'Bronx',cd:'207',parcels:47,acres:82.7,units:8918,vacant:24,flood:0},
+  {boro:'Brooklyn',cd:'302',parcels:111,acres:76.4,units:8548,vacant:48,flood:2},
+  {boro:'Queens',cd:'402',parcels:91,acres:40.5,units:8485,vacant:68,flood:13},
+  {boro:'Brooklyn',cd:'301',parcels:97,acres:73.1,units:7851,vacant:55,flood:20},
+  {boro:'Manhattan',cd:'110',parcels:111,acres:59.7,units:7046,vacant:53,flood:8}
+];
+
+const OPPS = [
+  {boro:'Brooklyn',addr:'Flatbush Avenue',zone:'C3',lot:23108842,far:0.8,unused:17331632,units:21664,flood:true,owner:'NYC Dept of Small Business Services'},
+  {boro:'Bronx',addr:'2131 Hart Street',zone:'R6',lot:4855000,far:2.4,unused:11627242,units:14534,flood:true,owner:'NYC DCAS'},
+  {boro:'Manhattan',addr:'Main Street',zone:'R7-2',lot:4227757,far:3.4,unused:9756783,units:12195,flood:true,owner:'Riverwalk 8 Affordable, L.P.'},
+  {boro:'Manhattan',addr:'South Street',zone:'C2-8',lot:924750,far:10.0,unused:9247500,units:11559,flood:true,owner:'NYC Dept of Small Business Services'},
+  {boro:'Bronx',addr:'750 Baychester Ave',zone:'R6',lot:2720000,far:2.4,unused:5477100,units:6846,flood:false,owner:'NYC Dept of Education'},
+  {boro:'Staten Island',addr:'50 Brielle Avenue',zone:'R3-2',lot:8259785,far:0.8,unused:5456239,units:6820,flood:true,owner:'NYC Health & Hospital/Seaview'},
+  {boro:'Manhattan',addr:'1 Pier 6',zone:'C4-6',lot:510025,far:10.0,unused:5075904,units:6344,flood:true,owner:'NYC Dept of Small Business Services'},
+  {boro:'Manhattan',addr:'12 Avenue',zone:'R8',lot:777914,far:6.0,unused:4683042,units:5853,flood:true,owner:'NYC Dept of Small Business Services'},
+  {boro:'Bronx',addr:'West 261 Street',zone:'R1-1',lot:5909787,far:0.8,unused:4432340,units:5540,flood:true,owner:'NYC Dept of Small Business Services'},
+  {boro:'Manhattan',addr:'Pier 19',zone:'C4-6',lot:404450,far:10.0,unused:4014419,units:5018,flood:true,owner:'NYC Dept of Small Business Services'},
+  {boro:'Queens',addr:'Rockaway Beach Blvd',zone:'R6',lot:1322664,far:2.4,unused:3214074,units:4017,flood:true,owner:'NYC HPD'},
+  {boro:'Manhattan',addr:'292 Greenwich St',zone:'C6-4',lot:318603,far:10.0,unused:3119210,units:3899,flood:true,owner:'NYC Dept of Education'},
+  {boro:'Brooklyn',addr:'Sheepshead Bay Road',zone:'R5',lot:1955000,far:1.5,unused:2932500,units:3665,flood:true,owner:'NYC Dept of Small Business Services'},
+  {boro:'Manhattan',addr:'Pier 9',zone:'C4-6',lot:320800,far:10.0,unused:2887200,units:3609,flood:true,owner:'NYC Dept of Small Business Services'},
+  {boro:'Staten Island',addr:'Murray Hulbert Ave',zone:'C4-2A',lot:859800,far:3.0,unused:2579400,units:3224,flood:true,owner:'NYC Dept of Small Business Services'},
+  {boro:'Manhattan',addr:'462 1 Avenue',zone:'R8',lot:753175,far:6.0,unused:2409672,units:3012,flood:true,owner:'NYC Health and Hospitals Corp'},
+  {boro:'Bronx',addr:'100 W Mosholu Pkwy S',zone:'R6',lot:1278242,far:2.4,unused:2398775,units:2998,flood:false,owner:'NYC Dept of Education'},
+  {boro:'Brooklyn',addr:'Shore Boulevard',zone:'R5',lot:1357188,far:1.5,unused:2035782,units:2544,flood:true,owner:'NYC Dept of Small Business Services'},
+  {boro:'Bronx',addr:'730 Concourse Village',zone:'R8',lot:386000,far:6.0,unused:2031835,units:2539,flood:false,owner:'NYS Dept of Transportation'},
+  {boro:'Bronx',addr:'3350 Johnson Avenue',zone:'R6',lot:937729,far:2.4,unused:2026797,units:2533,flood:true,owner:'NYC Dept of Education'}
+];
+
+const fmt = n => n>=1e6?(n/1e6).toFixed(1)+'M':n>=1e3?Math.round(n/1e3).toLocaleString()+'K':n.toLocaleString();
+const fmtN = n => n.toLocaleString();
+let charts = {};
+
+function destroyAll(){Object.values(charts).forEach(c=>{try{c.destroy()}catch(e){}});charts={};}
+
+function getData(boro){
+  const view = document.getElementById('viewFilter').value;
+  const src = view === 'all' ? ALL : DEV;
+  if(boro==='all'){
+    const tot = {};
+    BOROS.forEach(b=>{
+      const d = src[b]||{};
+      Object.keys(d).forEach(k=>{tot[k]=(tot[k]||0)+d[k];});
+    });
+    return tot;
+  }
+  return src[boro]||{};
+}
+
+function updateKPIs(){
+  const boro = document.getElementById('boroFilter').value;
+  const d = getData(boro);
+  const view = document.getElementById('viewFilter').value;
+  const label = boro==='all'?'All NYC':boro;
+  let html;
+  if(view==='dev'){
+    const floodPct = d.parcels>0?Math.round(d.flood/d.parcels*100):0;
+    html = `
+      <div class="kpi"><div class="val ok">${fmtN(d.parcels)}</div><div class="label">Developable Parcels</div></div>
+      <div class="kpi"><div class="val">${fmtN(Math.round(d.acres))}</div><div class="label">Acres</div></div>
+      <div class="kpi"><div class="val purple">${fmt(Math.round(d.potential||0))}</div><div class="label">Potential Units (FAR)</div></div>
+      <div class="kpi"><div class="val warn">${fmtN(d.vacant||0)}</div><div class="label">Vacant Lots</div></div>
+      <div class="kpi"><div class="val danger">${floodPct}%</div><div class="label">In Flood Zone</div></div>
+      <div class="kpi"><div class="val">${fmtN(d.existing||0)}</div><div class="label">Existing Units</div></div>`;
+  } else {
+    html = `
+      <div class="kpi"><div class="val ok">${fmtN(d.parcels)}</div><div class="label">City-Owned Parcels</div></div>
+      <div class="kpi"><div class="val">${fmtN(Math.round(d.acres))}</div><div class="label">Total Acres</div></div>
+      <div class="kpi"><div class="val purple">${fmtN(d.res_zoned||0)}</div><div class="label">Residentially Zoned</div></div>
+      <div class="kpi"><div class="val danger">${fmtN(d.flood||0)}</div><div class="label">In Flood Zone</div></div>
+      <div class="kpi"><div class="val">${fmtN(d.units||0)}</div><div class="label">Existing Res Units</div></div>`;
+  }
+  document.getElementById('kpis').innerHTML = html;
+}
+
+function renderUnitsChart(){
+  const boro = document.getElementById('boroFilter').value;
+  const view = document.getElementById('viewFilter').value;
+  const src = view==='all'?ALL:DEV;
+  const metric = view==='all'?'units':'potential';
+  const label = view==='all'?'Existing Res Units':'Potential Units (FAR)';
+  const boros = boro==='all'?BOROS:[boro];
+  const vals = boros.map(b=>(src[b]||{})[metric]||0);
+  const colors = boros.map(b=>boro==='all'?BORO_COLORS[b]:BORO_COLORS[b]);
+  const ctx = document.getElementById('unitsChart').getContext('2d');
+  charts.units = new Chart(ctx,{
+    type:'bar',data:{labels:boros,datasets:[{label,data:vals,backgroundColor:colors,borderRadius:4}]},
+    options:{responsive:true,maintainAspectRatio:false,indexAxis:'y',
+      plugins:{legend:{display:false}},
+      scales:{x:{ticks:{color:'#94a3b8',callback:v=>fmt(v)},grid:{color:'rgba(51,65,85,0.3)'}},
+              y:{ticks:{color:'#e2e8f0',font:{size:12}},grid:{display:false}}}}
+  });
+}
+
+function renderShareDonut(){
+  const view = document.getElementById('viewFilter').value;
+  const src = view==='all'?ALL:DEV;
+  const metric = view==='all'?'parcels':'parcels';
+  const vals = BOROS.map(b=>(src[b]||{})[metric]||0);
+  const colors = BOROS.map(b=>BORO_COLORS[b]);
+  const boro = document.getElementById('boroFilter').value;
+  const ctx = document.getElementById('shareDonut').getContext('2d');
+  charts.share = new Chart(ctx,{
+    type:'doughnut',
+    data:{labels:BOROS,datasets:[{data:vals,backgroundColor:boro==='all'?colors:BOROS.map(b=>b===boro?BORO_COLORS[b]:'#334155')}]},
+    options:{responsive:true,maintainAspectRatio:false,
+      plugins:{legend:{position:'right',labels:{color:'#e2e8f0',font:{size:11},padding:10}}}}
+  });
+}
+
+function renderScatterChart(){
+  const view = document.getElementById('viewFilter').value;
+  const src = view==='all'?ALL:DEV;
+  const metric = view==='all'?'units':'potential';
+  const datasets = BOROS.map(b=>{
+    const d = src[b]||{};
+    return {label:b,data:[{x:d.acres||0,y:(d[metric]||0)}],
+      backgroundColor:BORO_COLORS[b],pointRadius:Math.max(8,Math.sqrt((d[metric]||0)/500)),
+      pointHoverRadius:12};
+  });
+  const ctx = document.getElementById('scatterChart').getContext('2d');
+  charts.scatter = new Chart(ctx,{
+    type:'scatter',data:{datasets},
+    options:{responsive:true,maintainAspectRatio:false,
+      plugins:{legend:{labels:{color:'#e2e8f0',font:{size:10}}}},
+      scales:{x:{title:{display:true,text:'Acres',color:'#94a3b8'},ticks:{color:'#94a3b8'},grid:{color:'rgba(51,65,85,0.3)'}},
+              y:{title:{display:true,text:view==='all'?'Existing Units':'Potential Units',color:'#94a3b8'},ticks:{color:'#94a3b8',callback:v=>fmt(v)},grid:{color:'rgba(51,65,85,0.3)'}}}}
+  });
+}
+
+function renderFloodChart(){
+  const view = document.getElementById('viewFilter').value;
+  const src = view==='all'?ALL:DEV;
+  const boros = BOROS;
+  const floodPcts = boros.map(b=>{const d=src[b]||{};return d.parcels>0?Math.round(d.flood/d.parcels*100):0;});
+  const colors = floodPcts.map(p=>p>50?'#ef444480':p>25?'#f59e0b80':'#22c55e80');
+  const ctx = document.getElementById('floodChart').getContext('2d');
+  charts.flood = new Chart(ctx,{
+    type:'bar',data:{labels:boros,datasets:[{label:'% in Flood Zone',data:floodPcts,backgroundColor:colors,borderRadius:4}]},
+    options:{responsive:true,maintainAspectRatio:false,
+      plugins:{legend:{display:false}},
+      scales:{x:{ticks:{color:'#94a3b8'},grid:{color:'rgba(51,65,85,0.3)'}},
+              y:{max:100,ticks:{color:'#94a3b8',callback:v=>v+'%'},grid:{color:'rgba(51,65,85,0.3)'}}}}
+  });
+}
+
+function renderCDChart(){
+  const boro = document.getElementById('boroFilter').value;
+  const filtered = boro==='all'?CD:CD.filter(c=>c.boro===boro);
+  const top = filtered.slice(0,20);
+  const labels = top.map(c=>c.boro.substring(0,3)+' '+c.cd);
+  const vals = top.map(c=>c.units);
+  const colors = top.map(c=>BORO_COLORS[c.boro]);
+  const ctx = document.getElementById('cdChart').getContext('2d');
+  charts.cd = new Chart(ctx,{
+    type:'bar',data:{labels,datasets:[{label:'Potential Units',data:vals,backgroundColor:colors,borderRadius:4}]},
+    options:{responsive:true,maintainAspectRatio:false,
+      plugins:{legend:{display:false}},
+      scales:{x:{ticks:{color:'#94a3b8',font:{size:10}},grid:{color:'rgba(51,65,85,0.3)'}},
+              y:{ticks:{color:'#94a3b8',callback:v=>fmt(v)},grid:{color:'rgba(51,65,85,0.3)'}}}}
+  });
+}
+
+function renderBoroTable(){
+  const view = document.getElementById('viewFilter').value;
+  const src = view==='all'?ALL:DEV;
+  let html;
+  if(view==='dev'){
+    html = '<thead><tr><th>Borough</th><th>Parcels</th><th>Acres</th><th>Potential Units</th><th>Vacant</th><th>Flood Zone</th><th>Flood %</th></tr></thead><tbody>';
+    let tot={p:0,a:0,u:0,v:0,f:0};
+    BOROS.forEach(b=>{const d=src[b]||{};const fp=d.parcels>0?Math.round(d.flood/d.parcels*100):0;
+      html+=`<tr><td style="color:${BORO_COLORS[b]};font-weight:700">${b}</td><td>${fmtN(d.parcels)}</td><td>${fmtN(Math.round(d.acres))}</td><td>${fmtN(Math.round(d.potential||0))}</td><td>${fmtN(d.vacant||0)}</td><td>${fmtN(d.flood||0)}</td><td>${fp}%</td></tr>`;
+      tot.p+=d.parcels||0;tot.a+=d.acres||0;tot.u+=d.potential||0;tot.v+=d.vacant||0;tot.f+=d.flood||0;});
+    html+=`<tr style="font-weight:700;border-top:2px solid var(--accent)"><td>TOTAL</td><td>${fmtN(tot.p)}</td><td>${fmtN(Math.round(tot.a))}</td><td>${fmtN(Math.round(tot.u))}</td><td>${fmtN(tot.v)}</td><td>${fmtN(tot.f)}</td><td>${Math.round(tot.f/tot.p*100)}%</td></tr></tbody>`;
+  } else {
+    html = '<thead><tr><th>Borough</th><th>Parcels</th><th>Acres</th><th>Res-Zoned</th><th>Flood Zone</th><th>Existing Units</th></tr></thead><tbody>';
+    BOROS.forEach(b=>{const d=src[b]||{};
+      html+=`<tr><td style="color:${BORO_COLORS[b]};font-weight:700">${b}</td><td>${fmtN(d.parcels)}</td><td>${fmtN(Math.round(d.acres))}</td><td>${fmtN(d.res_zoned||0)}</td><td>${fmtN(d.flood||0)}</td><td>${fmtN(d.units||0)}</td></tr>`;});
+    html+='</tbody>';
+  }
+  document.getElementById('boroTable').innerHTML = html;
+}
+
+function renderOppsTable(){
+  const boro = document.getElementById('boroFilter').value;
+  const filtered = boro==='all'?OPPS:OPPS.filter(o=>o.boro===boro);
+  let html = '<thead><tr><th>#</th><th>Borough</th><th>Address</th><th>Zone</th><th>Lot (sqft)</th><th>FAR</th><th>Unused FAR</th><th>Units</th><th>Flood</th><th>Owner</th></tr></thead><tbody>';
+  filtered.forEach((o,i)=>{
+    html+=`<tr><td>${i+1}</td><td style="color:${BORO_COLORS[o.boro]};font-weight:600">${o.boro}</td><td>${o.addr}</td><td>${o.zone}</td><td>${fmtN(o.lot)}</td><td>${o.far}</td><td>${fmtN(o.unused)}</td><td><strong>${fmtN(o.units)}</strong></td><td>${o.flood?'<span style="color:var(--danger)">YES</span>':'no'}</td><td style="font-size:.78rem">${o.owner}</td></tr>`;
+  });
+  html+='</tbody>';
+  document.getElementById('oppsTable').innerHTML = html;
+}
+
+function render(){
+  destroyAll();
+  updateKPIs();
+  renderUnitsChart();
+  renderShareDonut();
+  renderScatterChart();
+  renderFloodChart();
+  renderCDChart();
+  renderBoroTable();
+  renderOppsTable();
+}
+render();
+</script>
+</body>
+</html>

@@ -1,0 +1,436 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1.0">
+<title>421-a Expiration Timeline — Interactive Explorer</title>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.min.js"></script>
+<style>
+:root{--bg:#0f172a;--card:#1e293b;--border:#334155;--text:#e2e8f0;--muted:#94a3b8;--accent:#3b82f6;--danger:#ef4444;--warn:#f59e0b;--ok:#22c55e}
+*{margin:0;padding:0;box-sizing:border-box}
+body{font-family:'Segoe UI',system-ui,-apple-system,sans-serif;background:var(--bg);color:var(--text);line-height:1.6;padding:24px}
+h1{font-size:1.7rem;margin-bottom:4px}
+.subtitle{color:var(--muted);font-size:.95rem;margin-bottom:20px}
+.controls{display:flex;gap:12px;flex-wrap:wrap;margin-bottom:20px}
+.controls select{background:var(--card);color:var(--text);border:1px solid var(--border);border-radius:6px;padding:8px 14px;font-size:.9rem;cursor:pointer}
+.controls select:hover{border-color:var(--accent)}
+.kpi-row{display:grid;grid-template-columns:repeat(auto-fit,minmax(180px,1fr));gap:14px;margin-bottom:24px}
+.kpi{background:var(--card);border:1px solid var(--border);border-radius:10px;padding:16px;text-align:center}
+.kpi .val{font-size:1.8rem;font-weight:700;color:var(--accent)}
+.kpi .val.danger{color:var(--danger)}
+.kpi .val.warn{color:var(--warn)}
+.kpi .val.ok{color:var(--ok)}
+.kpi .label{color:var(--muted);font-size:.8rem;margin-top:4px}
+.grid-2col{display:grid;grid-template-columns:1fr 1fr;gap:20px;margin-bottom:24px}
+.chart-card{background:var(--card);border:1px solid var(--border);border-radius:10px;padding:20px}
+.chart-card h3{font-size:1rem;margin-bottom:12px;color:var(--text)}
+.chart-wrap{position:relative;height:380px}
+.chart-wrap.tall{height:420px}
+.chart-wrap.short{height:300px}
+.full-width{grid-column:1/-1}
+table{width:100%;border-collapse:collapse;font-size:.85rem}
+th,td{padding:8px 10px;text-align:left;border-bottom:1px solid var(--border)}
+th{color:var(--muted);font-weight:600;font-size:.78rem;text-transform:uppercase}
+td{color:var(--text)}
+.badge{display:inline-block;padding:2px 8px;border-radius:4px;font-size:.75rem;font-weight:600}
+.badge.crisis{background:#991b1b;color:#fecaca}
+.badge.high{background:#92400e;color:#fde68a}
+.badge.mod{background:#065f46;color:#a7f3d0}
+.badge.low{background:#1e3a5f;color:#93c5fd}
+.note{color:var(--muted);font-size:.78rem;font-style:italic;margin-top:8px}
+@media(max-width:900px){.grid-2col{grid-template-columns:1fr}}
+</style>
+</head>
+<body>
+
+<h1>421-a Tax Abatement Expiration Timeline</h1>
+<p class="subtitle">Furman Center SHD Property-Level Analysis &mdash; 5,261 properties, 211,567 units &mdash; Expiration window: 2026&ndash;2060</p>
+<p style="margin-top:8px"><a href="Explorer_Master_Dashboard.html" style="color:#3b82f6;text-decoration:none;font-size:.9rem">&#8592; Back to Master Dashboard</a></p>
+
+<div class="controls">
+  <select id="boroFilter" onchange="render()">
+    <option value="all">All Boroughs</option>
+    <option value="Brooklyn">Brooklyn</option>
+    <option value="Manhattan">Manhattan</option>
+    <option value="Queens">Queens</option>
+    <option value="Bronx">Bronx</option>
+    <option value="Staten Island">Staten Island</option>
+  </select>
+  <select id="viewFilter" onchange="render()">
+    <option value="all">Full Timeline (2026–2060)</option>
+    <option value="wave1">First Wave (2026–2035)</option>
+    <option value="wave2">Second Wave (2052–2060)</option>
+    <option value="near">Near-Term (2026–2030)</option>
+  </select>
+</div>
+
+<div class="kpi-row" id="kpis"></div>
+
+<div class="grid-2col">
+  <div class="chart-card full-width">
+    <h3>Annual Expiration Volume (Units at Risk)</h3>
+    <div class="chart-wrap tall"><canvas id="annualChart"></canvas></div>
+    <p class="note">Bar color indicates urgency: red = within 5 years, amber = 6–10 years, green = 10+ years. Dashed line = annual average.</p>
+  </div>
+
+  <div class="chart-card">
+    <h3>Cumulative Units Expiring Over Time</h3>
+    <div class="chart-wrap"><canvas id="cumulChart"></canvas></div>
+  </div>
+
+  <div class="chart-card">
+    <h3>Borough Share of Expirations</h3>
+    <div class="chart-wrap"><canvas id="boroDonut"></canvas></div>
+  </div>
+
+  <div class="chart-card full-width">
+    <h3>Borough Expiration Trends (Units by Year)</h3>
+    <div class="chart-wrap tall"><canvas id="boroTrend"></canvas></div>
+  </div>
+
+  <div class="chart-card">
+    <h3>Program Start Era Distribution</h3>
+    <div class="chart-wrap"><canvas id="eraChart"></canvas></div>
+  </div>
+
+  <div class="chart-card">
+    <h3>Expiration Window Summary</h3>
+    <div class="chart-wrap" style="height:auto;overflow-y:auto;max-height:400px">
+      <table id="windowTable"></table>
+    </div>
+  </div>
+
+  <div class="chart-card full-width">
+    <h3>Borough Deep Dive</h3>
+    <div class="chart-wrap" style="height:auto;overflow-y:auto;max-height:400px">
+      <table id="boroTable"></table>
+    </div>
+  </div>
+</div>
+
+<p class="note" style="margin-top:12px">Data source: Furman Center for Real Estate and Urban Policy, Subsidized Housing Database (BBL Analysis, May 2025). 421-a regular program only. Analysis date: March 24, 2026. Dashboard generated by Policy Analyst Agent (Claude), Anthropic.</p>
+
+<script>
+/* ── DATA ── */
+const DATA = {
+  byYear: {2026:8116,2027:11396,2028:12651,2029:4247,2030:5140,2031:4747,2032:9071,2033:12651,2034:12298,2035:18734,2036:7888,2037:8418,2038:5828,2039:3485,2040:4884,2041:1830,2042:1519,2043:4349,2044:4705,2045:7192,2046:543,2049:29,2052:2515,2053:3501,2054:6464,2055:6313,2056:7355,2057:11732,2058:12294,2059:10914,2060:750},
+  propsByYear: {2026:281,2027:349,2028:407,2029:118,2030:150,2031:176,2032:277,2033:354,2034:436,2035:554,2036:227,2037:212,2038:51,2039:37,2040:28,2041:27,2042:34,2043:52,2044:44,2045:59,2046:3,2049:1,2052:17,2053:68,2054:132,2055:189,2056:229,2057:241,2058:275,2059:224,2060:8},
+  byBoro: {
+    "Brooklyn":{2026:2952,2027:4903,2028:6053,2029:735,2030:935,2031:1316,2032:2847,2033:4364,2034:5058,2035:7194,2036:2630,2037:3994,2038:1023,2039:453,2040:368,2041:494,2042:699,2043:2431,2044:2765,2045:6429,2046:23,2049:29,2052:243,2053:2093,2054:2456,2055:3990,2056:4112,2057:6037,2058:5223,2059:2693,2060:198},
+    "Manhattan":{2026:2468,2027:3634,2028:1632,2029:2227,2030:2898,2031:2066,2032:3914,2033:3116,2034:2544,2035:1795,2036:3411,2037:1963,2038:3655,2039:2069,2040:4191,2041:821,2042:313,2043:271,2044:701,2045:305,2052:2257,2053:1111,2054:2815,2055:1135,2056:856,2057:520,2058:1670,2059:2076},
+    "Queens":{2026:2087,2027:2262,2028:4395,2029:792,2030:761,2031:815,2032:1644,2033:2735,2034:2632,2035:7884,2036:725,2037:738,2038:232,2039:33,2040:29,2041:294,2042:34,2043:432,2044:1002,2045:279,2046:404,2053:79,2054:511,2055:560,2056:817,2057:3082,2058:2610,2059:1440,2060:64},
+    "Bronx":{2026:471,2027:520,2028:508,2029:493,2030:534,2031:545,2032:656,2033:2414,2034:2041,2035:1849,2036:1117,2037:1723,2038:826,2039:930,2040:296,2041:221,2042:473,2043:644,2044:237,2045:179,2052:15,2053:218,2054:682,2055:602,2056:1570,2057:2093,2058:2791,2059:4592,2060:488},
+    "Staten Island":{2026:138,2027:77,2028:63,2030:12,2031:5,2032:10,2033:22,2034:23,2035:12,2036:5,2038:92,2043:571,2046:116,2055:26,2059:113}
+  },
+  startEra: {"2000-2005":{props:148,units:4649},"2006-2010":{props:812,units:27995},"2011-2014":{props:1496,units:47484},"2015-2019":{props:1210,units:53523},"2020-2025":{props:1595,units:77916}},
+  boroSummary: {
+    "Brooklyn":{props:2836,units:84748,by2030:15578,by2035:36357,peak:"2035 (7,194)"},
+    "Manhattan":{props:421,units:56434,by2030:12859,by2035:26294,peak:"2040 (4,191)"},
+    "Queens":{props:1126,units:39372,by2030:10297,by2035:26007,peak:"2035 (7,884)"},
+    "Bronx":{props:843,units:29728,by2030:2526,by2035:10031,peak:"2059 (4,592)"},
+    "Staten Island":{props:35,units:1285,by2030:290,by2035:362,peak:"2043 (571)"}
+  }
+};
+
+const BOROUGHS = ['Brooklyn','Manhattan','Queens','Bronx','Staten Island'];
+const BORO_COLORS = {Brooklyn:'#3b82f6',Manhattan:'#f59e0b',Queens:'#22c55e',Bronx:'#ef4444','Staten Island':'#a78bfa'};
+const VIEWS = {all:[2026,2060],wave1:[2026,2035],wave2:[2052,2060],near:[2026,2030]};
+let charts = {};
+
+/* ── THRESHOLD LINE PLUGIN ── */
+const thresholdLinePlugin = {
+  id:'thresholdLine',
+  afterDraw(chart){
+    const ann=chart.options?.plugins?.thresholdLine;
+    if(!ann) return;
+    if(!chart.scales?.y) return;
+    const yScale=chart.scales.y;
+    const yPx=yScale.getPixelForValue(ann.value);
+    if(yPx<chart.chartArea.top||yPx>chart.chartArea.bottom) return;
+    const ctx=chart.ctx;
+    ctx.save();
+    ctx.beginPath();
+    ctx.setLineDash([6,4]);
+    ctx.strokeStyle=ann.color||'#94a3b8';
+    ctx.lineWidth=1.5;
+    ctx.moveTo(chart.chartArea.left,yPx);
+    ctx.lineTo(chart.chartArea.right,yPx);
+    ctx.stroke();
+    if(ann.label){
+      ctx.fillStyle=ann.color||'#94a3b8';
+      ctx.font='11px sans-serif';
+      ctx.textAlign='right';
+      ctx.fillText(ann.label,chart.chartArea.right-4,yPx-6);
+    }
+    ctx.restore();
+  }
+};
+Chart.register(thresholdLinePlugin);
+
+/* ── HELPERS ── */
+const fmt = n => n>=1e6?(n/1e6).toFixed(1)+'M':n>=1e3?(n/1e3).toFixed(1)+'K':n.toString();
+const fmtFull = n => n.toLocaleString();
+
+function getFilteredYears(){
+  const view = document.getElementById('viewFilter').value;
+  const [minY,maxY] = VIEWS[view];
+  return Object.keys(DATA.byYear).map(Number).filter(y=>y>=minY&&y<=maxY).sort((a,b)=>a-b);
+}
+
+function getBoroData(boro,years){
+  if(boro==='all'){
+    return years.map(y=>DATA.byYear[y]||0);
+  }
+  const bd = DATA.byBoro[boro]||{};
+  return years.map(y=>bd[y]||0);
+}
+
+function destroyAll(){
+  Object.values(charts).forEach(c=>{try{c.destroy()}catch(e){}});
+  charts={};
+}
+
+/* ── KPIs ── */
+function updateKPIs(){
+  const boro = document.getElementById('boroFilter').value;
+  const years = getFilteredYears();
+  const vals = getBoroData(boro,years);
+  const total = vals.reduce((a,b)=>a+b,0);
+  const peakIdx = vals.indexOf(Math.max(...vals));
+  const peakYear = years[peakIdx];
+  const peakVal = vals[peakIdx];
+
+  // Near-term (by 2030)
+  const near = years.filter(y=>y<=2030).reduce((s,y,i)=>s+(years[i]<=2030?getBoroData(boro,[y])[0]:0),0);
+  const nearYears = years.filter(y=>y<=2030);
+  const nearTotal = nearYears.reduce((s,y)=>{
+    const d = boro==='all'?(DATA.byYear[y]||0):(DATA.byBoro[boro]?.[y]||0);
+    return s+d;
+  },0);
+
+  // Properties
+  let totalProps;
+  if(boro==='all') totalProps = years.reduce((s,y)=>s+(DATA.propsByYear[y]||0),0);
+  else totalProps = DATA.boroSummary[boro]?.props||0;
+
+  const html = `
+    <div class="kpi"><div class="val danger">${fmt(total)}</div><div class="label">Units at Risk (Filtered)</div></div>
+    <div class="kpi"><div class="val warn">${peakYear}</div><div class="label">Peak Year (${fmt(peakVal)} units)</div></div>
+    <div class="kpi"><div class="val">${fmt(nearTotal)}</div><div class="label">Units Expiring by 2030</div></div>
+    <div class="kpi"><div class="val">${fmtFull(totalProps)}</div><div class="label">Properties</div></div>
+    <div class="kpi"><div class="val ok">${years.length}</div><div class="label">Expiration Years Shown</div></div>
+  `;
+  document.getElementById('kpis').innerHTML = html;
+}
+
+/* ── CHARTS ── */
+function renderAnnualChart(){
+  const years = getFilteredYears();
+  const boro = document.getElementById('boroFilter').value;
+  const vals = getBoroData(boro,years);
+  const avg = vals.reduce((a,b)=>a+b,0)/vals.length;
+  const colors = years.map(y=>{
+    if(y<=2030) return 'rgba(239,68,68,0.85)';
+    if(y<=2040) return 'rgba(245,158,11,0.85)';
+    return 'rgba(34,197,94,0.85)';
+  });
+  const ctx = document.getElementById('annualChart').getContext('2d');
+  charts.annual = new Chart(ctx,{
+    type:'bar',
+    data:{labels:years,datasets:[{label:'Units Expiring',data:vals,backgroundColor:colors,borderRadius:4}]},
+    options:{
+      responsive:true,maintainAspectRatio:false,
+      plugins:{
+        legend:{display:false},
+        thresholdLine:{value:avg,color:'#94a3b8',label:'Avg: '+fmt(Math.round(avg))}
+      },
+      scales:{
+        x:{ticks:{color:'#94a3b8',font:{size:11}},grid:{color:'rgba(51,65,85,0.3)'}},
+        y:{ticks:{color:'#94a3b8',callback:v=>fmt(v)},grid:{color:'rgba(51,65,85,0.3)'}}
+      }
+    }
+  });
+}
+
+function renderCumulChart(){
+  const years = getFilteredYears();
+  const boro = document.getElementById('boroFilter').value;
+  const vals = getBoroData(boro,years);
+  let cumul = [], running = 0;
+  vals.forEach(v=>{running+=v;cumul.push(running)});
+  const ctx = document.getElementById('cumulChart').getContext('2d');
+  charts.cumul = new Chart(ctx,{
+    type:'line',
+    data:{labels:years,datasets:[{
+      label:'Cumulative Units',data:cumul,
+      borderColor:'#3b82f6',backgroundColor:'rgba(59,130,246,0.15)',
+      fill:true,tension:0.3,pointRadius:3
+    }]},
+    options:{
+      responsive:true,maintainAspectRatio:false,
+      plugins:{legend:{display:false}},
+      scales:{
+        x:{ticks:{color:'#94a3b8',font:{size:10}},grid:{color:'rgba(51,65,85,0.3)'}},
+        y:{ticks:{color:'#94a3b8',callback:v=>fmt(v)},grid:{color:'rgba(51,65,85,0.3)'}}
+      }
+    }
+  });
+}
+
+function renderBoroDonut(){
+  const boro = document.getElementById('boroFilter').value;
+  if(boro!=='all'){
+    // Show year buckets for single borough
+    const years = getFilteredYears();
+    const bd = DATA.byBoro[boro]||{};
+    const buckets = {'2026-2030':0,'2031-2035':0,'2036-2045':0,'2046-2060':0};
+    years.forEach(y=>{
+      const v = bd[y]||0;
+      if(y<=2030) buckets['2026-2030']+=v;
+      else if(y<=2035) buckets['2031-2035']+=v;
+      else if(y<=2045) buckets['2036-2045']+=v;
+      else buckets['2046-2060']+=v;
+    });
+    const labels = Object.keys(buckets);
+    const vals = Object.values(buckets);
+    const colors = ['#ef4444','#f59e0b','#22c55e','#3b82f6'];
+    const ctx = document.getElementById('boroDonut').getContext('2d');
+    charts.donut = new Chart(ctx,{
+      type:'doughnut',
+      data:{labels,datasets:[{data:vals,backgroundColor:colors,borderWidth:0}]},
+      options:{
+        responsive:true,maintainAspectRatio:false,
+        plugins:{legend:{position:'right',labels:{color:'#e2e8f0',font:{size:11},padding:12}}}
+      }
+    });
+    return;
+  }
+  const years = getFilteredYears();
+  const labels = BOROUGHS;
+  const vals = BOROUGHS.map(b=>{
+    const bd = DATA.byBoro[b]||{};
+    return years.reduce((s,y)=>s+(bd[y]||0),0);
+  });
+  const colors = BOROUGHS.map(b=>BORO_COLORS[b]);
+  const ctx = document.getElementById('boroDonut').getContext('2d');
+  charts.donut = new Chart(ctx,{
+    type:'doughnut',
+    data:{labels,datasets:[{data:vals,backgroundColor:colors,borderWidth:0}]},
+    options:{
+      responsive:true,maintainAspectRatio:false,
+      plugins:{legend:{position:'right',labels:{color:'#e2e8f0',font:{size:11},padding:12}}}
+    }
+  });
+}
+
+function renderBoroTrend(){
+  const years = getFilteredYears();
+  const selBoro = document.getElementById('boroFilter').value;
+  const datasets = BOROUGHS.map(b=>{
+    const bd = DATA.byBoro[b]||{};
+    const vals = years.map(y=>bd[y]||0);
+    const isSelected = selBoro===b;
+    const isDimmed = selBoro!=='all'&&!isSelected;
+    return {
+      label:b,data:vals,
+      borderColor:isDimmed?BORO_COLORS[b]+'66':BORO_COLORS[b],
+      backgroundColor:'transparent',
+      borderWidth:isSelected?3:(isDimmed?1:2),
+      borderDash:isDimmed?[4,3]:[],
+      pointRadius:isSelected?4:2,
+      tension:0.3
+    };
+  });
+  const ctx = document.getElementById('boroTrend').getContext('2d');
+  charts.boroTrend = new Chart(ctx,{
+    type:'line',
+    data:{labels:years,datasets},
+    options:{
+      responsive:true,maintainAspectRatio:false,
+      plugins:{legend:{labels:{color:'#e2e8f0',font:{size:11}}}},
+      scales:{
+        x:{ticks:{color:'#94a3b8',font:{size:10}},grid:{color:'rgba(51,65,85,0.3)'}},
+        y:{ticks:{color:'#94a3b8',callback:v=>fmt(v)},grid:{color:'rgba(51,65,85,0.3)'}}
+      }
+    }
+  });
+}
+
+function renderEraChart(){
+  const eras = Object.keys(DATA.startEra);
+  const vals = eras.map(e=>DATA.startEra[e].units);
+  const colors = ['#64748b','#3b82f6','#f59e0b','#22c55e','#ef4444'];
+  const ctx = document.getElementById('eraChart').getContext('2d');
+  charts.era = new Chart(ctx,{
+    type:'bar',
+    data:{labels:eras,datasets:[{label:'Units',data:vals,backgroundColor:colors,borderRadius:4}]},
+    options:{
+      responsive:true,maintainAspectRatio:false,
+      indexAxis:'y',
+      plugins:{legend:{display:false}},
+      scales:{
+        x:{ticks:{color:'#94a3b8',callback:v=>fmt(v)},grid:{color:'rgba(51,65,85,0.3)'}},
+        y:{ticks:{color:'#e2e8f0',font:{size:11}},grid:{display:false}}
+      }
+    }
+  });
+}
+
+function renderWindowTable(){
+  const years = getFilteredYears();
+  const boro = document.getElementById('boroFilter').value;
+  const windows = [
+    {label:'2026 (Immediate)',range:[2026,2026],badge:'crisis'},
+    {label:'2027–2030',range:[2027,2030],badge:'crisis'},
+    {label:'2031–2035',range:[2031,2035],badge:'high'},
+    {label:'2036–2040',range:[2036,2040],badge:'mod'},
+    {label:'2041–2045',range:[2041,2045],badge:'mod'},
+    {label:'2046–2051',range:[2046,2051],badge:'low'},
+    {label:'2052–2060',range:[2052,2060],badge:'high'}
+  ];
+  let html = '<thead><tr><th>Window</th><th>Units</th><th>Properties</th><th>Urgency</th></tr></thead><tbody>';
+  windows.forEach(w=>{
+    const wYears = years.filter(y=>y>=w.range[0]&&y<=w.range[1]);
+    if(wYears.length===0) return;
+    let units=0, props=0;
+    wYears.forEach(y=>{
+      if(boro==='all'){units+=DATA.byYear[y]||0;props+=DATA.propsByYear[y]||0;}
+      else{units+=(DATA.byBoro[boro]?.[y]||0);props+=0;}
+    });
+    const badgeLabels = {crisis:'IMMEDIATE',high:'HIGH',mod:'MODERATE',low:'LOW'};
+    html+=`<tr><td>${w.label}</td><td>${fmtFull(units)}</td><td>${boro==='all'?fmtFull(props):'—'}</td><td><span class="badge ${w.badge}">${badgeLabels[w.badge]}</span></td></tr>`;
+  });
+  html+='</tbody>';
+  document.getElementById('windowTable').innerHTML=html;
+}
+
+function renderBoroTable(){
+  let html = '<thead><tr><th>Borough</th><th>Properties</th><th>Total Units</th><th>By 2030</th><th>By 2035</th><th>Peak Year</th></tr></thead><tbody>';
+  const order = ['Brooklyn','Manhattan','Queens','Bronx','Staten Island'];
+  order.forEach(b=>{
+    const d = DATA.boroSummary[b];
+    html+=`<tr><td><span style="color:${BORO_COLORS[b]};font-weight:700">${b}</span></td><td>${fmtFull(d.props)}</td><td>${fmtFull(d.units)}</td><td>${fmtFull(d.by2030)}</td><td>${fmtFull(d.by2035)}</td><td>${d.peak}</td></tr>`;
+  });
+  const tot = {props:5261,units:211567,by2030:41550,by2035:99051};
+  html+=`<tr style="font-weight:700;border-top:2px solid var(--accent)"><td>TOTAL</td><td>${fmtFull(tot.props)}</td><td>${fmtFull(tot.units)}</td><td>${fmtFull(tot.by2030)}</td><td>${fmtFull(tot.by2035)}</td><td>2035 (18,734)</td></tr>`;
+  html+='</tbody>';
+  document.getElementById('boroTable').innerHTML=html;
+}
+
+/* ── MAIN RENDER ── */
+function render(){
+  destroyAll();
+  updateKPIs();
+  renderAnnualChart();
+  renderCumulChart();
+  renderBoroDonut();
+  renderBoroTrend();
+  renderEraChart();
+  renderWindowTable();
+  renderBoroTable();
+}
+
+render();
+</script>
+</body>
+</html>

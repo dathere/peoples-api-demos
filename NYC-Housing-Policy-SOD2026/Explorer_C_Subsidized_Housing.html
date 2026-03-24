@@ -1,0 +1,625 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Section C: Subsidized Housing & Expiration Risk — Interactive Explorer</title>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.min.js"></script>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', 'Oxygen', 'Ubuntu', 'Cantarell', sans-serif;
+            background-color: #0f172a;
+            color: #e2e8f0;
+            line-height: 1.6;
+        }
+
+        .container {
+            max-width: 1600px;
+            margin: 0 auto;
+            padding: 2rem;
+        }
+
+        header {
+            margin-bottom: 2rem;
+            border-bottom: 2px solid #1e293b;
+            padding-bottom: 1.5rem;
+        }
+
+        h1 {
+            font-size: 2rem;
+            font-weight: 700;
+            margin-bottom: 0.5rem;
+            color: #f1f5f9;
+        }
+
+        .subtitle {
+            font-size: 0.95rem;
+            color: #94a3b8;
+            font-weight: 400;
+        }
+
+        .filters {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 1.5rem;
+            margin-bottom: 2rem;
+            background: #1e293b;
+            padding: 1.5rem;
+            border-radius: 0.5rem;
+        }
+
+        .filter-group {
+            display: flex;
+            flex-direction: column;
+            gap: 0.5rem;
+        }
+
+        .filter-group label {
+            font-size: 0.85rem;
+            font-weight: 600;
+            color: #cbd5e1;
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+        }
+
+        .filter-group select {
+            padding: 0.75rem;
+            background-color: #0f172a;
+            color: #e2e8f0;
+            border: 1px solid #334155;
+            border-radius: 0.375rem;
+            font-size: 0.95rem;
+            cursor: pointer;
+            transition: border-color 0.2s;
+        }
+
+        .filter-group select:hover,
+        .filter-group select:focus {
+            border-color: #64748b;
+            outline: none;
+        }
+
+        .kpi-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 1.5rem;
+            margin-bottom: 2rem;
+        }
+
+        .kpi-card {
+            background: #1e293b;
+            padding: 1.5rem;
+            border-radius: 0.5rem;
+            border-left: 4px solid #64748b;
+            transition: transform 0.2s, border-color 0.2s;
+        }
+
+        .kpi-card:hover {
+            transform: translateY(-2px);
+            border-left-color: #94a3b8;
+        }
+
+        .kpi-card.critical {
+            border-left-color: #ef4444;
+        }
+
+        .kpi-label {
+            font-size: 0.85rem;
+            color: #94a3b8;
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+            margin-bottom: 0.5rem;
+            font-weight: 600;
+        }
+
+        .kpi-value {
+            font-size: 2rem;
+            font-weight: 700;
+            color: #f1f5f9;
+            margin-bottom: 0.25rem;
+        }
+
+        .kpi-subtext {
+            font-size: 0.8rem;
+            color: #64748b;
+        }
+
+        .charts-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(500px, 1fr));
+            gap: 2rem;
+            margin-bottom: 2rem;
+        }
+
+        .chart-container {
+            background: #1e293b;
+            padding: 1.5rem;
+            border-radius: 0.5rem;
+            position: relative;
+        }
+
+        .chart-title {
+            font-size: 1.1rem;
+            font-weight: 600;
+            margin-bottom: 1rem;
+            color: #f1f5f9;
+        }
+
+        .chart-wrapper {
+            position: relative;
+            height: 350px;
+        }
+
+        .full-width {
+            grid-column: 1 / -1;
+        }
+
+        .table-container {
+            background: #1e293b;
+            padding: 1.5rem;
+            border-radius: 0.5rem;
+            margin-bottom: 2rem;
+            overflow-x: auto;
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            font-size: 0.9rem;
+        }
+
+        thead {
+            background: #0f172a;
+        }
+
+        th {
+            padding: 1rem;
+            text-align: left;
+            font-weight: 600;
+            color: #cbd5e1;
+            border-bottom: 2px solid #334155;
+            text-transform: uppercase;
+            font-size: 0.75rem;
+            letter-spacing: 0.05em;
+        }
+
+        td {
+            padding: 0.75rem 1rem;
+            border-bottom: 1px solid #334155;
+            color: #e2e8f0;
+        }
+
+        tbody tr:hover {
+            background-color: #0f172a;
+        }
+
+        .badge {
+            display: inline-block;
+            padding: 0.25rem 0.75rem;
+            border-radius: 9999px;
+            font-size: 0.75rem;
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+        }
+
+        .badge-immediate {
+            background-color: rgba(239, 68, 68, 0.2);
+            color: #fca5a5;
+        }
+
+        .badge-high {
+            background-color: rgba(251, 146, 60, 0.2);
+            color: #fdba74;
+        }
+
+        .badge-peak {
+            background-color: rgba(217, 70, 239, 0.2);
+            color: #e879f9;
+        }
+
+        .badge-moderate {
+            background-color: rgba(59, 130, 246, 0.2);
+            color: #93c5fd;
+        }
+
+        .disclaimer {
+            background: #1e293b;
+            padding: 1.5rem;
+            border-radius: 0.5rem;
+            font-size: 0.85rem;
+            color: #94a3b8;
+            margin-top: 2rem;
+            border-left: 4px solid #64748b;
+        }
+
+        .disclaimer-title {
+            font-weight: 600;
+            color: #cbd5e1;
+            margin-bottom: 0.5rem;
+        }
+
+        @media (max-width: 1024px) {
+            .charts-grid {
+                grid-template-columns: 1fr;
+            }
+
+            .filters {
+                grid-template-columns: 1fr;
+            }
+        }
+
+        .sort-icon {
+            margin-left: 0.25rem;
+            font-size: 0.75rem;
+            opacity: 0.6;
+        }
+
+        th:hover .sort-icon {
+            opacity: 1;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <nav style="margin-bottom:8px"><a href="Explorer_Master_Dashboard.html" style="color:#94a3b8;text-decoration:none;font-size:.85rem;display:inline-flex;align-items:center;gap:4px;transition:color .2s" onmouseover="this.style.color='#3b82f6'" onmouseout="this.style.color='#94a3b8'">&larr; Back to Master Dashboard</a></nav>
+        <header>
+            <h1>Section C: Subsidized Housing & Expiration Risk — Interactive Explorer</h1>
+            <p class="subtitle">Mayor Mamdani's Housing Agenda · Furman Center SHD · 2026–2045</p>
+        </header>
+
+        <div class="filters">
+            <div class="filter-group">
+                <label for="boroughFilter">Borough</label>
+                <select id="boroughFilter">
+                    <option value="Citywide">Citywide</option>
+                    <option value="Manhattan">Manhattan</option>
+                    <option value="Brooklyn">Brooklyn</option>
+                    <option value="Queens">Queens</option>
+                    <option value="Bronx">Bronx</option>
+                    <option value="Staten_Island">Staten Island</option>
+                </select>
+            </div>
+
+            <div class="filter-group">
+                <label for="programFilter">Program Type</label>
+                <select id="programFilter">
+                    <option value="All">All Programs</option>
+                    <option value="421-a">421-a</option>
+                    <option value="J-51">J-51</option>
+                    <option value="Mitchell-Lama">Mitchell-Lama</option>
+                    <option value="LIHTC_4pct">LIHTC 4%</option>
+                    <option value="LIHTC_9pct">LIHTC 9%</option>
+                    <option value="Section_8">Section 8</option>
+                    <option value="NYCHA">NYCHA</option>
+                </select>
+            </div>
+        </div>
+
+        <div class="kpi-grid">
+            <div class="kpi-card critical">
+                <div class="kpi-label">Total Units at Risk (2026–2035)</div>
+                <div class="kpi-value" id="kpiTotalUnits">377,631</div>
+                <div class="kpi-subtext">Subsidies expiring across all programs</div>
+            </div>
+
+            <div class="kpi-card critical">
+                <div class="kpi-label">421-a Units at Risk</div>
+                <div class="kpi-value" id="kpiUnits421a">201,965</div>
+                <div class="kpi-subtext">53.5% of portfolio</div>
+            </div>
+
+            <div class="kpi-card critical">
+                <div class="kpi-label">Peak Crisis Year</div>
+                <div class="kpi-value" id="kpiPeakYear">2035</div>
+                <div class="kpi-subtext">18,734 units expiring (49.1%)</div>
+            </div>
+
+            <div class="kpi-card">
+                <div class="kpi-label">Tax Delinquency Rate</div>
+                <div class="kpi-value" id="kpiDelinquency">94.8%</div>
+                <div class="kpi-subtext">421-a portfolio average</div>
+            </div>
+        </div>
+
+        <div class="charts-grid">
+            <div class="chart-container full-width">
+                <div class="chart-title">421-a Expiration Timeline (2026–2035)</div>
+                <div class="chart-wrapper">
+                    <canvas id="expirationTimelineChart"></canvas>
+                </div>
+            </div>
+
+            <div class="chart-container full-width">
+                <div class="chart-title">Cumulative Units Losing Subsidy (2026–2035)</div>
+                <div class="chart-wrapper">
+                    <canvas id="cumulativeExpirationChart"></canvas>
+                </div>
+            </div>
+
+            <div class="chart-container">
+                <div class="chart-title">Portfolio Composition (All Programs)</div>
+                <div class="chart-wrapper">
+                    <canvas id="portfolioCompositionChart"></canvas>
+                </div>
+            </div>
+
+            <div class="chart-container">
+                <div class="chart-title">421-a by Borough</div>
+                <div class="chart-wrapper">
+                    <canvas id="boroughChart"></canvas>
+                </div>
+            </div>
+
+            <div class="chart-container full-width">
+                <div class="chart-title">J-51 Expiration Roadmap</div>
+                <div class="chart-wrapper">
+                    <canvas id="j51ExpirationChart"></canvas>
+                </div>
+            </div>
+        </div>
+
+        <div class="table-container">
+            <div class="chart-title">Detailed Expiration Schedule & Risk Assessment (421-a)</div>
+            <table id="expirationTable">
+                <thead>
+                    <tr>
+                        <th>Year <span class="sort-icon">↕</span></th>
+                        <th>Properties <span class="sort-icon">↕</span></th>
+                        <th>Units <span class="sort-icon">↕</span></th>
+                        <th>% of Total <span class="sort-icon">↕</span></th>
+                        <th>Violations <span class="sort-icon">↕</span></th>
+                        <th>Delinquent <span class="sort-icon">↕</span></th>
+                        <th>Delinq. Rate <span class="sort-icon">↕</span></th>
+                        <th>Risk Level <span class="sort-icon">↕</span></th>
+                    </tr>
+                </thead>
+                <tbody id="tableBody">
+                </tbody>
+            </table>
+        </div>
+
+        <div class="disclaimer">
+            <div class="disclaimer-title">Data Source & Methodology</div>
+            <p>This interactive explorer presents aggregated data from the Furman Center's Subsidized Housing Dataset (2026) and NYC Department of Finance property tax records. All figures represent nominal counts as of Q2 2026. Expiration timelines reflect contractual obligation dates and may differ from actual affordability loss dates due to renewals, modifications, or policy interventions. Borough-level data aggregates properties by primary location. Tax delinquency percentages reflect properties with outstanding property tax arrears exceeding 6 months. For policy analysis, cross-reference with official NYCHA, HPD, and Department of Finance filings. This explorer is provided for informational purposes and should not be construed as investment or policy advice.</p>
+        </div>
+    </div>
+
+    <script>
+        // Data definitions
+        const data421aByBorough = {
+            Brooklyn: { props: 2836, units: 84748, avgAssess: 3200000, delinqPct: 93.2 },
+            Bronx: { props: 843, units: 29728, avgAssess: 1800000, delinqPct: 97.1 },
+            Queens: { props: 1126, units: 39372, avgAssess: 2100000, delinqPct: 93.4 },
+            Manhattan: { props: 421, units: 56434, avgAssess: 8700000, delinqPct: 94.5 },
+            Staten_Island: { props: 35, units: 1285, avgAssess: 1600000, delinqPct: 97.1 }
+        };
+
+        const data421aExpirationTimeline = {
+            2026: { props: 281, units: 8116, violations: 42, delinquent: 271 },
+            2027: { props: 349, units: 11396, violations: 50, delinquent: 341 },
+            2028: { props: 407, units: 12651, violations: 57, delinquent: 394 },
+            2029: { props: 118, units: 4247, violations: 23, delinquent: 114 },
+            2030: { props: 150, units: 5140, violations: 29, delinquent: 145 },
+            2031: { props: 176, units: 4747, violations: 36, delinquent: 173 },
+            2032: { props: 277, units: 9071, violations: 47, delinquent: 270 },
+            2033: { props: 354, units: 12651, violations: 71, delinquent: 344 },
+            2034: { props: 436, units: 12298, violations: 83, delinquent: 424 },
+            2035: { props: 554, units: 18734, violations: 83, delinquent: 499 }
+        };
+
+        const dataPortfolioComposition = {
+            Regular_421a: { props: 5261, units: 158567 },
+            "421a_Affordable": { props: 15, units: 1728 },
+            J51: { props: 1867, units: 88395 },
+            Mitchell_Lama: { props: 210, units: 93086 },
+            LIHTC_4pct: { props: 850, units: 99078 },
+            LIHTC_9pct: { props: 521, units: 23010 },
+            Section_8: { props: 476, units: 24851 },
+            NYCHA: { props: 694, units: 193448 }
+        };
+
+        const dataJ51Expiration = {
+            "2026-2030": { props: 912, units: 27139, delinqPct: 98.6 },
+            "2031-2040": { props: 658, units: 39224, delinqPct: 97.4 },
+            "2041-2060": { props: 297, units: 22032, delinqPct: 95.9 }
+        };
+
+        // Chart instances
+        let charts = {};
+        function destroyAll() { Object.values(charts).forEach(c => c.destroy()); charts = {}; }
+
+        const clr = { primary: '#3b82f6', danger: '#ef4444', warning: '#f97316', success: '#22c55e', peak: '#d946ef', muted: '#334155' };
+        const ttip = { backgroundColor: '#1e293b', titleColor: '#f1f5f9', bodyColor: '#e2e8f0', borderColor: '#334155', borderWidth: 1 };
+        const scaleX = { ticks: { color: '#94a3b8', font: { size: 10 } }, grid: { color: '#334155', drawBorder: false } };
+        const scaleY = { ticks: { color: '#94a3b8', font: { size: 10 } }, grid: { color: '#334155', drawBorder: false }, beginAtZero: true };
+        const legendDef = { labels: { color: '#e2e8f0', font: { size: 11, weight: '500' } } };
+        function fmtY(value) { return value.toLocaleString(); }
+
+        // Compute citywide 421-a totals
+        const cityUnits421a = Object.values(data421aByBorough).reduce((a, b) => a + b.units, 0);
+        const cityProps421a = Object.values(data421aByBorough).reduce((a, b) => a + b.props, 0);
+
+        // Program key mapping for filter
+        const programKeyMap = { '421-a': 'Regular_421a', 'J-51': 'J51', 'Mitchell-Lama': 'Mitchell_Lama', 'LIHTC_4pct': 'LIHTC_4pct', 'LIHTC_9pct': 'LIHTC_9pct', 'Section_8': 'Section_8', 'NYCHA': 'NYCHA' };
+
+        function getState() {
+            const borough = document.getElementById('boroughFilter').value;
+            const program = document.getElementById('programFilter').value;
+            const isCitywide = borough === 'Citywide';
+            const isAllProg = program === 'All';
+            // Borough unit share for scaling timeline data
+            const boroData = !isCitywide ? data421aByBorough[borough] : null;
+            const boroShare = boroData ? boroData.units / cityUnits421a : 1;
+            const geoLabel = isCitywide ? 'Citywide' : borough.replace(/_/g, ' ');
+            return { borough, program, isCitywide, isAllProg, boroData, boroShare, geoLabel };
+        }
+
+        function updateDashboard() {
+            destroyAll();
+            const s = getState();
+
+            // ---- KPIs ----
+            const boroUnits421a = s.boroData ? s.boroData.units : cityUnits421a;
+            const boroProps421a = s.boroData ? s.boroData.props : cityProps421a;
+            const boroDelinq = s.boroData ? s.boroData.delinqPct : 94.8;
+
+            // Total at risk depends on program filter
+            let totalAtRisk = 0;
+            if (s.isAllProg) {
+                if (s.isCitywide) {
+                    totalAtRisk = Object.values(dataPortfolioComposition).reduce((a, b) => a + b.units, 0);
+                } else {
+                    totalAtRisk = Math.round(Object.values(dataPortfolioComposition).reduce((a, b) => a + b.units, 0) * s.boroShare);
+                }
+            } else {
+                const pk = programKeyMap[s.program] || s.program;
+                const progData = dataPortfolioComposition[pk];
+                totalAtRisk = progData ? (s.isCitywide ? progData.units : Math.round(progData.units * s.boroShare)) : 0;
+            }
+
+            // Peak year in expiration timeline (scaled)
+            const expYears = Object.keys(data421aExpirationTimeline).map(Number).sort((a, b) => a - b);
+            let peakYear = 2035, peakUnits = 0;
+            expYears.forEach(y => {
+                const u = Math.round(data421aExpirationTimeline[y].units * s.boroShare);
+                if (u > peakUnits) { peakUnits = u; peakYear = y; }
+            });
+
+            document.getElementById('kpiTotalUnits').textContent = totalAtRisk.toLocaleString();
+            document.querySelector('#kpiTotalUnits').closest('.kpi-card').querySelector('.kpi-subtext').textContent =
+                s.geoLabel + (s.isAllProg ? ' · All programs' : ' · ' + s.program);
+
+            document.getElementById('kpiUnits421a').textContent = boroUnits421a.toLocaleString();
+            document.querySelector('#kpiUnits421a').closest('.kpi-card').querySelector('.kpi-subtext').textContent =
+                boroProps421a.toLocaleString() + ' properties · ' + s.geoLabel;
+
+            document.getElementById('kpiPeakYear').textContent = peakYear;
+            document.querySelector('#kpiPeakYear').closest('.kpi-card').querySelector('.kpi-subtext').textContent =
+                peakUnits.toLocaleString() + ' units · ' + s.geoLabel + (!s.isCitywide ? ' (est.)' : '');
+
+            document.getElementById('kpiDelinquency').textContent = boroDelinq.toFixed(1) + '%';
+            document.querySelector('#kpiDelinquency').closest('.kpi-card').querySelector('.kpi-subtext').textContent =
+                '421-a portfolio · ' + s.geoLabel;
+
+            // ---- Chart titles ----
+            document.querySelectorAll('.chart-title')[0].textContent = '421-a Expiration Timeline — ' + s.geoLabel + (!s.isCitywide ? ' (est.)' : '');
+            document.querySelectorAll('.chart-title')[1].textContent = 'Cumulative Units Losing Subsidy — ' + s.geoLabel;
+
+            // ---- Expiration Timeline ----
+            const scaledUnits = expYears.map(y => Math.round(data421aExpirationTimeline[y].units * s.boroShare));
+            const maxU = Math.max(...scaledUnits);
+            charts.timeline = new Chart(document.getElementById('expirationTimelineChart').getContext('2d'), {
+                type: 'bar',
+                data: { labels: expYears, datasets: [{ label: 'Units Expiring' + (!s.isCitywide ? ' (est.)' : ''), data: scaledUnits, backgroundColor: scaledUnits.map((u, i) => u >= maxU * 0.95 ? clr.peak : clr.danger), borderColor: '#0f172a', borderWidth: 1, borderRadius: 4 }] },
+                options: { responsive: true, maintainAspectRatio: false, plugins: { legend: legendDef, tooltip: ttip }, scales: { x: scaleX, y: { ...scaleY, ticks: { ...scaleY.ticks, callback: fmtY } } } }
+            });
+
+            // ---- Cumulative ----
+            let cum = 0;
+            const cumData = expYears.map(y => { cum += Math.round(data421aExpirationTimeline[y].units * s.boroShare); return cum; });
+            charts.cumulative = new Chart(document.getElementById('cumulativeExpirationChart').getContext('2d'), {
+                type: 'line',
+                data: { labels: expYears, datasets: [{ label: 'Cumulative Units Lost', data: cumData, borderColor: clr.danger, backgroundColor: 'rgba(239,68,68,0.1)', borderWidth: 3, fill: true, tension: 0.4, pointBackgroundColor: clr.danger, pointBorderColor: '#0f172a', pointBorderWidth: 2, pointRadius: 5 }] },
+                options: { responsive: true, maintainAspectRatio: false, plugins: { legend: legendDef, tooltip: ttip }, scales: { x: scaleX, y: { ...scaleY, ticks: { ...scaleY.ticks, callback: fmtY } } } }
+            });
+
+            // ---- Portfolio Composition ----
+            const programs = Object.keys(dataPortfolioComposition);
+            const progUnits = programs.map(p => dataPortfolioComposition[p].units);
+            const bgColors = ['rgba(59,130,246,0.8)', 'rgba(147,197,253,0.8)', 'rgba(249,115,22,0.8)', 'rgba(34,197,94,0.8)', 'rgba(168,85,247,0.8)', 'rgba(236,72,153,0.8)', 'rgba(14,165,233,0.8)', 'rgba(217,70,239,0.8)'];
+            // Dim non-selected program
+            const selProgKey = programKeyMap[s.program] || s.program;
+            const finalBg = s.isAllProg ? bgColors : bgColors.map((c, i) => programs[i] === selProgKey ? c : 'rgba(51,65,85,0.4)');
+
+            charts.portfolio = new Chart(document.getElementById('portfolioCompositionChart').getContext('2d'), {
+                type: 'doughnut',
+                data: { labels: programs.map(p => p.replace(/_/g, ' ')), datasets: [{ data: progUnits, backgroundColor: finalBg, borderColor: '#0f172a', borderWidth: 2 }] },
+                options: { responsive: true, maintainAspectRatio: false, plugins: { legend: { ...legendDef, position: 'bottom' }, tooltip: { ...ttip, callbacks: { label: function(ctx) { const v = ctx.parsed; const t = ctx.dataset.data.reduce((a, b) => a + b, 0); return v.toLocaleString() + ' units (' + ((v / t) * 100).toFixed(1) + '%)'; } } } } }
+            });
+
+            // ---- Borough Chart ----
+            const allBoros = Object.keys(data421aByBorough);
+            const boroLabels = allBoros.map(b => b.replace(/_/g, ' '));
+            const boroPropsArr = allBoros.map(b => data421aByBorough[b].props);
+            const boroUnitsArr = allBoros.map(b => data421aByBorough[b].units);
+            const boroBgPrimary = allBoros.map(b => (!s.isCitywide && b !== s.borough) ? 'rgba(51,65,85,0.4)' : clr.primary);
+            const boroBgWarn = allBoros.map(b => (!s.isCitywide && b !== s.borough) ? 'rgba(51,65,85,0.3)' : clr.warning);
+
+            charts.borough = new Chart(document.getElementById('boroughChart').getContext('2d'), {
+                type: 'bar',
+                data: { labels: boroLabels, datasets: [
+                    { label: 'Properties', data: boroPropsArr, backgroundColor: boroBgPrimary, borderColor: '#0f172a', borderWidth: 1, borderRadius: 4 },
+                    { label: 'Units', data: boroUnitsArr, backgroundColor: boroBgWarn, borderColor: '#0f172a', borderWidth: 1, borderRadius: 4, yAxisID: 'y1' }
+                ] },
+                options: { responsive: true, maintainAspectRatio: false, plugins: { legend: legendDef, tooltip: ttip }, scales: { x: { ...scaleX, stacked: false }, y: { ...scaleY, position: 'left', title: { display: true, text: 'Properties', color: '#94a3b8' } }, y1: { type: 'linear', beginAtZero: true, position: 'right', title: { display: true, text: 'Units', color: '#94a3b8' }, ticks: { color: '#94a3b8', font: { size: 10 } }, grid: { drawOnChartArea: false } } } }
+            });
+
+            // ---- J-51 ----
+            const j51Periods = Object.keys(dataJ51Expiration);
+            const j51Units = j51Periods.map(p => Math.round(dataJ51Expiration[p].units * s.boroShare));
+            const j51Props = j51Periods.map(p => Math.round(dataJ51Expiration[p].props * s.boroShare));
+            document.querySelectorAll('.chart-title')[4].textContent = 'J-51 Expiration Roadmap — ' + s.geoLabel + (!s.isCitywide ? ' (est.)' : '');
+
+            charts.j51 = new Chart(document.getElementById('j51ExpirationChart').getContext('2d'), {
+                type: 'bar',
+                data: { labels: j51Periods, datasets: [
+                    { label: 'Units', data: j51Units, backgroundColor: clr.primary, borderColor: '#0f172a', borderWidth: 1, borderRadius: 4 },
+                    { label: 'Properties', data: j51Props, backgroundColor: clr.success, borderColor: '#0f172a', borderWidth: 1, borderRadius: 4, yAxisID: 'y1' }
+                ] },
+                options: { responsive: true, maintainAspectRatio: false, plugins: { legend: legendDef, tooltip: ttip }, scales: { x: { ...scaleX, stacked: false }, y: { ...scaleY, position: 'left', title: { display: true, text: 'Units', color: '#94a3b8' } }, y1: { type: 'linear', beginAtZero: true, position: 'right', title: { display: true, text: 'Properties', color: '#94a3b8' }, ticks: { color: '#94a3b8', font: { size: 10 } }, grid: { drawOnChartArea: false } } } }
+            });
+
+            // ---- Table ----
+            const tbody = document.getElementById('tableBody');
+            tbody.innerHTML = '';
+            const scaledTotal = expYears.reduce((sum, y) => sum + Math.round(data421aExpirationTimeline[y].units * s.boroShare), 0);
+
+            expYears.forEach(year => {
+                const raw = data421aExpirationTimeline[year];
+                const units = Math.round(raw.units * s.boroShare);
+                const props = Math.round(raw.props * s.boroShare);
+                const violations = Math.round(raw.violations * s.boroShare);
+                const delinquent = Math.round(raw.delinquent * s.boroShare);
+                const pctOfTotal = scaledTotal > 0 ? ((units / scaledTotal) * 100).toFixed(1) : '0.0';
+                const delinqRate = props > 0 ? ((delinquent / props) * 100).toFixed(1) : '0.0';
+
+                let riskBadge = 'moderate', riskLabel = 'MODERATE';
+                if (units >= maxU * 0.95) { riskBadge = 'peak'; riskLabel = 'PEAK CRISIS'; }
+                else if (year >= 2033) { riskBadge = 'high'; riskLabel = 'HIGH'; }
+                else if (year <= 2027) { riskBadge = 'immediate'; riskLabel = 'IMMEDIATE'; }
+
+                const row = document.createElement('tr');
+                row.innerHTML = `
+                    <td>${year}</td>
+                    <td>${props.toLocaleString()}</td>
+                    <td>${units.toLocaleString()}</td>
+                    <td>${pctOfTotal}%</td>
+                    <td>${violations}</td>
+                    <td>${delinquent}</td>
+                    <td>${delinqRate}%</td>
+                    <td><span class="badge badge-${riskBadge}">${riskLabel}</span></td>
+                `;
+                tbody.appendChild(row);
+            });
+
+            // Update table title
+            document.querySelector('.table-container .chart-title').textContent =
+                'Detailed Expiration Schedule & Risk Assessment (421-a) — ' + s.geoLabel + (!s.isCitywide ? ' (est.)' : '');
+        }
+
+        // Filter handlers
+        document.getElementById('boroughFilter').addEventListener('change', updateDashboard);
+        document.getElementById('programFilter').addEventListener('change', updateDashboard);
+
+        // Initialize on load
+        window.addEventListener('DOMContentLoaded', updateDashboard);
+    </script>
+</body>
+</html>
