@@ -20,7 +20,7 @@ The scenario is a housing policy briefing for Mayor Zohran Mamdani, pre-loading 
 
 After the initial analysis, Claude made additional [recommendations for further analysis](Mamdani_Policy_Analysis_EXPANDED.md#recommendations-for-future-analysis), and we onboarded additional datasets - StreetEasy market data, Census ACS estimates, BLS economic indicators, and NYCHA Physical Needs Assessments.
 
-The first session started on March 23, 2026 at 7:54 AM EST and last session ended on 2026-03-24 at 9:58 AM EST, with about ~8 hours of active conversation and analysis time, with the [qsv MCP Server being invoked 273 times](qsvmcp.log). The final deliverables were produced by the end of the last session, with some additional time for formatting and documentation.
+The first session started on March 23, 2026 at 7:54 AM EST and last session ended on 2026-03-24 at 9:58 AM EST, with about ~8 hours of active conversation and analysis time over ~10 sessions, with the [qsv MCP Server being invoked 273 times](qsvmcp.log). The final deliverables were produced by the end of the last session, with some additional time for formatting and documentation.
 
 ## Deliverables
 
