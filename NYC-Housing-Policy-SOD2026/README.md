@@ -81,7 +81,7 @@ This entire analysis was produced through conversational interaction with Claude
 The workflow:
 
 1. **Data ingestion** — Raw datasets loaded and profiled using qsv tools (stats, frequency, headers), compiled into an PROJECT_ONTOLOGY.md ([initial](PROJECT_ONTOLOGY-initial.md) & [final](PROJECT_ONTOLOGY-final.md)) of data sources, key fields, and quality notes for reference throughout the analysis
-2. **Data wrangling** — SQL queries via qsv's Polars engine, Python extraction for complex transforms (comma-formatted numbers, date parsing, UTF-8 encoding issues)
+2. **Data wrangling** — SQL queries via qsv's Polars engine with DuckDB passthrough/fallback, Python extraction for complex transforms (comma-formatted numbers, date parsing, UTF-8 encoding issues)
 3. **Analysis** — Iterative exploration driven by findings (e.g., discovering the bimodal 421-a expiration pattern, the PLUTO park-filtering challenge, Manhattan's FAR density anomaly)
 4. **Documentation** — Policy analysis written section-by-section with real data tables, updated as new datasets were integrated
 5. **Visualization** — Interactive Chart.js dashboards with borough/time filters, built to match a consistent dark-theme design system
