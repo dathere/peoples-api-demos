@@ -18,7 +18,7 @@ The scenario is a housing policy briefing for Mayor Zohran Mamdani, pre-loading 
 
 > "Can you analyze the NYC 311 files, the PLUTO file, the Furman Center Subsidized Housing Database (see https://www.furmancenter.org/data-tools-resources/data-tools-data-downloads/ for info),  NYC's Budget for FY 2025 (see https://www.nyc.gov/content/omb/pages/publications to retrieve files as needed), and do a comprehensive temporal analysis using the policy-analyst agent through the lens of Mayor Mamdani's priorities?"
 
-After the initial analysis, Claude made additional recommendations for further analysis, and we onboarded additional datasets - StreetEasy market data, Census ACS estimates, BLS economic indicators, and NYCHA Physical Needs Assessments.
+After the initial analysis, Claude made additional [recommendations for further analysis](Mamdani_Policy_Analysis_EXPANDED.md#recommendations-for-future-analysis), and we onboarded additional datasets - StreetEasy market data, Census ACS estimates, BLS economic indicators, and NYCHA Physical Needs Assessments.
 
 ## Deliverables
 
