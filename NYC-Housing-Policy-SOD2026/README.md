@@ -12,13 +12,15 @@
 
 ## What This Is
 
-This project demonstrates an AI-driven policy analysis workflow built incrementally with [Claude](https://claude.ai) using [Cowork mode](https://www.anthropic.com/product/claude-cowork) and the [qsv data wrangling plugin](https://github.com/dathere/qsv?tab=readme-ov-file#qsv-blazing-fast-data-wrangling-toolkit) and its [Policy-Analyst Agent](https://github.com/dathere/qsv/blob/master/.claude/skills/agents/policy-analyst.md). Starting from raw public datasets, it produces a 2,600-line policy analysis document and 8 interactive dashboards — all generated through iterative conversation with Claude.
+This project demonstrates an AI-driven policy analysis workflow built incrementally with [Claude Cowork](https://www.anthropic.com/product/claude-cowork) and the [qsv data wrangling plugin](https://github.com/dathere/qsv?tab=readme-ov-file#qsv-blazing-fast-data-wrangling-toolkit) and its [Policy-Analyst Agent](https://github.com/dathere/qsv/blob/master/.claude/skills/agents/policy-analyst.md). Starting from raw public datasets, it produces a 2,600-line policy analysis document and 8 interactive dashboards — all generated through iterative conversation with Claude.
 
-The scenario is a housing policy briefing for Mayor Zohran Mamdani, pre-loading all the data in a Cowork project, with the prompt:
+The scenario is a housing policy briefing for Mayor Zohran Mamdani, pre-loading all the data in a [Cowork Project](https://support.claude.com/en/articles/14116274-organize-your-tasks-with-projects-in-cowork), with the initial prompt:
 
 > "Can you analyze the NYC 311 files, the PLUTO file, the Furman Center Subsidized Housing Database (see https://www.furmancenter.org/data-tools-resources/data-tools-data-downloads/ for info),  NYC's Budget for FY 2025 (see https://www.nyc.gov/content/omb/pages/publications to retrieve files as needed), and do a comprehensive temporal analysis using the policy-analyst agent through the lens of Mayor Mamdani's priorities?"
 
 After the initial analysis, Claude made additional [recommendations for further analysis](Mamdani_Policy_Analysis_EXPANDED.md#recommendations-for-future-analysis), and we onboarded additional datasets - StreetEasy market data, Census ACS estimates, BLS economic indicators, and NYCHA Physical Needs Assessments.
+
+The first session started on March 23, 2026 at 7:54 AM EST and last session ended on 2026-03-24 at 9:58 AM EST, with about ~8 hours of active conversation and analysis time, with the [qsv MCP Server being invoked 273 times](qsvmcp.log). The final deliverables were produced by the end of the last session, with some additional time for formatting and documentation.
 
 ## Deliverables
 
@@ -104,6 +106,7 @@ Explorer_E_Public_Land.html            ← Public land inventory
 Explorer_NYCHA_Capital.html            ← NYCHA capital backlog
 PROJECT_ONTOLOGY-initial.md            ← Initial data source ontology with key fields and quality notes
 PROJECT_ONTOLOGY-final.md              ← Final data source ontology with updates after full data exploration
+qsvmcp.log                             ← Log of all qsv MCP Server interactions (273 invocations)
 ```
 
 Raw data files (CSVs, PLUTO, 311, PNA Excel files) are not included in this repo due to size (~35 GB total). See Data Sources above for where to obtain them.
