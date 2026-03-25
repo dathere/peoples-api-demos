@@ -148,6 +148,6 @@ This analysis was produced using Claude, an AI assistant by Anthropic, using [da
 
 ---
 
-Github Repo: https://github.com/dathere/peoples-api-demos/
-Github Pages: https://dathere.github.io/peoples-api-demos/NYC-Housing-Policy-SOD2026/
-LinkedIn post: https://www.linkedin.com/posts/joelnatividad_nyc-housing-policy-analysis-for-mayor-mamdani-activity-7442299861846163456-XwMB
+Github Repo: https://github.com/dathere/peoples-api-demos/  
+Github Pages: https://dathere.github.io/peoples-api-demos/NYC-Housing-Policy-SOD2026/  
+LinkedIn post: https://www.linkedin.com/posts/joelnatividad_nyc-housing-policy-analysis-for-mayor-mamdani-activity-7442299861846163456-XwMB  
