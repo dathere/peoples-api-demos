@@ -137,7 +137,7 @@ Cue CKAN integration. 😊
 
 This would allow us to onboard and discover new and related datasets in seconds instead of hours, and maintain a live data catalog not just for this project but across the entire organization, if not the [entire civic data ecosystem](https://ecosystem.ckan.org/)!
 
-IMHO, once we do, we can say we have achieved "Accelerated Civic Intelligence." 😉
+IMHO, once we do, we can say we have achieved "_**Accelerated Civic Intelligence**_." 😉
 
 ## AI Disclaimer
 
