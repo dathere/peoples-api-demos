@@ -14,7 +14,7 @@
 
 This project demonstrates an AI-driven policy analysis workflow built incrementally with [Claude](https://claude.ai) using [Cowork mode](https://www.anthropic.com/product/claude-cowork) and the [qsv data wrangling plugin](https://github.com/dathere/qsv?tab=readme-ov-file#qsv-blazing-fast-data-wrangling-toolkit) and its [Policy-Analyst Agent](https://github.com/dathere/qsv/blob/master/.claude/skills/agents/policy-analyst.md). Starting from raw public datasets, it produces a 2,600-line policy analysis document and 8 interactive dashboards — all generated through iterative conversation with Claude.
 
-The scenario is a housing policy briefing for mayor Zohran Mamdani, pre-loading all the data in a Cowork project, with the prompt:
+The scenario is a housing policy briefing for Mayor Zohran Mamdani, pre-loading all the data in a Cowork project, with the prompt:
 
 > "Can you analyze the NYC 311 files, the PLUTO file, the Furman Center Subsidized Housing Database (see https://www.furmancenter.org/data-tools-resources/data-tools-data-downloads/ for info),  NYC's Budget for FY 2025 (see https://www.nyc.gov/content/omb/pages/publications to retrieve files as needed), and do a comprehensive temporal analysis using the policy-analyst agent through the lens of Mayor Mamdani's priorities?"
 
