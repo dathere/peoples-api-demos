@@ -133,11 +133,11 @@ In our opinion, this is a game-changer for the public sector, which often do not
 
 And we believe this is just the beginning. Currently, the main bottleneck is the repeated in-situ [FAIRification](https://www.go-fair.org/fair-principles/fairification-process/) and manual onboarding of datasets into the analysis workflow. The [Project](PROJECT_ONTOLOGY-initial.md) [Ontology](PROJECT_ONTOLOGY-final.md) we compile at the beginning of the process was critical for keeping track of the datasets, their key fields, and quality notes - but it was not a formal ontology and we have to derive it with Claude's general world knowledge. What if we had a **standardized, machine-readable, agent-understandable, user-friendly data source ontology format** ("[Open Data as a Verb](https://docs.google.com/presentation/d/1MQ21dCPEEhr0MbedTZFkWCLsDk93p1P_xpSoPLEVvtw/edit?slide=id.g3a92da455bb_0_214#slide=id.g3a92da455bb_0_214)") that could be automatically extracted from datasets and ingested into the analysis workflow?
 
-Cue CKAN integration. :smile:
+Cue CKAN integration. 😊
 
 This would allow us to onboard and discover new and related datasets in seconds instead of hours, and maintain a live data catalog not just for this project but across the entire organization, if not the [entire civic data ecosystem](https://ecosystem.ckan.org/)!
 
-IMHO, once we do, we can say we have achieved "Accelerated Civic Intelligence." :wink:
+IMHO, once we do, we can say we have achieved "Accelerated Civic Intelligence." 😉
 
 ## AI Disclaimer
 
