@@ -12,13 +12,13 @@
 
 ## What This Is
 
-This project demonstrates an AI-driven policy analysis workflow built entirely with [Claude](https://claude.ai) using [Cowork mode](https://www.anthropic.com/product/claude-cowork) and the [qsv data wrangling plugin](https://github.com/dathere/qsv?tab=readme-ov-file#qsv-blazing-fast-data-wrangling-toolkit) and its [Policy-Analyst Agent](https://github.com/dathere/qsv/blob/master/.claude/skills/agents/policy-analyst.md). Starting from raw public datasets, it produces a 2,600-line policy analysis document and 8 interactive dashboards — all generated through iterative conversation with Claude.
+This project demonstrates an AI-driven policy analysis workflow built incrementally with [Claude](https://claude.ai) using [Cowork mode](https://www.anthropic.com/product/claude-cowork) and the [qsv data wrangling plugin](https://github.com/dathere/qsv?tab=readme-ov-file#qsv-blazing-fast-data-wrangling-toolkit) and its [Policy-Analyst Agent](https://github.com/dathere/qsv/blob/master/.claude/skills/agents/policy-analyst.md). Starting from raw public datasets, it produces a 2,600-line policy analysis document and 8 interactive dashboards — all generated through iterative conversation with Claude.
 
 The scenario is a housing policy briefing for mayor Zohran Mamdani, pre-loading all the data in a Cowork project, with the prompt:
 
-> "Can you analyze the NYC 311 files, the PLUTO file, the Furman Center Subsidized Housing and Neighborhood Indicator files (see https://www.furmancenter.org/data-tools-resources/data-tools-data-downloads/ for info),  NYC's Budget for FY 2025 (see https://www.nyc.gov/content/omb/pages/publications to retrieve files as needed), and do a comprehensive temporal analysis using the policy-analyst agent through the lens of Mayor Mamdani's priorities?"
+> "Can you analyze the NYC 311 files, the PLUTO file, the Furman Center Subsidized Housing Database (see https://www.furmancenter.org/data-tools-resources/data-tools-data-downloads/ for info),  NYC's Budget for FY 2025 (see https://www.nyc.gov/content/omb/pages/publications to retrieve files as needed), and do a comprehensive temporal analysis using the policy-analyst agent through the lens of Mayor Mamdani's priorities?"
 
-After the initial analysis, Claude made additional recommendations for further analysis, and we onboarded additional datasets -StreetEasy market data, Census ACS estimates, BLS economic indicators, and NYCHA Physical Needs Assessments.
+After the initial analysis, Claude made additional recommendations for further analysis, and we onboarded additional datasets - StreetEasy market data, Census ACS estimates, BLS economic indicators, and NYCHA Physical Needs Assessments.
 
 ## Deliverables
 
@@ -28,7 +28,7 @@ After the initial analysis, Claude made additional recommendations for further a
 
 The main deliverable — a comprehensive policy brief covering six analytical sections with data from 8 sources:
 
-- **Section A: Supply Pipeline** — Permit trends, production gap analysis, borough-level completions (HousingDB)
+- **Section A: Supply Pipeline** — Permit trends, production gap analysis, borough-level completions (DCP HousingDB)
 - **Section B: Affordability Crisis** — Rent burden, income-rent divergence, bedroom-level analysis (StreetEasy, Census ACS, BLS)
 - **Section C: Subsidized Housing & 421-a** — Subsidy portfolio risk, 421-a bimodal expiration timeline for 211,567 units (Furman Center)
 - **Section D: Housing Conditions** — 9.83M HPD complaints over 16 years, seasonal patterns, borough disparities (311)
@@ -43,14 +43,14 @@ All dashboards are self-contained HTML files using Chart.js 4.4.1. No server req
 
 | File | Description | Size |
 |------|-------------|------|
-| **`Explorer_Master_Dashboard.html`** | 7-tab hub linking all sections. Overview KPIs, borough filter, time period filter. | 100 KB |
-| **`Explorer_A_Supply_Pipeline.html`** | Permit trends, completions lag, borough production comparison (2010–2026) | 56 KB |
-| **`Explorer_B_Affordability.html`** | Rent trends by bedroom, income-rent gap, rent burden, StreetEasy + Census + BLS | 56 KB |
-| **`Explorer_C_Subsidized_Housing.html`** | Subsidy portfolio by program, expiration risk, borough exposure | 28 KB |
-| **`Explorer_D_Conditions.html`** | 311 HPD complaint volume, seasonal patterns, complaint types, borough trends | 28 KB |
-| **`Explorer_421a_Timeline.html`** | 421-a expiration timeline 2026–2060, bimodal wave visualization, borough deep dive | 20 KB |
-| **`Explorer_E_Public_Land.html`** | City-owned developable parcels, potential units, flood zone cross-reference | 20 KB |
-| **`Explorer_NYCHA_Capital.html`** | PNA 2023 vs 2025 comparison, work type breakdown, top developments, cost distribution | 28 KB |
+| **`Explorer_Master_Dashboard.html`** | 7-tab hub linking all sections. Overview KPIs, borough filter, time period filter. | 114 KB |
+| **`Explorer_A_Supply_Pipeline.html`** | Permit trends, completions lag, borough production comparison (2010–2026) | 60 KB |
+| **`Explorer_B_Affordability.html`** | Rent trends by bedroom, income-rent gap, rent burden, StreetEasy + Census + BLS | 63 KB |
+| **`Explorer_C_Subsidized_Housing.html`** | Subsidy portfolio by program, expiration risk, borough exposure | 32 KB |
+| **`Explorer_D_Conditions.html`** | 311 HPD complaint volume, seasonal patterns, complaint types, borough trends | 32 KB |
+| **`Explorer_421a_Timeline.html`** | 421-a expiration timeline 2026–2060, bimodal wave visualization, borough deep dive | 22 KB |
+| **`Explorer_E_Public_Land.html`** | City-owned developable parcels, potential units, flood zone cross-reference | 25 KB |
+| **`Explorer_NYCHA_Capital.html`** | PNA 2023 vs 2025 comparison, work type breakdown, top developments, cost distribution | 32 KB |
 
 ### Data Sources
 
@@ -107,16 +107,13 @@ PROJECT_ONTOLOGY-final.md              ← Final data source ontology with updat
 ```
 
 Raw data files (CSVs, PLUTO, 311, PNA Excel files) are not included in this repo due to size (~35 GB total). See Data Sources above for where to obtain them.
+During the analysis, Claude and qsv produced 133 intermediate analysis artifacts, including SQL query logs, Python scripts, data profiling outputs, and iterative policy analysis drafts. These are not included in the published repo but can be made available upon request for audit purposes.
 
-## Running the Dashboards
+## Conclusion
 
-No build step required. Open any HTML file in a modern browser:
+This experiment demonstrates the potential of AI-driven policy analysis workflows to rapidly synthesize complex datasets into actionable insights and recommendations.
 
-```bash
-open Explorer_Master_Dashboard.html
-```
-
-The Master Dashboard links to all standalone explorers. Each standalone explorer links back to the Master Dashboard. All chart data is embedded in the HTML files — no external data fetching needed.
+We minimized hallucinations by scaffolding an iterative analysis cycle that started by inferring a project ontology - followed by repeated exploration, validation, auditing and refinement with the Policy Analyst Agent. This was further facilitated by qsv, as it's exponentially faster than traditional data wrangling tools, minimizing iteration cycle times. This allowed us to "steer" the analysis and produce a comprehensive housing policy analysis in a few hours. (WIP)
 
 ## AI Disclaimer
 
