@@ -78,7 +78,7 @@ All dashboards are self-contained HTML files using Chart.js 4.4.1. No server req
 
 ## How This Was Built
 
-This entire analysis was produced through conversational interaction with Claude in Cowork mode, using the [qsv 18.0.4 Cowork plugin](https://github.com/dathere/qsv/releases/tag/18.0.0), primarily using its [Policy-Analyst Agent](https://github.com/dathere/qsv/blob/master/.claude/skills/agents/policy-analyst.md). All data processing, analysis, and visualization steps were driven by iterative conversations with Claude, with the qsv Cowork Plugin [skills](https://github.com/dathere/qsv/tree/master/.claude/skills/skills) and [commands](https://github.com/dathere/qsv/blob/master/.claude/skills/commands/) steering all data ingestion, profiling, and SQL querying tasks using the qsv MCP Server.
+This entire analysis was produced through conversational interaction with Claude Cowork, using the [qsv 18.0.4 Cowork plugin](https://github.com/dathere/qsv/releases/tag/18.0.0), primarily using its [Policy-Analyst Agent](https://github.com/dathere/qsv/blob/master/.claude/skills/agents/policy-analyst.md). All data processing, analysis, and visualization steps were driven by iterative conversations with Claude, with the qsv Cowork Plugin [skills](https://github.com/dathere/qsv/tree/master/.claude/skills/skills) and [commands](https://github.com/dathere/qsv/blob/master/.claude/skills/commands/) steering all data ingestion, profiling, and SQL querying tasks using the qsv MCP Server.
 
 The workflow:
 
@@ -89,7 +89,7 @@ The workflow:
 5. **Visualization** — Interactive Chart.js dashboards with borough/time filters, built to match a consistent dark-theme design system
 6. **Audit** — Cross-file consistency checks, data validation, confidence ratings
 
-Each analytical section went through a cycle of: explore data → discover patterns → document findings → build dashboard → integrate into master document → audit for consistency.
+Each analytical section went through several cycles of: explore data → discover patterns → document findings → build dashboard → integrate into master document → audit for consistency.
 
 ## Repo Structure (Published Files)
 
@@ -130,7 +130,7 @@ We also leveraged the torrid pace of Claude development. Just this year alone:
 
 No work is without its limitations. In a real-world scenario, we would recommend a more extended timeline with multiple rounds of human expert review and stakeholder engagement to validate findings and refine recommendations before informing policy decisions.
 
-Still, we're amazed at how far we got in just a few hours and the quality of the analysis produced. And having built numerous Dashboard products and solutions in the past, we're particularly impressed by how we can create interactive, bespoke ad-hoc reports without dealing with the one-size-fits-all constraints of traditional BI/SaaS solutions - which could have easily taken weeks if not months to build or customize with a data engineering team. With this approach, we can go from raw data to actionable insights in hours, and easily update the analysis as new data comes in or priorities shift.
+Still, we're amazed at how far we got in just a few hours and the quality of the analysis produced. And having built numerous Dashboard products and solutions in the past, we're particularly impressed by how we can create interactive, bespoke ad-hoc reports without dealing with the one-size-fits-all constraints of traditional BI/SaaS solutions - which could have easily taken weeks if not months to build or customize with a data engineering team, and that's after creating ETL pipelines to onboard the data into proprietary databases. With this approach, we can go from raw data to actionable insights in hours, and easily update the analysis as new data comes in or priorities shift.
 
 In our opinion, this is a game-changer for the public sector, which often do not have the luxury of extensive data engineering resources. With AI-driven workflows like this, we can democratize access to powerful data analysis and enable more responsive, evidence-based policymaking.
 
