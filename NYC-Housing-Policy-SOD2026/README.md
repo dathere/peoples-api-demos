@@ -145,3 +145,9 @@ IMHO, once we do, we can say we have achieved "_**Accelerated Civic Intelligence
 ## AI Disclaimer
 
 This analysis was produced using Claude, an AI assistant by Anthropic, using [datHere's qsv Cowork plugin](https://github.com/dathere/qsv/releases/tag/18.0.0). All data processing is systematic and reproducible, but policy recommendations reflect analysis of provided datasets and should be validated against additional sources and stakeholder input before use in policy decisions.
+
+---
+
+Github Repo: https://github.com/dathere/peoples-api-demos/
+Github Pages: https://dathere.github.io/peoples-api-demos/NYC-Housing-Policy-SOD2026/
+LinkedIn post: https://www.linkedin.com/posts/joelnatividad_nyc-housing-policy-analysis-for-mayor-mamdani-activity-7442299861846163456-XwMB
