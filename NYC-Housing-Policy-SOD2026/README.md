@@ -76,7 +76,7 @@ All dashboards are self-contained HTML files using Chart.js 4.4.1. No server req
 
 ## How This Was Built
 
-This entire analysis was produced through conversational interaction with Claude in Cowork mode, using the [qsv 18.0.4 Cowork plugin](https://github.com/dathere/qsv/releases/tag/18.0.0), primarily using its [Policy-Analyst Agent](https://github.com/dathere/qsv/blob/master/.claude/skills/agents/policy-analyst.md). All data processing, analysis, and visualization steps were driven by iterative conversations with Claude, with the qsv plugin [skills](https://github.com/dathere/qsv/tree/master/.claude/skills/skills) steering all data ingestion, profiling, and SQL querying tasks.
+This entire analysis was produced through conversational interaction with Claude in Cowork mode, using the [qsv 18.0.4 Cowork plugin](https://github.com/dathere/qsv/releases/tag/18.0.0), primarily using its [Policy-Analyst Agent](https://github.com/dathere/qsv/blob/master/.claude/skills/agents/policy-analyst.md). All data processing, analysis, and visualization steps were driven by iterative conversations with Claude, with the qsv Cowork Plugin [skills](https://github.com/dathere/qsv/tree/master/.claude/skills/skills) and [commands](https://github.com/dathere/qsv/blob/master/.claude/skills/commands/) steering all data ingestion, profiling, and SQL querying tasks using the qsv MCP Server.
 
 The workflow:
 
@@ -141,4 +141,4 @@ IMHO, once we do, we can say we have achieved "Accelerated Civic Intelligence." 
 
 ## AI Disclaimer
 
-This analysis was produced using Claude, an AI assistant by Anthropic. All data processing is systematic and reproducible, but policy recommendations reflect analysis of provided datasets and should be validated against additional sources and stakeholder input before use in policy decisions.
+This analysis was produced using Claude, an AI assistant by Anthropic, using [datHere's qsv Cowork plugin](https://github.com/dathere/qsv/releases/tag/18.0.0). All data processing is systematic and reproducible, but policy recommendations reflect analysis of provided datasets and should be validated against additional sources and stakeholder input before use in policy decisions.
