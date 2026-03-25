@@ -113,7 +113,31 @@ During the analysis, Claude and qsv produced 133 intermediate analysis artifacts
 
 This experiment demonstrates the potential of AI-driven policy analysis workflows to rapidly synthesize complex datasets into actionable insights and recommendations.
 
-We minimized hallucinations by scaffolding an iterative analysis cycle that started by inferring a project ontology - followed by repeated exploration, validation, auditing and refinement with the Policy Analyst Agent. This was further facilitated by qsv, as it's exponentially faster than traditional data wrangling tools, minimizing iteration cycle times. This allowed us to "steer" the analysis and produce a comprehensive housing policy analysis in a few hours. (WIP)
+We minimized hallucinations by scaffolding an iterative analysis cycle that started by inferring a project ontology - followed by repeated exploration, validation, auditing and refinement with the Policy Analyst Agent. This was further facilitated by qsv, as it's exponentially faster than traditional data wrangling tools, minimizing iteration cycle times. This allowed us to "steer" the analysis and produce a comprehensive housing policy analysis in just a few hours.
+
+This approach mimics how AI-assisted Software Development has advanced rapidly in recent months with iterative test-driven development pioneered by Claude Code - as the rapid feedback loop enables both the Model and the Developer to make quick course corrections.
+
+We also leveraged the torrid pace of Claude development. Just this year alone:
+
+- Jan 16: The introduction of [Claude Cowork](https://claude.com/product/cowork) - bringing the same collaborative, iterative approach pioneered by Claude Code to knowledge work.
+- Feb 5: [Opus 4.6](https://www.anthropic.com/news/claude-opus-4-6)'s improved reasoning and contextual understanding enabled deeper analysis and synthesis across multiple complex datasets.
+- Feb 24: The introduction of [Cowork Plugins](https://claude.com/plugins) enabled us to bundle Agents, Skills and Commands into a single package.
+- Mar 13: The [1M context window](https://claude.com/blog/1m-context-ga) (from 200k tokens) for both Opus 4.6 and Sonnet 4.6 allowed us to avoid [context rot](https://www.trychroma.com/research/context-rot) and work across multiple datasets and analysis sections.
+- Mar 20: The release of [Cowork Projects](https://support.claude.com/en/articles/14116274-organize-your-tasks-with-projects-in-cowork) allowed us to pre-load all datasets and analysis artifacts into a single collaborative workspace, with its own memory and CLAUDE.md file, allowing us to maintain persistent context across different sessions.
+
+No work is without its limitations. In a real-world scenario, we would recommend a more extended timeline with multiple rounds of human expert review and stakeholder engagement to validate findings and refine recommendations before informing policy decisions.
+
+Still, we're amazed at how far we got in just a few hours and the quality of the analysis produced. And having built numerous Dashboard products and solutions in the past, we're particularly impressed by how we can create interactive, bespoke ad-hoc reports without dealing with the one-size-fits-all constraints of traditional BI/SaaS solutions - which could have easily taken weeks if not months to build or customize with a data engineering team. With this approach, we can go from raw data to actionable insights in hours, and easily update the analysis as new data comes in or priorities shift.
+
+In our opinion, this is a game-changer for the public sector, which often do not have the luxury of extensive data engineering resources. With AI-driven workflows like this, we can democratize access to powerful data analysis and enable more responsive, evidence-based policymaking.
+
+And we believe this is just the beginning. Currently, the main bottleneck is the repeated in-situ [FAIRification](https://www.go-fair.org/fair-principles/fairification-process/) and manual onboarding of datasets into the analysis workflow. The [Project](PROJECT_ONTOLOGY-initial.md) [Ontology](PROJECT_ONTOLOGY-final.md) we compile at the beginning of the process was critical for keeping track of the datasets, their key fields, and quality notes - but it was not a formal ontology and we have to derive it with Claude's general world knowledge. What if we had a **standardized, machine-readable, agent-understandable, user-friendly data source ontology format** ("[Open Data as a Verb](https://docs.google.com/presentation/d/1MQ21dCPEEhr0MbedTZFkWCLsDk93p1P_xpSoPLEVvtw/edit?slide=id.g3a92da455bb_0_214#slide=id.g3a92da455bb_0_214)") that could be automatically extracted from datasets and ingested into the analysis workflow?
+
+Cue CKAN integration. :smile:
+
+This would allow us to onboard and discover new and related datasets in seconds instead of hours, and maintain a live data catalog not just for this project but across the entire organization, if not the [entire civic data ecosystem](https://ecosystem.ckan.org/)!
+
+IMHO, once we do, we can say we have achieved "Accelerated Civic Intelligence." :wink:
 
 ## AI Disclaimer
 
