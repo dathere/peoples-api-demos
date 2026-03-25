@@ -10,13 +10,15 @@
 
 - **Supplementary Deliverables:** [`Housing Policy Master Dashboard`](Explorer_Master_Dashboard.html)<br>8 interactive dashboards in HTML format, detailed data source ontology, and methodological notes.
 
-## What This Is
+## What This Is - An AI-accelerated Policy Analysis Workbench
 
 This project demonstrates an AI-driven policy analysis workflow built incrementally with [Claude Cowork](https://www.anthropic.com/product/claude-cowork) and the [qsv data wrangling plugin](https://github.com/dathere/qsv?tab=readme-ov-file#qsv-blazing-fast-data-wrangling-toolkit) and its [Policy-Analyst Agent](https://github.com/dathere/qsv/blob/master/.claude/skills/agents/policy-analyst.md). Starting from raw public datasets, it produces a 2,600-line policy analysis document and 8 interactive dashboards — all generated through iterative conversation with Claude.
 
-The scenario is a housing policy briefing for Mayor Zohran Mamdani, pre-loading all the data in a [Cowork Project](https://support.claude.com/en/articles/14116274-organize-your-tasks-with-projects-in-cowork), with the initial prompt:
+The scenario is drafting a housing policy briefing for Mayor Zohran Mamdani, pre-loading all the data in a [Cowork Project](https://support.claude.com/en/articles/14116274-organize-your-tasks-with-projects-in-cowork), with the initial prompt:
 
 > "Can you analyze the NYC 311 files, the PLUTO file, the Furman Center Subsidized Housing Database (see https://www.furmancenter.org/data-tools-resources/data-tools-data-downloads/ for info),  NYC's Budget for FY 2025 (see https://www.nyc.gov/content/omb/pages/publications to retrieve files as needed), and do a comprehensive temporal analysis using the policy-analyst agent through the lens of Mayor Mamdani's priorities?"
+
+Note that we didn't specify the exact policy questions or analysis sections upfront. We let the data exploration and analysis be driven by the findings and patterns discovered in the intentionally Housing-centric datasets, with the Policy Analyst Agent guiding the process based on its understanding of Mayor Mamdani's priorities which it researched from public sources. This allowed us to minimize any bias or constraints we might have introduced by pre-defining the analysis structure, and instead let the data and the agent's reasoning drive the insights.
 
 After the initial analysis, Claude made additional [recommendations for further analysis](Mamdani_Policy_Analysis_EXPANDED.md#recommendations-for-future-analysis), and we onboarded additional datasets - StreetEasy market data, Census ACS estimates, BLS economic indicators, and NYCHA Physical Needs Assessments.
 
