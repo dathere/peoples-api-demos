@@ -121,7 +121,7 @@ We also leveraged the torrid pace of Claude development. Just this year alone:
 
 - Jan 16: The introduction of [Claude Cowork](https://claude.com/product/cowork) - bringing the same collaborative, iterative approach pioneered by Claude Code to knowledge work.
 - Feb 5: [Opus 4.6](https://www.anthropic.com/news/claude-opus-4-6)'s improved reasoning and contextual understanding enabled deeper analysis and synthesis across multiple complex datasets.
-- Feb 24: The introduction of [Cowork Plugins](https://claude.com/plugins) enabled us to bundle Agents, Skills and Commands into a single package.
+- Feb 24: The introduction of [Cowork Plugins](https://claude.com/plugins) enabled us to bundle Agents, Skills and Commands into a single package (big props to Anthropic for open-sourcing their [Cowork Plugin implementations](https://github.com/anthropics/knowledge-work-plugins), from which we "took" a lot of inspiration 😉).
 - Mar 13: The [1M context window](https://claude.com/blog/1m-context-ga) (from 200k tokens) for both Opus 4.6 and Sonnet 4.6 allowed us to avoid [context rot](https://www.trychroma.com/research/context-rot) and work across multiple datasets and analysis sections.
 - Mar 20: The release of [Cowork Projects](https://support.claude.com/en/articles/14116274-organize-your-tasks-with-projects-in-cowork) allowed us to pre-load all datasets and analysis artifacts into a single collaborative workspace, with its own memory and CLAUDE.md file, allowing us to maintain persistent context across different sessions.
 
