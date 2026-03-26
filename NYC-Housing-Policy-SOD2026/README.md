@@ -6,9 +6,11 @@
 
 **Scope:** Comprehensive data-driven housing policy analysis spanning supply, affordability, subsidized housing, building conditions, public land, and NYCHA capital needs across all five NYC boroughs.
 
-- **Primary Deliverable:** [`Mamdani_Policy_Analysis_EXPANDED.md`](Mamdani_Policy_Analysis_EXPANDED.md)<br>a 2,600-line policy brief with six analytical sections, evidence-based findings, risk scenarios, and implementation roadmaps.
+- **Primary Deliverable:** [`Mamdani_Policy_Analysis_EXPANDED.md`](Mamdani_Policy_Analysis_EXPANDED.md)  
+  a ~2,600-line policy brief with six analytical sections, evidence-based findings, risk scenarios, and implementation roadmaps.
 
-- **Supplementary Deliverables:** [`Housing Policy Master Dashboard`](Explorer_Master_Dashboard.html)<br>8 interactive dashboards in HTML format, detailed data source ontology, and methodological notes.
+- **Supplementary Deliverables:** [`Housing Policy Master Dashboard`](Explorer_Master_Dashboard.html)  
+  8 interactive dashboards in HTML format, detailed data source ontology, and methodological notes.
 
 ## What This Is - An AI-accelerated Policy Analysis Workbench
 
@@ -18,9 +20,11 @@ The scenario is drafting a housing policy briefing for Mayor Zohran Mamdani, pre
 
 > "Can you analyze the NYC 311 files, the PLUTO file, the Furman Center Subsidized Housing Database (see https://www.furmancenter.org/data-tools-resources/data-tools-data-downloads/ for info),  NYC's Budget for FY 2025 (see https://www.nyc.gov/content/omb/pages/publications to retrieve files as needed), and do a comprehensive temporal analysis using the policy-analyst agent through the lens of Mayor Mamdani's priorities?"
 
-Note that we didn't specify the exact policy questions or analysis sections upfront. We let the data exploration and analysis be driven by the findings and patterns discovered in the intentionally Housing-centric datasets, with the Policy Analyst Agent guiding the process based on its understanding of Mayor Mamdani's priorities which it researched from public sources. This allowed us to minimize any bias or constraints we might have introduced by pre-defining the analysis structure, and instead let the data and the agent's reasoning drive the insights.
+**Note that we didn't specify the exact policy questions or analysis sections upfront.** After the Agent derived the initial ontology based on the intentionally Housing-centric starter datasets, we let the data exploration and analysis be driven by the findings and patterns discovered by the Policy Analyst Agent - as it repeatedly consulted with us in the process based on its understanding of Mayor Mamdani's priorities which it researched from public sources.
 
-After the initial analysis, Claude made additional [recommendations for further analysis](Mamdani_Policy_Analysis_EXPANDED.md#recommendations-for-future-analysis), and we onboarded additional datasets - StreetEasy market data, Census ACS estimates, BLS economic indicators, and NYCHA Physical Needs Assessments.
+This allowed us to minimize any bias or constraints we might have introduced by pre-defining the analysis structure, and instead let the data and the agent's reasoning drive the insights - **as we proactively steered it to explore relevant areas and skip irrelevant ones** - as what would happen in a real-world scenario where the policy questions evolve as you explore the data and discover new patterns.
+
+After the [initial analysis was drafted](Mamdani_Policy_Analysis.md), Claude made additional [recommendations for further analysis](Mamdani_Policy_Analysis_EXPANDED.md#recommendations-for-future-analysis), and we onboarded additional datasets - StreetEasy market data, Census ACS estimates, BLS economic indicators, and NYCHA Physical Needs Assessments.
 
 The first session started on March 23, 2026 at 7:54 AM EST and last session ended on 2026-03-24 at 9:58 AM EST, with about ~8 hours of active conversation and analysis time over ~10 sessions, with the [qsv MCP Server being invoked 273 times](qsvmcp.log). The final deliverables were produced by the end of the last session, with some additional time for formatting and documentation.
 
@@ -97,7 +101,8 @@ Each analytical section went through several cycles of: explore data → discove
 
 ```
 README.md                              ← This file
-Mamdani_Policy_Analysis_EXPANDED.md    ← Main analysis document (2,600 lines)
+Mamdani_Policy_Analysis.md             ← Initial draft of the policy analysis (~600 lines)
+Mamdani_Policy_Analysis_EXPANDED.md    ← Expanded analysis document (~2,600 lines)
 Explorer_Master_Dashboard.html         ← Master dashboard (7 tabs)
 Explorer_A_Supply_Pipeline.html        ← Supply pipeline dashboard
 Explorer_B_Affordability.html          ← Affordability dashboard
